@@ -33,11 +33,6 @@
     margin:0; background:var(--bg); color:var(--tx);
     font-family:'Instrument Sans',-apple-system,'Segoe UI',sans-serif;
     -webkit-font-smoothing:antialiased; font-size:14px;
-    background-image:
-      radial-gradient(900px 520px at 12% -8%, rgba(255,91,38,.10), transparent 62%),
-      radial-gradient(760px 460px at 92% 4%, rgba(23,166,115,.10), transparent 60%),
-      radial-gradient(700px 500px at 60% 100%, rgba(122,136,255,.08), transparent 62%);
-    background-attachment:fixed;
   }
   /* jemné zrno přes celou plochu */
   body::before{
@@ -120,21 +115,8 @@
 
   section{ display:flex; flex-direction:column; gap:16px; }
   .sblock{
-    position:relative; overflow:hidden;
-    border-radius:26px; padding:24px 28px 26px;
-    background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86));
-    border:1px solid rgba(255,255,255,.9);
-    box-shadow:0 1px 2px rgba(24,22,18,.04), 0 24px 60px -36px rgba(24,22,18,.42);
-    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-  }
-  /* barevná záře v rohu podle sekce */
-  .sblock:not(.darkp)::before{
-    content:""; position:absolute; top:-90px; left:-70px; width:340px; height:220px; pointer-events:none;
-    background:radial-gradient(closest-side, var(--secc,#94a3b8), transparent 72%); opacity:.16;
-  }
-  .sblock:not(.darkp)::after{
-    content:""; position:absolute; top:0; left:28px; right:28px; height:1px; pointer-events:none;
-    background:linear-gradient(90deg, transparent, var(--secc,#94a3b8), transparent); opacity:.35;
+    position:relative; border-radius:20px; padding:20px 22px 22px;
+    background:var(--card); border:1px solid var(--line); box-shadow:none;
   }
   .sblock > *{ position:relative; z-index:1; }
   .sblock.blue{ --secc:#3b82f6; --secc2:#2563eb; }
@@ -194,6 +176,28 @@
   .darkp .lane-empty{ color:#6e6c62; }
   .darkp .allday span{ background:rgba(255,255,255,.08); color:#d8d6cd; }
   .darkp .empty-tile{ background:rgba(255,255,255,.05) !important; color:#8f8d82; }
+  /* hero = hlavní plocha appky */
+  .darkp{ padding:28px 32px 30px; border-radius:24px; }
+  .darkp .lane{ height:78px; border-radius:14px; }
+  .darkp .lane.slim{ height:40px; }
+  .darkp .lane + .lane{ margin-top:16px; }
+  .darkp .tl-hours{ margin-bottom:32px; }
+  .darkp .tl-hours span{ font-size:10.5px; }
+  .darkp .tl-block{ border-radius:12px; padding:8px 12px; top:6px; bottom:6px; }
+  .darkp .tl-block .n{ font-size:13.5px; }
+  .darkp .lane-tag{ top:-19px; font-size:10px; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; }
+  .darkp .wday{ min-height:168px; padding:12px 11px 12px; border-radius:15px; }
+  .darkp .week-grid{ gap:10px; }
+  .darkp .wday .dh .dn{ font-size:12.5px; }
+  .darkp h2{ font-size:19px; }
+  .hero-head{ display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .hero-id{ display:flex; align-items:center; gap:16px; }
+  .hero-clock{
+    font-family:var(--mono); font-size:34px; font-weight:600; letter-spacing:-.04em; line-height:1;
+    color:#faf9f5; font-variant-numeric:tabular-nums;
+  }
+  .hero-clock small{ display:block; font-size:10px; font-weight:400; letter-spacing:.1em; text-transform:uppercase; color:#6e6c62; margin-top:6px; }
+  .hero-div{ width:1px; align-self:stretch; background:rgba(255,255,255,.12); }
   .dayline{ position:relative; height:4px; border-radius:2px; background:rgba(255,255,255,.07); margin-top:16px; overflow:hidden; }
   .dayline > div{ position:absolute; top:0; bottom:0; left:0; border-radius:2px; background:linear-gradient(90deg, rgba(255,91,38,.25), #ff5b26); }
   .dayfoot{ font-family:var(--mono); font-size:11px; color:#6e6c62; margin-left:auto; }
@@ -262,41 +266,32 @@
   main{ gap:30px; }
   .sec-link{ border:none; background:none; color:var(--tx3); font-size:12.5px; cursor:pointer; padding:0; }
   .sec-link:hover{ color:var(--tx); text-decoration:underline; }
-  /* ============ barevné statistiky ============ */
-  .statrow{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-  .stat2{
-    position:relative; overflow:hidden; border-radius:20px; padding:15px 17px 14px;
-    display:flex; flex-direction:column; gap:11px; border:1px solid rgba(255,255,255,.75);
-    box-shadow:0 1px 2px rgba(24,22,18,.03), 0 18px 40px -30px rgba(24,22,18,.45);
-    transition:transform .16s, box-shadow .16s;
-  }
-  .stat2:hover{ transform:translateY(-2px); box-shadow:0 1px 2px rgba(24,22,18,.04), 0 26px 50px -30px rgba(24,22,18,.5); }
-  .stat2::after{
-    content:""; position:absolute; right:-40px; top:-40px; width:130px; height:130px; border-radius:50%;
-    background:radial-gradient(closest-side, rgba(255,255,255,.85), transparent 70%); pointer-events:none;
-  }
-  .stat2 .lb{ font-size:11.5px; font-weight:700; display:flex; align-items:center; gap:8px; letter-spacing:-.005em; }
-  .stat2 .ico{ width:24px; height:24px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.65); }
-  .stat2 .ico svg{ width:13px; height:13px; }
-  .stat2 .big{ font-size:31px; font-weight:800; letter-spacing:-.045em; line-height:1; font-variant-numeric:tabular-nums; }
-  .stat2 .big small{ font-size:14px; font-weight:700; letter-spacing:-.02em; opacity:.65; margin-left:3px; }
-  .stat2 .note{ font-size:10.5px; font-weight:600; opacity:.62; }
-  .stat2.blue{ background:linear-gradient(165deg,#e7efff,#dbe7ff); color:#1e40af; }
-  .stat2.violet{ background:linear-gradient(165deg,#efe9ff,#e6dcff); color:#5b21b6; }
-  .stat2.green{ background:linear-gradient(165deg,#e2f6ec,#d3f0e2); color:#0d7a54; }
-  .stat2.amber{ background:linear-gradient(165deg,#fdf1dd,#fbe8c8); color:#9a6b12; }
-  .stat2.red{ background:linear-gradient(165deg,#fdeaea,#fbdcdc); color:#b32020; }
-  /* mikro-grafy uvnitř dlaždic */
-  .spark{ display:flex; align-items:flex-end; gap:5px; height:26px; }
-  .spark i{ flex:1; max-width:15px; border-radius:4px; background:currentColor; opacity:.20; min-height:6px; }
-  .spark i.on{ opacity:.85; }
-  .spark i.tdy{ opacity:1; box-shadow:0 0 0 1.5px rgba(255,255,255,.55); }
-  .meter{ height:6px; border-radius:4px; background:rgba(255,255,255,.6); overflow:hidden; }
-  .meter > i{ display:block; height:100%; border-radius:4px; background:currentColor; opacity:.85; }
-  .dotline{ display:flex; align-items:center; gap:4px; height:26px; }
-  .dotline i{ width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.5; }
-  .dotline i.big{ width:9px; height:9px; opacity:.95; }
-  .dotline .rail{ flex:1; height:2px; border-radius:2px; background:currentColor; opacity:.18; }
+  /* ============ KPI proužek (bez kartiček) ============ */
+  .kpis{ display:flex; align-items:stretch; gap:0; }
+  .kpi{ padding:0 22px; display:flex; flex-direction:column; gap:4px; border-left:1px solid var(--line); }
+  .kpi:first-child{ border-left:none; padding-left:0; }
+  .kpi:last-child{ padding-right:0; }
+  .kpi b{ font-size:27px; font-weight:750; letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; }
+  .kpi b i{ font-style:normal; font-size:14px; font-weight:600; color:var(--tx4); letter-spacing:-.01em; }
+  .kpi span{ font-family:var(--mono); font-size:9.5px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--tx4); white-space:nowrap; }
+  .kpi.warn b{ color:var(--red); }
+  .kpi.good b{ color:var(--good); }
+  .spark{ display:flex; align-items:flex-end; gap:3px; height:16px; margin-top:2px; }
+  .spark i{ width:6px; border-radius:2px; background:var(--tx); opacity:.14; min-height:3px; }
+  .spark i.on{ opacity:.55; }
+  .spark i.tdy{ opacity:1; background:var(--accent); }
+  /* dvousloupcová spodní část — rozbíjí monotónní stoh karet */
+  .grid2{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; align-items:start; }
+  .grid2 > section{ min-width:0; }
+  .grid2 > .violet{ order:1; }
+  .grid2 > .green{ order:2; }
+  @media (max-width:1180px){ .grid2{ grid-template-columns:minmax(0,1fr); } }
+  /* hlavička sekce s eyebrow */
+  .eyebrow{ font-family:var(--mono); font-size:9.5px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--tx4); }
+  .sec-head.stack{ flex-direction:column; align-items:stretch; gap:14px; }
+  .sec-head.stack .sec-head-l{ align-items:center; }
+  .sec-head.stack .row2{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .sec-head h2{ font-size:17px; }
   .linkline{ display:flex; align-items:center; gap:12px; padding:0 2px; margin:-14px 0 -8px; }
   .linkline .ll-dot{ width:9px; height:9px; border-radius:50%; background:var(--accent); flex:none; }
   .linkline .ll-seg{ width:28%; height:2px; background:linear-gradient(90deg,var(--accent),rgba(255,91,38,.15)); }
@@ -1344,44 +1339,24 @@ function renderDnes(){
   document.getElementById("main").innerHTML = `
     <div class="hdr">
       <div>
-        <div class="hdr-date">${dateStr} · ${pad(now.getHours())}:${pad(now.getMinutes())}</div>
+        <div class="hdr-date">${dateStr}</div>
         <h1>${h1txt}</h1>
         <div class="hdr-sub">${subBits.join(" · ")}</div>
       </div>
-    </div>
-
-    <div class="statrow">
       ${(() => {
         const wk = weekDates();
         const counts = wk.map(k => (state.weekPlan[k] || []).length);
         const mx = Math.max(1, ...counts);
         const rhyAll = state.rhythms.filter(r => clientFilter === "all" || r.clientId === clientFilter);
         const runOk = rhyAll.filter(r => rhythmStatus(r) === "ok").length;
-        const pctOk = rhyAll.length ? Math.round(runOk / rhyAll.length * 100) : 0;
-        const evDots = timed.slice(0, 5);
-        return `
-        <div class="stat2 blue">
-          <div class="lb"><span class="ico">${ICONS.flag}</span>Fokus tento týden</div>
-          <div class="big">${todayFocus.length}<small>dnes · ${counts.reduce((a,b)=>a+b,0)} týden</small></div>
-          <div class="spark">${counts.map((c, i) => `<i class="${c ? "on" : ""} ${wk[i] === selDate ? "tdy" : ""}" style="height:${c ? Math.max(9, Math.round(c / mx * 26)) : 6}px"></i>`).join("")}</div>
-        </div>
-        <div class="stat2 violet">
-          <div class="lb"><span class="ico">${ICONS.clock}</span>Schůzky ${isPlanToday ? "dnes" : pdLab}</div>
-          <div class="big">${timed.length}${allDay.length ? `<small>+${allDay.length} celodenní</small>` : ""}</div>
-          <div class="dotline">${evDots.length
-            ? evDots.map(e => `<i class="${isPlanToday && ni.cur >= e.sh && ni.cur < e.eh ? "big" : ""}"></i><span class="rail"></span>`).join("")
-            : `<span class="rail"></span>`}</div>
-        </div>
-        <div class="stat2 green">
-          <div class="lb"><span class="ico">${ICONS.cycle}</span>Provoz běží</div>
-          <div class="big">${pctOk}<small>%</small></div>
-          <div class="meter"><i style="width:${pctOk}%"></i></div>
-          <div class="note">${runOk} z ${rhyAll.length || 0} pravidelných věcí v pořádku</div>
-        </div>
-        <div class="stat2 ${lateAll ? "red" : "amber"}">
-          <div class="lb"><span class="ico">${ICONS.shield}</span>${lateAll ? "Vyžaduje pozornost" : "Vše pod kontrolou"}</div>
-          <div class="big">${lateAll}<small>${lateAll === 1 ? "věc" : lateAll > 1 && lateAll < 5 ? "věci" : "věcí"}</small></div>
-          <div class="note">${lateAll ? "podrž dlaždici v Provozu, až to doděláš" : "nic zpožděného — jen tak dál"}</div>
+        return `<div class="kpis">
+          <div class="kpi">
+            <b>${todayFocus.length}</b><span>fokus dnes</span>
+            <div class="spark">${counts.map((c, i) => `<i class="${c ? "on" : ""} ${wk[i] === selDate ? "tdy" : ""}" style="height:${c ? Math.max(6, Math.round(c / mx * 16)) : 3}px"></i>`).join("")}</div>
+          </div>
+          <div class="kpi"><b>${timed.length}</b><span>schůzky</span></div>
+          <div class="kpi ${rhyAll.length && runOk === rhyAll.length ? "good" : ""}"><b>${runOk}<i> / ${rhyAll.length}</i></b><span>provoz běží</span></div>
+          <div class="kpi ${lateAll ? "warn" : ""}"><b>${lateAll}</b><span>zpožděno</span></div>
         </div>`;
       })()}
     </div>
@@ -1413,12 +1388,19 @@ function renderDnes(){
     </div>
 
     <section class="sblock darkp">
-      <div class="sec-head">
-        <div class="sec-head-l"><h2>Denní linka</h2>
-          <span class="sec-sub">${isPlanToday ? "bloky přetáhni — přesné časy neřešíš" : `plánuješ ${pdLab}`}</span></div>
+      <div class="hero-head">
+        <div class="hero-id">
+          <div class="hero-clock">${isPlanToday ? `${pad(now.getHours())}:${pad(now.getMinutes())}` : pdLab.split(" ")[1]}
+            <small>${isPlanToday ? (inDay ? `zbývá ${ni.leftH} h ${pad(ni.leftM)} min` : ni.cur < TL_START ? "den ještě nezačal" : "den skončil") : pdLab}</small></div>
+          <div class="hero-div"></div>
+          <div>
+            <h2>Denní linka</h2>
+            <span class="sec-sub">${isPlanToday ? "bloky přetáhni — přesné časy neřešíš" : `plánuješ dopředu`}</span>
+          </div>
+        </div>
         <div style="display:flex;align-items:center;gap:12px;">
           <div class="seg" style="padding:3px;">
-            ${PLAN_MODES.map(([k, lab]) => `<button class="${pm === k ? "active" : ""}" style="padding:6px 13px;font-size:12px;" onclick="setPlanMode('${k}')">${lab}</button>`).join("")}
+            ${PLAN_MODES.map(([k, lab]) => `<button class="${pm === k ? "active" : ""}" style="padding:7px 14px;font-size:12.5px;" onclick="setPlanMode('${k}')">${lab}</button>`).join("")}
           </div>
           ${state.google.clientId
             ? `<button class="sec-link" onclick="gManualRefresh()">${gConnected() ? "Obnovit kalendář" : "Připojit kalendář"}</button>`
@@ -1429,7 +1411,7 @@ function renderDnes(){
         <div class="tl-scroll">
         <div class="tl-hours">${Array.from({length: TL_SPAN + 1}, (_, i) => `<span>${TL_START+i}:00</span>`).join("")}</div>
         <div class="tl-lanes">
-          <div class="lane" id="calLane">
+          <div class="lane${!timed.length && !state.google.clientId ? " slim" : ""}" id="calLane">
             <span class="lane-tag">${isPlanToday ? "Dnešní schůzky" : `Schůzky — ${pdLab}`}</span>
             ${timed.map(ev => blockHtml(ev, !isPlanToday ? "" : ni.cur >= ev.eh ? "past" : ni.cur >= ev.sh ? "now" : "")).join("")}
             ${!timed.length ? `<div class="lane-empty">${!state.google.clientId ? "schůzky se načtou z Google Kalendáře" : G.loading ? "Načítám kalendář…" : G.error ? esc(G.error) : isPlanToday ? "dnes žádné schůzky" : "žádné schůzky"}</div>` : ""}
@@ -1491,16 +1473,20 @@ function renderDnes(){
       <span class="ll-rest"></span>
     </div>` : ""}
 
+    <div class="grid2">
     <section class="sblock green">
-      <div class="sec-head">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.cycle}</span><h2>Provoz</h2>
-          <span class="sec-sub">${rhyForClient.length ? `${naRadeMe.length} u mě · ${cekaClaude.length} u Clauda · ${doneToday.length} hotovo dnes` : "pravidelné věci"}</span></div>
-        <div style="display:flex;align-items:center;gap:12px;">
+      <div class="sec-head stack">
+        <div class="sec-head-l"><span class="sec-ico">${ICONS.cycle}</span>
+          <div><h2>Provoz</h2>
+            <div class="eyebrow" style="margin-top:3px;">${rhyForClient.length ? `${naRadeMe.length} u mě · ${cekaClaude.length} u Clauda · ${doneToday.length} hotovo` : "pravidelné věci"}</div>
+          </div>
+        </div>
+        <div class="row2">
           <div class="seg" style="padding:2px;">
             ${[["all","Vše"],["me","Já"],["claude","Claude"],["both","Spolu"]].map(([k, lab]) =>
-              `<button class="${ownerFilter === k ? "active" : ""}" style="padding:5px 11px;font-size:12px;" onclick="setOwnerFilter('${k}')">${lab}</button>`).join("")}
+              `<button class="${ownerFilter === k ? "active" : ""}" style="padding:5px 10px;font-size:11.5px;" onclick="setOwnerFilter('${k}')">${lab}</button>`).join("")}
           </div>
-          <button class="sec-link" onclick="openAddRhythm()">+ Pravidelná věc</button>
+          <button class="sec-link" onclick="openAddRhythm()">+ Pravidelná</button>
         </div>
       </div>
 
@@ -1561,6 +1547,7 @@ function renderDnes(){
       ${projs.map(p => renderProjectCard(p, true)).join("")}
       ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádný projekt — přidej ho vlevo v menu" : "Pro tenhle výběr tu nic není"}</div>` : ""}
     </section>
+    </div>
 
     <section class="sblock amber">
       <div class="sec-head">
