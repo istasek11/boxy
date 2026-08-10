@@ -283,8 +283,22 @@
   /* dvousloupcová spodní část — rozbíjí monotónní stoh karet */
   .grid2{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; align-items:start; }
   .grid2 > section{ min-width:0; }
-  .grid2 > .violet{ order:1; }
-  .grid2 > .green{ order:2; }
+  /* cesta = hlavní věc, velkoryse */
+  .cesta{ padding:26px 30px 30px; }
+  .cesta .pcard{ background:transparent; border:none; padding:22px 4px 6px; }
+  .cesta .pcard:hover{ box-shadow:none; }
+  .cesta .pcard + .pcard{ border-top:1px solid var(--line); margin-top:6px; }
+  .cesta .pcard .nm{ font-size:21px; letter-spacing:-.025em; margin-top:5px; }
+  .cesta .path{ padding:14px 10px 34px; }
+  .cesta .stop .dot{ width:17px; height:17px; border-width:4px; }
+  .cesta .stop.current .dot{ width:24px; height:24px; box-shadow:0 0 0 6px rgba(255,91,38,.16); }
+  .cesta .stop .pl{ top:30px; font-size:12px; }
+  .cesta .stop.current .pl{ font-size:13.5px; }
+  .cesta .path .seg-line{ height:6px; top:9px; }
+  .cesta .pfoot{ border-top:none; padding-top:2px; }
+  .cesta .pmeaning{ font-size:14px; }
+  .cesta .pmeaning b{ font-weight:700; }
+  .cesta .pmeaning .lbl{ font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-ink); margin-bottom:6px; }
   @media (max-width:1180px){ .grid2{ grid-template-columns:minmax(0,1fr); } }
   /* hlavička sekce s eyebrow */
   .eyebrow{ font-family:var(--mono); font-size:9.5px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--tx4); }
@@ -1069,7 +1083,7 @@ const ICONS = {
   flag:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 14.5v-12"/><path d="M3.5 3h8.2l-1.6 2.75 1.6 2.75H3.5"/></svg>`,
   mind:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8v2.4M8 11.8v2.4M1.8 8h2.4M11.8 8h2.4M3.6 3.6l1.7 1.7M10.7 10.7l1.7 1.7M12.4 3.6l-1.7 1.7M5.3 10.7l-1.7 1.7"/></svg>`
 };
-const STATUS_LABEL = { ok:"běží", soon:"blíží se", late:"zpožděno" };
+const STATUS_LABEL = { ok:"běží", soon:"blíží se", late:"čeká" };
 const STATUS_ORDER = { late:0, soon:1, ok:2 };
 const STATUS_BAR = { ok:"var(--good)", soon:"var(--amber)", late:"var(--red)" };
 function projectWatch(p){
@@ -1192,7 +1206,7 @@ function renderSidebar(){
       cp.map(p => `
       <button class="nav-row proj-item ${view === p.id ? "active" : ""}" style="padding-left:26px;" onclick="go('${p.id}')">
         <span class="nm"><span class="proj-name">${esc(p.name)}</span></span>
-        <span class="proj-phase" style="padding-left:0;">${esc((p.phases[p.currentPhaseIndex]||{}).name || "")} · ${p.currentPhaseIndex+1}/${p.phases.length}</span>
+        <span class="proj-phase" style="padding-left:0;">${esc((p.phases[p.currentPhaseIndex]||{}).name || "")}</span>
       </button>`).join("");
   }).join("");
   document.getElementById("archCount").textContent = state.projects.filter(p => p.archived).length || "";
@@ -1326,39 +1340,29 @@ function renderDnes(){
   const planBs = (state.dayPlan[planDate] || []).slice().sort((a,b) => a.sh - b.sh);
 
   const lateAll = state.rhythms.filter(r => rhythmStatus(r) === "late").length;
+  const hourNow = new Date().getHours();
+  const greet = hourNow < 5 ? "Ještě vzhůru" : hourNow < 10 ? "Dobré ráno" : hourNow < 12 ? "Dobré dopoledne" : hourNow < 18 ? "Dobrý den" : "Dobrý večer";
   const linkedBlock = (state.dayPlan[planDate] || []).find(b => b.refType === "project" && state.projects.some(p => p.id === b.refId));
   const linkedProj = linkedBlock ? state.projects.find(p => p.id === linkedBlock.refId) : null;
   const focusProj = todayFocus.map(f => f.refType === "project" ? state.projects.find(p => p.id === f.refId) : null).find(Boolean);
-  const pushName = focusProj ? clientName(focusProj.clientId) : (todayFocus[0] ? todayFocus[0].title : null);
-  const h1txt = pushName ? `Dnes posouváš ${esc(pushName)}` : "Dnes";
-  const subBits = [
-    todayFocus.length ? `${todayFocus.length === 1 ? "Jeden fokus" : todayFocus.length + " věci ve fokusu"}` : "Zatím bez fokusu — přetáhni si něco na linku",
-    timed.length ? `${timed.length} ${timed.length === 1 ? "schůzka" : timed.length < 5 ? "schůzky" : "schůzek"}` : "žádné schůzky",
-    lateAll ? `<b style="color:var(--red);">${lateAll} zpožděno</b>` : "nic zpožděného"
-  ];
+  const leadProj = focusProj || projs[0] || null;
+  const h1txt = greet;
+  let subLine;
+  if(leadProj){
+    const lp = leadProj.phases[Math.min(leadProj.currentPhaseIndex, leadProj.phases.length - 1)];
+    const rest = leadProj.phases.length - leadProj.currentPhaseIndex - 1;
+    subLine = `<b>${esc(leadProj.name)}</b> stojí na zastávce „${esc(lp.name)}"` +
+      (rest > 0 ? ` — do cíle ${rest === 1 ? "zbývá poslední krok" : `zbývají ${rest} zastávky`}.` : " — poslední krok před cílem.");
+  } else {
+    subLine = "Zatím tu není žádná cesta. Přidej projekt a uvidíš, kam míří.";
+  }
   document.getElementById("main").innerHTML = `
     <div class="hdr">
       <div>
         <div class="hdr-date">${dateStr}</div>
         <h1>${h1txt}</h1>
-        <div class="hdr-sub">${subBits.join(" · ")}</div>
+        <div class="hdr-sub">${subLine}</div>
       </div>
-      ${(() => {
-        const wk = weekDates();
-        const counts = wk.map(k => (state.weekPlan[k] || []).length);
-        const mx = Math.max(1, ...counts);
-        const rhyAll = state.rhythms.filter(r => clientFilter === "all" || r.clientId === clientFilter);
-        const runOk = rhyAll.filter(r => rhythmStatus(r) === "ok").length;
-        return `<div class="kpis">
-          <div class="kpi">
-            <b>${todayFocus.length}</b><span>fokus dnes</span>
-            <div class="spark">${counts.map((c, i) => `<i class="${c ? "on" : ""} ${wk[i] === selDate ? "tdy" : ""}" style="height:${c ? Math.max(6, Math.round(c / mx * 16)) : 3}px"></i>`).join("")}</div>
-          </div>
-          <div class="kpi"><b>${timed.length}</b><span>schůzky</span></div>
-          <div class="kpi ${rhyAll.length && runOk === rhyAll.length ? "good" : ""}"><b>${runOk}<i> / ${rhyAll.length}</i></b><span>provoz běží</span></div>
-          <div class="kpi ${lateAll ? "warn" : ""}"><b>${lateAll}</b><span>zpožděno</span></div>
-        </div>`;
-      })()}
     </div>
 
     <div class="toprow" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
@@ -1387,16 +1391,30 @@ function renderDnes(){
       </div></div>
     </div>
 
+    <section class="sblock violet cesta">
+      <div class="sec-head">
+        <div class="sec-head-l"><span class="sec-ico">${ICONS.flag}</span>
+          <div><div class="eyebrow">kam to jde</div><h2>Cesta</h2></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--good);"></i>za tebou</span>
+          <span><i style="background:var(--accent);"></i>teď</span>
+          <span><i style="background:#d8d6cd;"></i>před tebou</span>
+        </div>
+      </div>
+      ${projs.map(p => renderProjectCard(p, true)).join("")}
+      ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádná cesta — přidej projekt vlevo v menu a rozvrhni si zastávky" : "Pro tenhle výběr tu nic není"}</div>` : ""}
+    </section>
+
     <section class="sblock darkp">
       <div class="hero-head">
         <div class="hero-id">
-          <div class="hero-clock">${isPlanToday ? `${pad(now.getHours())}:${pad(now.getMinutes())}` : pdLab.split(" ")[1]}
-            <small>${isPlanToday ? (inDay ? `zbývá ${ni.leftH} h ${pad(ni.leftM)} min` : ni.cur < TL_START ? "den ještě nezačal" : "den skončil") : pdLab}</small></div>
-          <div class="hero-div"></div>
           <div>
+            <div class="eyebrow" style="color:#6e6c62;">${isPlanToday ? "dnešek" : pdLab}</div>
             <h2>Denní linka</h2>
-            <span class="sec-sub">${isPlanToday ? "bloky přetáhni — přesné časy neřešíš" : `plánuješ dopředu`}</span>
           </div>
+          <div class="hero-div"></div>
+          <span class="sec-sub" style="max-width:280px;">${isPlanToday ? "co dneska chceš dělat — bloky přetáhni, přesné časy neřeš" : "plánuješ dopředu"}</span>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
           <div class="seg" style="padding:3px;">
@@ -1429,14 +1447,12 @@ function renderDnes(){
         </div>
         </div>
         ${allDay.length ? `<div class="allday">${allDay.map(e => `<span>${esc(e.title)}</span>`).join("")}</div>` : ""}
-        ${isPlanToday ? `<div class="dayline"><div style="width:${ni.dayPct}%"></div></div>` : ""}
         <div class="qchips" style="margin-top:16px;padding-top:15px;border-top:1px solid var(--fill);">
           <span class="q-lbl">Přetáhni na linku</span>
           ${quickList().map(q => `<span class="qchip" draggable="true" ondragstart="dragStart(event,'quick','${q.id}')"
             ondblclick="openEditQuick('${q.id}')" title="Dvojklik = upravit"
             style="background:${tint(q.color,.15)};color:${lighten(q.color)};"><span class="grip">⠿</span>${esc(q.title)}</span>`).join("")}
           <button class="qadd" onclick="openAddQuick()" title="Přidat blok">+ vlastní blok</button>
-          <span class="dayfoot">${!isPlanToday ? "" : inDay ? `do konce dne ${ni.leftH} h ${pad(ni.leftM)} min` : ni.cur < TL_START ? "den ještě nezačal" : "pracovní den skončil"}</span>
         </div>
         ${pm === "tyden" ? `<div class="week-grid wk7" style="margin-top:12px;">
           ${weekDates().map(k => {
@@ -1473,13 +1489,10 @@ function renderDnes(){
       <span class="ll-rest"></span>
     </div>` : ""}
 
-    <div class="grid2">
     <section class="sblock green">
       <div class="sec-head stack">
         <div class="sec-head-l"><span class="sec-ico">${ICONS.cycle}</span>
-          <div><h2>Provoz</h2>
-            <div class="eyebrow" style="margin-top:3px;">${rhyForClient.length ? `${naRadeMe.length} u mě · ${cekaClaude.length} u Clauda · ${doneToday.length} hotovo` : "pravidelné věci"}</div>
-          </div>
+          <div><div class="eyebrow">ať to běží samo</div><h2>Provoz</h2></div>
         </div>
         <div class="row2">
           <div class="seg" style="padding:2px;">
@@ -1507,8 +1520,7 @@ function renderDnes(){
           <button class="cad-head ${isOpen ? "open" : ""}" onclick="toggleProvoz('${key}', ${isOpen})">
             <span class="chev">▶</span>
             <span class="t">${label}</span>
-            <span class="c">${inGroup.length}</span>
-            ${lateN ? `<span class="warn">${lateN} zpožděno</span>` : dueN ? `<span class="warn" style="color:#a05a04;background:var(--amber-soft);">${dueN} na řadě</span>` : `<span class="okw">běží ✓</span>`}
+            ${lateN ? `<span class="warn">čeká na tebe</span>` : dueN ? `<span class="warn" style="color:#a05a04;background:var(--amber-soft);">na řadě</span>` : `<span class="okw">běží ✓</span>`}
           </button>
           ${isOpen ? `<div class="cad-body" style="margin-top:10px;">
             ${due.length ? `<div class="rhythm-grid">${due.map(rTileHtml).join("")}</div>` : ""}
@@ -1534,25 +1546,11 @@ function renderDnes(){
       </div>` : ""}
     </section>
 
-    <section class="sblock violet">
-      <div class="sec-head">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.flag}</span><h2>Cesty projektů</h2>
-          <span class="sec-sub">kde jsi a co je další zastávka</span></div>
-        <div class="legend">
-          <span><i style="background:var(--good);"></i>hotovo</span>
-          <span><i style="background:var(--accent);"></i>teď</span>
-          <span><i style="background:#d8d6cd;"></i>dál</span>
-        </div>
-      </div>
-      ${projs.map(p => renderProjectCard(p, true)).join("")}
-      ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádný projekt — přidej ho vlevo v menu" : "Pro tenhle výběr tu nic není"}</div>` : ""}
-    </section>
-    </div>
 
     <section class="sblock amber">
       <div class="sec-head">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.mind}</span><h2>Na mysli</h2>
-          <span class="sec-sub">odlož drobnost, ať ji nemusíš držet v hlavě</span></div>
+        <div class="sec-head-l"><span class="sec-ico">${ICONS.mind}</span>
+          <div><div class="eyebrow">ať to nenosíš v hlavě</div><h2>Na mysli</h2></div></div>
         <div class="seg" style="padding:2px;">
           ${[["all","Vše"],["práce","Práce"],["osobní","Osobní"],["nákup","Nákup"],["zdraví","Zdraví"]].map(([k, lab]) =>
             `<button class="${noteFilter === k ? "active" : ""}" style="padding:5px 11px;font-size:12px;" onclick="setNoteFilter('${k}')">${lab}<span class="cnt">${noteCounts[k]}</span></button>`).join("")}
@@ -1584,13 +1582,14 @@ function renderProjectCard(p, draggable){
     const l = (i / (n - 1)) * 100, w = 100 / (n - 1);
     return `<div class="seg-line ${i < cur ? "done" : "todo"}" style="left:calc(${l}% + 7px); width:calc(${w}% - 14px);"></div>`;
   }).join("");
+  const left = n - cur - 1;
+  const leftTxt = p.done ? "u cíle" : left === 0 ? "poslední zastávka" : left === 1 ? "pak už jen jedna zastávka" : `pak ještě ${left} zastávky`;
   return `<div class="pcard ${watch ? "watch" : ""}" id="card-${p.id}" ${draggable ? `draggable="true" ondragstart="dragStart(event,'project','${p.id}')"` : ""}>
     <div class="head">
       <div>
+        <div class="eyebrow">${esc(clientName(p.clientId))}${p.deadline ? ` · ${fmtDeadline(p.deadline)}` : ""}</div>
         <div class="nm"><i style="background:${clientDot(p.clientId)}"></i>${esc(p.name)}</div>
-        <div class="meta">${esc(clientName(p.clientId))} · termín ${fmtDeadline(p.deadline)} · fáze ${cur+1} z ${n}</div>
       </div>
-      <span class="status ${watch ? "late" : "ok"}"><i></i>${watch ? "sledovat" : "v normě"}</span>
     </div>
     <div class="path">
       ${segs}
@@ -1600,12 +1599,12 @@ function renderProjectCard(p, draggable){
     </div>
     <div class="pfoot">
       <div class="pmeaning">
-        <span class="lbl">${esc(p.phases[cur].name)}</span>
-        ${esc(p.phases[cur].meaning || "")}
+        <span class="lbl">teď jsi tady · ${esc(leftTxt)}</span>
+        <b>${esc(p.phases[cur].name)}</b>${p.phases[cur].meaning ? ` — ${esc(p.phases[cur].meaning)}` : ""}
         <div class="pnote" id="pnote-${p.id}" style="opacity:0;"></div>
       </div>
       <button class="btn-primary" ${p.done ? "disabled" : ""} onclick="advancePhase('${p.id}')">
-        ${p.done ? "Dokončeno ✓" : cur === n - 1 ? "Dokončit" : "Posunout dál →"}</button>
+        ${p.done ? "Dojeto ✓" : cur === n - 1 ? "Dojet do cíle" : "Další zastávka →"}</button>
     </div>
     <span class="hover-tools">
       <span class="tool-btn" title="Otevřít plochu" onclick="go('${p.id}')">↗</span>
