@@ -231,6 +231,8 @@
     position:relative; border-radius:9px; padding:6px 20px 6px 9px; font-size:11.5px; font-weight:650;
     line-height:1.25; overflow:hidden; text-overflow:ellipsis; cursor:default;
   }
+  .focus-chip[draggable="true"]{ cursor:grab; }
+  .focus-chip[draggable="true"]:active{ cursor:grabbing; }
   .focus-chip .fx{
     position:absolute; top:2px; right:2px; width:15px; height:15px; border:none; background:transparent;
     color:inherit; opacity:0; font-size:10px; cursor:pointer; border-radius:5px;
@@ -574,7 +576,7 @@ function blank(){
     settings:{theme:"light", dayStart:8, dayEnd:19, view:"day", taskFilter:"all", collapsed:[], dayGroup:false},
     google:{clientId:"", hidden:[]},
     sync:{url:"", key:""},
-    clients:[], rhythms:[], projects:[], notes:[], history:[], dayPlan:{}, weekPlan:{}, dayModes:{}, systems:[], metrics:[],
+    clients:[], rhythms:[], projects:[], notes:[], history:[], dayPlan:{}, weekPlan:{}, dayModes:{}, quickBlocks:[], systems:[], metrics:[],
     boxyMigrated:0,
     updatedAt:0
   };
@@ -584,7 +586,7 @@ function payload(){
     version:state.version, tasks:state.tasks, labels:state.labels, sections:state.sections,
     settings:state.settings, google:state.google,
     clients:state.clients, rhythms:state.rhythms, projects:state.projects,
-    notes:state.notes, history:state.history, dayPlan:state.dayPlan, weekPlan:state.weekPlan, dayModes:state.dayModes, systems:state.systems, metrics:state.metrics,
+    notes:state.notes, history:state.history, dayPlan:state.dayPlan, weekPlan:state.weekPlan, dayModes:state.dayModes, quickBlocks:state.quickBlocks, systems:state.systems, metrics:state.metrics,
     boxyMigrated:state.boxyMigrated, updatedAt:state.updatedAt
   };
 }
@@ -733,12 +735,46 @@ function rhythmStatus(r){
   if(ds >= r.everyDays - 1) return "soon";
   return "ok";
 }
-const QUICK_BLOCKS = [
+const QUICK_DEFAULTS = [
   { id:"ops", title:"Operativa", color:"#64748b" },
   { id:"deep", title:"Deep work", color:"#8b5cf6" },
   { id:"mail", title:"E-maily", color:"#0ea5e9" },
   { id:"pauza", title:"Pauza", color:"#f59e0b" }
 ];
+if(!Array.isArray(state.quickBlocks) || !state.quickBlocks.length){
+  state.quickBlocks = QUICK_DEFAULTS.map(q => ({...q}));
+}
+function quickList(){ return state.quickBlocks; }
+function openAddQuick(){
+  dialog("Nový blok", `
+    <div class="field-row">
+      <div class="field" style="flex:2;"><label>Název</label><input name="title" required placeholder="např. Fakturace"></div>
+      <div class="field"><label>Barva</label><input name="color" type="color" value="#64748b" style="height:38px;padding:3px;"></div>
+    </div>
+  `, "Přidat", fd => {
+    state.quickBlocks.push({ id:uid(), title:fd.get("title").trim(), color:fd.get("color") || "#64748b" });
+    save(); closeDialog(); render();
+  });
+}
+function openEditQuick(id){
+  const q = state.quickBlocks.find(x => x.id === id); if(!q) return;
+  dialog("Upravit blok", `
+    <div class="field-row">
+      <div class="field" style="flex:2;"><label>Název</label><input name="title" required value="${esc(q.title)}"></div>
+      <div class="field"><label>Barva</label><input name="color" type="color" value="${q.color}" style="height:38px;padding:3px;"></div>
+    </div>
+    <div class="field"><button type="button" class="btn-light" style="color:var(--red);" onclick="removeQuick('${q.id}')">Smazat blok</button></div>
+  `, "Uložit", fd => {
+    q.title = fd.get("title").trim(); q.color = fd.get("color") || q.color;
+    save(); closeDialog(); render();
+  });
+}
+function removeQuick(id){
+  const q = state.quickBlocks.find(x => x.id === id); if(!q) return;
+  if(!window.confirm(`Smazat blok „${q.title}"?`)) return;
+  state.quickBlocks = state.quickBlocks.filter(x => x.id !== id);
+  save(); closeDialog(); render();
+}
 const ICONS = {
   chart:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2.5 13.5v-4M6.2 13.5V6.5M9.9 13.5V9M13.6 13.5V3.5"/></svg>`,
   shield:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8 13 3.6v3.9c0 3.3-2.1 5.5-5 6.7-2.9-1.2-5-3.4-5-6.7V3.6z"/><path d="M5.8 7.9l1.6 1.6 2.8-3"/></svg>`,
@@ -928,19 +964,15 @@ function dropDay(e, key){
   const el = document.getElementById("wd-" + key); if(el) el.classList.remove("droppable");
   let d;
   try { d = JSON.parse(e.dataTransfer.getData("text/plain")); } catch(_){ return; }
-  let title = "Fokus", color = "#94a3b8", refType = d.type, refId = d.id;
-  if(d.type === "project"){
-    const p = state.projects.find(x => x.id === d.id); if(!p) return;
-    title = p.name; color = clientDot(p.clientId);
-  } else if(d.type === "rhythm"){
-    const r = state.rhythms.find(x => x.id === d.id); if(!r) return;
-    title = r.name; color = clientDot(r.clientId);
-  } else if(d.type === "quick"){
-    const q = QUICK_BLOCKS.find(x => x.id === d.id); if(!q) return;
-    title = q.title; color = q.color;
-  } else return;
+  if(d.type === "move"){
+    const it = takeMoved(d); if(!it) return;
+    if(!state.weekPlan[key]) state.weekPlan[key] = [];
+    state.weekPlan[key].push(it);
+    save(); render(); return;
+  }
+  const it = dropItemFrom(d); if(!it) return;
   if(!state.weekPlan[key]) state.weekPlan[key] = [];
-  state.weekPlan[key].push({ id:uid(), refType, refId, title, color });
+  state.weekPlan[key].push(it);
   save(); render();
 }
 function removeFocus(key, id){
@@ -1060,8 +1092,10 @@ function renderDnes(){
         ${allDay.length ? `<div class="allday">${allDay.map(e => `<span>${esc(e.title)}</span>`).join("")}</div>` : ""}
         <div class="qchips" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--fill);">
           <span class="q-lbl">Přetáhni:</span>
-          ${QUICK_BLOCKS.map(q => `<span class="qchip" draggable="true" ondragstart="dragStart(event,'quick','${q.id}')"
+          ${quickList().map(q => `<span class="qchip" draggable="true" ondragstart="dragStart(event,'quick','${q.id}')"
+            ondblclick="openEditQuick('${q.id}')" title="Dvojklik = upravit"
             style="background:${tint(q.color,.14)};color:${darken(q.color)};"><span class="grip">⠿</span>${esc(q.title)}</span>`).join("")}
+          <button class="sec-link" style="font-size:12px;" onclick="openAddQuick()" title="Přidat blok">+ blok</button>
           <span style="flex:1;"></span>
           <div class="seg" style="padding:2px;">
             ${PLAN_MODES.map(([k, lab]) => `<button class="${pm === k ? "active" : ""}" style="padding:5px 11px;font-size:12px;" onclick="setPlanMode('${k}')">${lab}</button>`).join("")}
@@ -1080,7 +1114,8 @@ function renderDnes(){
               <div class="dh"><span class="dn">${["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7]}${isT ? " · dnes" : ""}</span><span class="dd">${d.getDate()}. ${d.getMonth()+1}.</span></div>
               ${evs.map(e => `<div class="ev"><b>${e.t}</b> ${esc(e.title)}</div>`).join("")}
               ${evsAll.length > 2 ? `<div class="ev">+${evsAll.length - 2} další</div>` : ""}
-              ${foc.map(f => `<div class="focus-chip" style="background:${tint(f.color || "#94a3b8",.16)};color:${darken(f.color || "#94a3b8")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
+              ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
+                style="background:${tint(f.color || "#94a3b8",.16)};color:${darken(f.color || "#94a3b8")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
               <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat fokus dne">+</button>
             </div>`;
           }).join("")}
@@ -1252,7 +1287,7 @@ function planDrop(e){
     const r = state.rhythms.find(x => x.id === d.id); if(!r) return;
     title = r.name; color = clientDot(r.clientId);
   } else if(d.type === "quick"){
-    const q = QUICK_BLOCKS.find(x => x.id === d.id); if(!q) return;
+    const q = quickList().find(x => x.id === d.id); if(!q) return;
     title = q.title; color = q.color;
   } else return;
   const sh = Math.max(TL_START, Math.min(TL_END - 0.5, laneTime(e)));
@@ -1350,21 +1385,38 @@ function modeData(){
   if(!d.casti) d.casti = { rano:[], dopo:[], odpo:[], vecer:[] };
   return d;
 }
-function dropItem(e){
-  let d;
-  try { d = JSON.parse(e.dataTransfer.getData("text/plain")); } catch(_){ return null; }
+function dropItemFrom(d){
   let title, color;
   if(d.type === "project"){ const p = state.projects.find(x => x.id === d.id); if(!p) return null; title = p.name; color = clientDot(p.clientId); }
   else if(d.type === "rhythm"){ const r = state.rhythms.find(x => x.id === d.id); if(!r) return null; title = r.name; color = clientDot(r.clientId); }
-  else if(d.type === "quick"){ const q = QUICK_BLOCKS.find(x => x.id === d.id); if(!q) return null; title = q.title; color = q.color; }
+  else if(d.type === "quick"){ const q = quickList().find(x => x.id === d.id); if(!q) return null; title = q.title; color = q.color; }
   else return null;
   return { id:uid(), refType:d.type, refId:d.id, title, color };
+}
+/* přesun už umístěné položky mezi sekcemi (den ↔ den, část dne ↔ část dne) */
+function moveStart(e, src, key, id){
+  e.stopPropagation();
+  e.dataTransfer.setData("text/plain", JSON.stringify({ type:"move", src, key, id }));
+  e.dataTransfer.effectAllowed = "move";
+}
+function takeMoved(d){
+  if(d.type !== "move") return null;
+  let arr = null;
+  if(d.src === "week") arr = state.weekPlan[d.key];
+  else if(d.src === "casti"){ const dm = state.dayModes[selDate]; arr = dm && dm.casti ? dm.casti[d.key] : null; }
+  if(!Array.isArray(arr)) return null;
+  const i = arr.findIndex(x => x.id === d.id);
+  if(i < 0) return null;
+  return arr.splice(i, 1)[0];
 }
 function zoneOver(e, id){ e.preventDefault(); e.dataTransfer.dropEffect = "copy"; const el = document.getElementById(id); if(el) el.classList.add("droppable"); }
 function zoneLeave(id){ const el = document.getElementById(id); if(el) el.classList.remove("droppable"); }
 function zoneDrop(e, kind, slot){
   e.preventDefault(); zoneLeave(`zone-${kind}-${slot}`);
-  const it = dropItem(e); if(!it) return;
+  let d;
+  try { d = JSON.parse(e.dataTransfer.getData("text/plain")); } catch(_){ return; }
+  const it = d.type === "move" ? takeMoved(d) : dropItemFrom(d);
+  if(!it) return;
   modeData()[kind][slot].push(it);
   save(); render();
 }
@@ -1383,7 +1435,8 @@ function zoneAddDialog(kind, slot, label){
   });
 }
 function zoneChips(kind, slot, items){
-  return items.map(f => `<div class="focus-chip" style="background:${tint(f.color || "#94a3b8",.16)};color:${darken(f.color || "#94a3b8")};">${esc(f.title)}<button class="fx" onclick="zoneRemove('${kind}','${slot}','${f.id}')">✕</button></div>`).join("");
+  return items.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'${kind}','${slot}','${f.id}')"
+    style="background:${tint(f.color || "#94a3b8",.16)};color:${darken(f.color || "#94a3b8")};">${esc(f.title)}<button class="fx" onclick="zoneRemove('${kind}','${slot}','${f.id}')">✕</button></div>`).join("");
 }
 function zoneBoxHtml(kind, slot, label, sub, items, minH){
   const id = `zone-${kind}-${slot}`;
@@ -1908,6 +1961,7 @@ function applyRemote(remote){
   ["clients","rhythms","projects","notes","history","systems","metrics"].forEach(k => {
     if(Array.isArray(remote[k])) state[k] = remote[k];
   });
+  if(Array.isArray(remote.quickBlocks) && remote.quickBlocks.length) state.quickBlocks = remote.quickBlocks;
   if(remote.dayPlan && typeof remote.dayPlan === "object") state.dayPlan = remote.dayPlan;
   if(remote.weekPlan && typeof remote.weekPlan === "object") state.weekPlan = remote.weekPlan;
   if(remote.dayModes && typeof remote.dayModes === "object") state.dayModes = remote.dayModes;
