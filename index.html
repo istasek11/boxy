@@ -234,11 +234,21 @@
   .focus-chip[draggable="true"]{ cursor:grab; }
   .focus-chip[draggable="true"]:active{ cursor:grabbing; }
   .focus-chip .fx{
-    position:absolute; top:2px; right:2px; width:15px; height:15px; border:none; background:transparent;
-    color:inherit; opacity:0; font-size:10px; cursor:pointer; border-radius:5px;
+    position:absolute; top:50%; right:3px; transform:translateY(-50%); width:16px; height:16px; border:none; background:transparent;
+    color:inherit; opacity:.5; font-size:10.5px; cursor:pointer; border-radius:5px;
     display:flex; align-items:center; justify-content:center; transition:opacity .12s;
   }
-  .focus-chip:hover .fx{ opacity:.7; }
+  .focus-chip:hover .fx{ opacity:1; }
+  /* koš při přetahování umístěné položky */
+  .trash{
+    position:fixed; left:50%; bottom:26px; transform:translate(-50%, 90px); z-index:90;
+    display:flex; align-items:center; gap:9px; background:#fff; color:var(--red);
+    border-radius:999px; padding:13px 22px; font-size:13px; font-weight:700;
+    box-shadow:0 10px 30px -8px rgba(24,24,27,.28), 0 0 0 1.5px rgba(220,38,38,.25);
+    transition:transform .2s; pointer-events:none;
+  }
+  .trash.show{ transform:translate(-50%, 0); pointer-events:auto; }
+  .trash.droppable{ background:var(--red); color:#fff; }
   .wday .addf{
     margin-top:auto; border:none; background:transparent; color:var(--tx4); font-size:11px;
     cursor:pointer; border-radius:8px; padding:4px; transition:all .12s; text-align:center;
@@ -539,6 +549,10 @@
 </div>
 <div id="dialogHost"></div>
 <div id="toastHost"></div>
+<div class="trash" id="trashZone"
+  ondragover="event.preventDefault(); event.dataTransfer.dropEffect='move'; this.classList.add('droppable');"
+  ondragleave="this.classList.remove('droppable');"
+  ondrop="trashDrop(event)">🗑 Pusť sem pro smazání</div>
 
 <script>
 /* ============================================================
@@ -1398,6 +1412,27 @@ function moveStart(e, src, key, id){
   e.stopPropagation();
   e.dataTransfer.setData("text/plain", JSON.stringify({ type:"move", src, key, id }));
   e.dataTransfer.effectAllowed = "move";
+  const t = document.getElementById("trashZone");
+  if(t) setTimeout(() => t.classList.add("show"), 0);
+}
+function moveEnd(){
+  const t = document.getElementById("trashZone");
+  if(t){ t.classList.remove("show"); t.classList.remove("droppable"); }
+}
+document.addEventListener("dragend", moveEnd);
+function trashDrop(e){
+  e.preventDefault();
+  let d;
+  try { d = JSON.parse(e.dataTransfer.getData("text/plain")); } catch(_){ moveEnd(); return; }
+  const it = takeMoved(d);
+  moveEnd();
+  if(!it) return;
+  save(); render();
+  toast(`„${it.title}" odstraněno`, "Vrátit", () => {
+    if(d.src === "week"){ if(!state.weekPlan[d.key]) state.weekPlan[d.key] = []; state.weekPlan[d.key].push(it); }
+    else if(d.src === "casti"){ modeData().casti[d.key].push(it); }
+    save(); render();
+  });
 }
 function takeMoved(d){
   if(d.type !== "move") return null;
