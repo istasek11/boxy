@@ -10,17 +10,20 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#fafafa; --card:#ffffff; --fill:#f1f2f4; --fill2:#e9eaee;
-    --tx:#18181b; --tx2:#4b4b53; --tx3:#75757e; --tx4:#b2b2ba;
-    --accent:#ff5a3d; --accent-ink:#d8451f; --accent-soft:#ffece7;
-    --good:#179d6b; --good-soft:#e3f6ee;
-    --amber:#d97706; --amber-soft:#fcf1e0;
+    --bg:#f1efea; --card:#ffffff; --fill:#f4f3ee; --fill2:#e7e5de;
+    --tx:#17150f; --tx2:#45433c; --tx3:#7c7a71; --tx4:#b5b3a9;
+    --line:#e7e6e0;
+    --accent:#ff5b26; --accent-ink:#d8451f; --accent-soft:#ffe9df;
+    --good:#17a673; --good-soft:#e2f5ec;
+    --amber:#c99f43; --amber-soft:#faf1dc;
     --red:#dc2626; --red-soft:#fdeaea;
-    --sh:0 1px 2px rgba(24,24,27,.04), 0 10px 30px -14px rgba(24,24,27,.10);
-    --sh-lg:0 4px 12px rgba(24,24,27,.06), 0 32px 64px -24px rgba(24,24,27,.22);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sh:0 1px 2px rgba(24,22,18,.04), 0 10px 30px -14px rgba(24,22,18,.10);
+    --sh-lg:0 4px 12px rgba(24,22,18,.06), 0 32px 64px -24px rgba(24,22,18,.24);
     --r:18px;
   }
   *{ box-sizing:border-box; }
@@ -28,9 +31,21 @@
   @media (prefers-reduced-motion:reduce){ *,*::before,*::after{ animation:none !important; transition:none !important; } }
   body{
     margin:0; background:var(--bg); color:var(--tx);
-    font-family:'Inter',-apple-system,'Segoe UI',sans-serif;
+    font-family:'Instrument Sans',-apple-system,'Segoe UI',sans-serif;
     -webkit-font-smoothing:antialiased; font-size:14px;
+    background-image:
+      radial-gradient(900px 520px at 12% -8%, rgba(255,91,38,.10), transparent 62%),
+      radial-gradient(760px 460px at 92% 4%, rgba(23,166,115,.10), transparent 60%),
+      radial-gradient(700px 500px at 60% 100%, rgba(122,136,255,.08), transparent 62%);
+    background-attachment:fixed;
   }
+  /* jemné zrno přes celou plochu */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.22'/></svg>");
+    mix-blend-mode:multiply;
+  }
+  .app{ position:relative; z-index:1; }
   button{ font-family:inherit; }
   .app{ min-height:100vh; display:grid; grid-template-columns:230px 1fr; }
 
@@ -41,10 +56,10 @@
   }
   .brand{ display:flex; align-items:center; gap:9px; padding:0 10px; }
   .brand-mark{
-    width:26px; height:26px; border-radius:8px;
-    background:linear-gradient(135deg,#ff7a55,#f4431f);
-    color:#fff; display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:12.5px;
+    width:28px; height:28px; border-radius:9px;
+    background:#17150f;
+    color:var(--accent); display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:13.5px;
   }
   .brand-name{ font-size:14.5px; font-weight:700; letter-spacing:-.01em; }
   .nav-row{
@@ -75,12 +90,13 @@
   .syncpill.err .led{ background:var(--red); }
 
   /* ============ main ============ */
-  main{ padding:44px 56px 90px; display:flex; flex-direction:column; gap:44px; max-width:1120px; width:100%; }
+  main{ padding:44px 56px 90px; display:flex; flex-direction:column; gap:44px; max-width:1180px; width:100%; min-width:0; }
   @keyframes rise{ from{ opacity:0; transform:translateY(5px);} to{ opacity:1; transform:none;} }
   main > *{ animation:rise .28s ease both; }
   .hdr{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; }
-  .hdr-date{ font-size:14px; color:var(--tx3); font-weight:500; }
-  h1{ margin:4px 0 0; font-size:32px; font-weight:800; letter-spacing:-.03em; }
+  .hdr-date{ font-family:var(--mono); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--tx4); font-weight:500; }
+  h1{ margin:8px 0 0; font-size:40px; font-weight:700; letter-spacing:-.035em; line-height:1; }
+  .hdr-sub{ font-size:15px; color:var(--tx3); margin-top:10px; }
   .stats{ display:flex; align-items:flex-start; gap:26px; }
   .stat{ text-align:right; }
   .stat .num{ font-size:24px; font-weight:800; letter-spacing:-.03em; line-height:1.1; font-variant-numeric:tabular-nums; }
@@ -103,11 +119,84 @@
   .seg .cnt{ color:var(--tx3); font-weight:500; font-size:11.5px; }
 
   section{ display:flex; flex-direction:column; gap:16px; }
-  .sblock{ border-radius:24px; padding:22px 24px 24px; background:var(--secbg); }
-  .sblock.blue{ --secc:#3b82f6; --secc2:#2563eb; --secbg:rgba(59,130,246,.09); }
-  .sblock.green{ --secc:#10b981; --secc2:#059669; --secbg:rgba(16,185,129,.10); }
-  .sblock.violet{ --secc:#8b5cf6; --secc2:#7c3aed; --secbg:rgba(139,92,246,.09); }
-  .sblock.amber{ --secc:#f59e0b; --secc2:#d97706; --secbg:rgba(245,158,11,.12); }
+  .sblock{
+    position:relative; overflow:hidden;
+    border-radius:26px; padding:24px 28px 26px;
+    background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86));
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 1px 2px rgba(24,22,18,.04), 0 24px 60px -36px rgba(24,22,18,.42);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  /* barevná záře v rohu podle sekce */
+  .sblock:not(.darkp)::before{
+    content:""; position:absolute; top:-90px; left:-70px; width:340px; height:220px; pointer-events:none;
+    background:radial-gradient(closest-side, var(--secc,#94a3b8), transparent 72%); opacity:.16;
+  }
+  .sblock:not(.darkp)::after{
+    content:""; position:absolute; top:0; left:28px; right:28px; height:1px; pointer-events:none;
+    background:linear-gradient(90deg, transparent, var(--secc,#94a3b8), transparent); opacity:.35;
+  }
+  .sblock > *{ position:relative; z-index:1; }
+  .sblock.blue{ --secc:#3b82f6; --secc2:#2563eb; }
+  .sblock.green{ --secc:#17a673; --secc2:#0d7a54; }
+  .sblock.violet{ --secc:#8b5cf6; --secc2:#7c3aed; }
+  .sblock.amber{ --secc:#e6a13c; --secc2:#c9862a; }
+  /* tmavý hero panel — denní linka */
+  .sblock.darkp{
+    background:radial-gradient(120% 170% at 18% 0%, #23211b 0%, #14130f 60%);
+    border-color:#14130f; color:#faf9f5;
+    box-shadow:0 30px 60px -30px rgba(20,19,15,.55);
+  }
+  .darkp h2{ color:#faf9f5; }
+  .darkp .sec-sub{ color:#8f8d82; }
+  .darkp .sec-ico{ box-shadow:none; }
+  .darkp .sec-link{ color:#ffb08a; border:1px solid rgba(255,140,94,.35); border-radius:999px; padding:7px 14px; font-weight:600; font-size:12.5px; }
+  .darkp .sec-link:hover{ color:#ffd0b8; text-decoration:none; border-color:rgba(255,140,94,.65); }
+  .darkp .tl-card{ background:transparent; box-shadow:none; padding:0; }
+  .darkp .tl-hours span{ font-family:var(--mono); font-size:10px; color:#6e6c62; font-weight:400; }
+  .darkp .tl-lanes{ background:repeating-linear-gradient(to right, rgba(255,255,255,.07) 0 1px, transparent 1px calc(100%/11)); }
+  .darkp .lane.plan{ background:rgba(255,255,255,.05); }
+  .darkp .lane.plan.droppable{ background:rgba(255,91,38,.15); box-shadow:inset 0 0 0 2px var(--accent); }
+  .darkp .lane-tag{ color:#8f8d82; }
+  .darkp .lane-tag .sec-link{ border:none; padding:0; }
+  .darkp .tl-block{ background:rgba(255,255,255,.09); box-shadow:none; border:1px solid rgba(255,255,255,.09); }
+  .darkp .tl-block .n{ color:#f2f1ea; }
+  .darkp .tl-block .t{ color:#8f8d82; font-family:var(--mono); font-size:9px; }
+  .darkp .tl-block.now{ box-shadow:0 0 0 1.5px var(--accent), 0 0 22px rgba(255,91,38,.25); }
+  .darkp .tl-block.past{ opacity:.6; }
+  .darkp .tl-block.past .n{ text-decoration:none; }
+  .qadd{
+    border:1px dashed rgba(255,255,255,.22); background:transparent; color:#8f8d82;
+    border-radius:999px; padding:7px 15px; font-size:12.5px; cursor:pointer; transition:all .13s;
+  }
+  .qadd:hover{ color:#d8d6cd; border-color:rgba(255,255,255,.4); }
+  .darkp .plan-block{ border:none; }
+  .darkp .tl-nowline{ width:2px; border-left:none; background:linear-gradient(180deg,#ffd9c6,#ff5b26); box-shadow:0 0 18px rgba(255,91,38,.8); }
+  .darkp .tl-nowlabel{ background:#ffd9c6; color:#17150f; font-family:var(--mono); box-shadow:none; }
+  .darkp .qchips{ border-top:1px solid rgba(255,255,255,.08) !important; }
+  .darkp .q-lbl{ font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#6e6c62; }
+  .darkp .qchip{ border:1px solid rgba(255,255,255,.13); }
+  .darkp .seg{ background:rgba(255,255,255,.07) !important; }
+  .darkp .seg button{ color:#8f8d82; }
+  .darkp .seg button:hover{ color:#d8d6cd; }
+  .darkp .seg button.active{ background:#faf9f5; color:#17150f; box-shadow:none; }
+  .darkp .wday{ background:rgba(255,255,255,.06); }
+  .darkp .wday.today{ background:rgba(255,255,255,.10); box-shadow:0 0 0 2px var(--accent); }
+  .darkp .wday.droppable{ background:rgba(255,91,38,.15); box-shadow:inset 0 0 0 2px var(--accent); }
+  .darkp .wday .dh .dn{ color:#f2f1ea; }
+  .darkp .wday.today .dh .dn{ color:#ffb08a; }
+  .darkp .wday .dh .dd{ color:#8f8d82; font-family:var(--mono); font-size:10px; }
+  .darkp .wday .ev{ color:#a5a294; }
+  .darkp .wday .ev b{ color:#d8d6cd; }
+  .darkp .wday .addf{ color:#6e6c62; }
+  .darkp .wday .addf:hover{ background:rgba(255,255,255,.08); color:#d8d6cd; }
+  .darkp .mind-note{ color:#6e6c62; }
+  .darkp .lane-empty{ color:#6e6c62; }
+  .darkp .allday span{ background:rgba(255,255,255,.08); color:#d8d6cd; }
+  .darkp .empty-tile{ background:rgba(255,255,255,.05) !important; color:#8f8d82; }
+  .dayline{ position:relative; height:4px; border-radius:2px; background:rgba(255,255,255,.07); margin-top:16px; overflow:hidden; }
+  .dayline > div{ position:absolute; top:0; bottom:0; left:0; border-radius:2px; background:linear-gradient(90deg, rgba(255,91,38,.25), #ff5b26); }
+  .dayfoot{ font-family:var(--mono); font-size:11px; color:#6e6c62; margin-left:auto; }
   .sblock.cyan{ --secc:#0891b2; --secc2:#0e7490; --secbg:rgba(8,145,178,.08); }
   .sblock.rose{ --secc:#e11d48; --secc2:#be123c; --secbg:rgba(225,29,72,.07); }
   .met-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
@@ -157,13 +246,65 @@
   .sec-ico svg{ width:16px; height:16px; }
   h2{ margin:0; font-size:16.5px; font-weight:700; letter-spacing:-.015em; }
   .sec-sub{ font-size:12.5px; color:var(--tx3); margin-left:4px; }
-  .sblock .seg{ background:rgba(255,255,255,.7); }
-  .sblock .empty-tile{ background:rgba(255,255,255,.6); }
-  .sblock .tile-add{ outline-color:rgba(0,0,0,.09); }
-  .sblock .tile-add:hover{ background:rgba(255,255,255,.7); }
+  .sblock .seg{ background:var(--fill); }
+  .sblock .empty-tile{ background:var(--fill); }
+  .sblock .tile-add{ outline-color:var(--line); }
+  .sblock .tile-add:hover{ background:var(--fill); }
+  /* uvnitř světlé karty jsou dlaždice teplé, ne bílé */
+  .sblock:not(.darkp) .rtile,
+  .sblock:not(.darkp) .stile,
+  .sblock:not(.darkp) .mtile{ background:#faf9f6; border:1px solid var(--line); box-shadow:none; }
+  .sblock:not(.darkp) .rtile:hover,
+  .sblock:not(.darkp) .stile:hover,
+  .sblock:not(.darkp) .mtile:hover{ background:#fff; box-shadow:0 10px 26px -18px rgba(24,22,18,.35); }
+  .sblock:not(.darkp) .mind{ background:transparent; box-shadow:none; padding:0; }
+  .sblock:not(.darkp) .v-projs{ background:#faf9f6; border:1px solid var(--line); }
   main{ gap:30px; }
   .sec-link{ border:none; background:none; color:var(--tx3); font-size:12.5px; cursor:pointer; padding:0; }
   .sec-link:hover{ color:var(--tx); text-decoration:underline; }
+  /* ============ barevné statistiky ============ */
+  .statrow{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .stat2{
+    position:relative; overflow:hidden; border-radius:20px; padding:15px 17px 14px;
+    display:flex; flex-direction:column; gap:11px; border:1px solid rgba(255,255,255,.75);
+    box-shadow:0 1px 2px rgba(24,22,18,.03), 0 18px 40px -30px rgba(24,22,18,.45);
+    transition:transform .16s, box-shadow .16s;
+  }
+  .stat2:hover{ transform:translateY(-2px); box-shadow:0 1px 2px rgba(24,22,18,.04), 0 26px 50px -30px rgba(24,22,18,.5); }
+  .stat2::after{
+    content:""; position:absolute; right:-40px; top:-40px; width:130px; height:130px; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(255,255,255,.85), transparent 70%); pointer-events:none;
+  }
+  .stat2 .lb{ font-size:11.5px; font-weight:700; display:flex; align-items:center; gap:8px; letter-spacing:-.005em; }
+  .stat2 .ico{ width:24px; height:24px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.65); }
+  .stat2 .ico svg{ width:13px; height:13px; }
+  .stat2 .big{ font-size:31px; font-weight:800; letter-spacing:-.045em; line-height:1; font-variant-numeric:tabular-nums; }
+  .stat2 .big small{ font-size:14px; font-weight:700; letter-spacing:-.02em; opacity:.65; margin-left:3px; }
+  .stat2 .note{ font-size:10.5px; font-weight:600; opacity:.62; }
+  .stat2.blue{ background:linear-gradient(165deg,#e7efff,#dbe7ff); color:#1e40af; }
+  .stat2.violet{ background:linear-gradient(165deg,#efe9ff,#e6dcff); color:#5b21b6; }
+  .stat2.green{ background:linear-gradient(165deg,#e2f6ec,#d3f0e2); color:#0d7a54; }
+  .stat2.amber{ background:linear-gradient(165deg,#fdf1dd,#fbe8c8); color:#9a6b12; }
+  .stat2.red{ background:linear-gradient(165deg,#fdeaea,#fbdcdc); color:#b32020; }
+  /* mikro-grafy uvnitř dlaždic */
+  .spark{ display:flex; align-items:flex-end; gap:5px; height:26px; }
+  .spark i{ flex:1; max-width:15px; border-radius:4px; background:currentColor; opacity:.20; min-height:6px; }
+  .spark i.on{ opacity:.85; }
+  .spark i.tdy{ opacity:1; box-shadow:0 0 0 1.5px rgba(255,255,255,.55); }
+  .meter{ height:6px; border-radius:4px; background:rgba(255,255,255,.6); overflow:hidden; }
+  .meter > i{ display:block; height:100%; border-radius:4px; background:currentColor; opacity:.85; }
+  .dotline{ display:flex; align-items:center; gap:4px; height:26px; }
+  .dotline i{ width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.5; }
+  .dotline i.big{ width:9px; height:9px; opacity:.95; }
+  .dotline .rail{ flex:1; height:2px; border-radius:2px; background:currentColor; opacity:.18; }
+  .linkline{ display:flex; align-items:center; gap:12px; padding:0 2px; margin:-14px 0 -8px; }
+  .linkline .ll-dot{ width:9px; height:9px; border-radius:50%; background:var(--accent); flex:none; }
+  .linkline .ll-seg{ width:28%; height:2px; background:linear-gradient(90deg,var(--accent),rgba(255,91,38,.15)); }
+  .linkline .ll-txt{ font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-ink); white-space:nowrap; }
+  .linkline .ll-rest{ flex:1; height:1px; background:var(--line); }
+  .legend{ display:flex; align-items:center; gap:16px; font-size:12px; color:var(--tx3); }
+  .legend span{ display:flex; align-items:center; gap:7px; }
+  .legend i{ width:9px; height:9px; border-radius:50%; }
 
   /* ============ timeline ============ */
   .tl-card{ background:var(--card); border-radius:var(--r); padding:22px 24px 18px; box-shadow:var(--sh); }
@@ -245,9 +386,9 @@
     display:flex; align-items:center; gap:9px; background:#fff; color:var(--red);
     border-radius:999px; padding:13px 22px; font-size:13px; font-weight:700;
     box-shadow:0 10px 30px -8px rgba(24,24,27,.28), 0 0 0 1.5px rgba(220,38,38,.25);
-    transition:transform .2s; pointer-events:none;
+    transition:transform .2s, opacity .18s; pointer-events:none; opacity:0; visibility:hidden;
   }
-  .trash.show{ transform:translate(-50%, 0); pointer-events:auto; }
+  .trash.show{ transform:translate(-50%, 0); pointer-events:auto; opacity:1; visibility:visible; }
   .trash.droppable{ background:var(--red); color:#fff; }
   .wday .addf{
     margin-top:auto; border:none; background:transparent; color:var(--tx4); font-size:11px;
@@ -257,13 +398,13 @@
   .wday.today .addf:hover{ background:var(--fill); }
 
   /* ============ rytmus ============ */
-  .rhythm-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .rhythm-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
   .cad-head{
     display:flex; align-items:center; gap:10px; width:100%; text-align:left;
-    border:none; background:rgba(255,255,255,.55); border-radius:12px; padding:11px 14px;
+    border:none; background:var(--fill); border-radius:12px; padding:11px 14px;
     cursor:pointer; transition:background .13s;
   }
-  .cad-head:hover{ background:rgba(255,255,255,.85); }
+  .cad-head:hover{ background:var(--fill2); }
   .cad-head .chev{ font-size:11px; color:var(--tx3); transition:transform .18s; display:inline-block; }
   .cad-head.open .chev{ transform:rotate(90deg); }
   .cad-head .t{ font-size:13.5px; font-weight:700; }
@@ -273,10 +414,10 @@
   .cad-body{ display:flex; flex-direction:column; gap:10px; padding:2px 2px 6px; }
   .sub-label{ font-size:12px; font-weight:700; color:var(--tx2); margin:6px 0 -4px; display:flex; align-items:center; gap:7px; }
   .sub-label .n{ color:var(--tx3); font-weight:550; }
-  .rrow-grid{ display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; }
+  .rrow-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:8px 12px; }
   .rrow{
     display:flex; align-items:center; gap:9px; width:100%; text-align:left;
-    background:rgba(255,255,255,.66); border:none; border-radius:11px; padding:9px 12px;
+    background:#faf9f6; border:1px solid var(--line); border-radius:11px; padding:9px 12px;
     font-size:13px; cursor:pointer; color:var(--tx); transition:background .13s;
   }
   .rrow:hover{ background:#fff; }
@@ -396,25 +537,25 @@
 
   /* ============ projekty ============ */
   .pcard{
-    position:relative; background:var(--card); border-radius:var(--r);
-    padding:20px 22px 16px; display:flex; flex-direction:column; gap:18px; box-shadow:var(--sh);
+    position:relative; background:#faf9f6; border:1px solid var(--line); border-radius:var(--r);
+    padding:20px 22px 16px; display:flex; flex-direction:column; gap:18px;
     transition:box-shadow .18s;
   }
-  .pcard:hover{ box-shadow:var(--sh-lg); }
+  .pcard:hover{ box-shadow:0 14px 34px -22px rgba(24,22,18,.28); }
   .pcard .head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding-right:52px; }
   .pcard .nm{ font-size:17px; font-weight:700; letter-spacing:-.02em; display:flex; align-items:center; gap:9px; }
   .pcard .nm i{ width:9px; height:9px; border-radius:50%; display:inline-block; flex:none; }
   .pcard .meta{ font-size:12.5px; color:var(--tx3); margin-top:4px; }
-  .path{ position:relative; display:flex; justify-content:space-between; padding:4px 8px 24px; }
-  .path .seg-line{ position:absolute; top:8.5px; height:3px; border-radius:3px; }
-  .path .seg-line.done{ background:var(--good); }
+  .path{ position:relative; display:flex; justify-content:space-between; padding:6px 8px 28px; }
+  .path .seg-line{ position:absolute; top:8px; height:5px; border-radius:3px; }
+  .path .seg-line.done{ background:linear-gradient(90deg, var(--good), var(--accent)); }
   .path .seg-line.todo{ background:var(--fill2); }
   .stop{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:8px; width:10px; }
-  .stop .dot{ width:11px; height:11px; border-radius:50%; background:var(--good); transition:all .4s; }
-  .stop.future .dot{ background:#fff; border:2.5px solid var(--fill2); }
-  .stop.current .dot{ width:15px; height:15px; background:#fff; border:3.5px solid var(--good); box-shadow:0 0 0 4px var(--good-soft); margin-top:-2px; }
-  .stop .pl{ position:absolute; top:22px; font-size:11px; color:var(--tx4); white-space:nowrap; font-weight:550; }
-  .stop.current .pl{ color:var(--tx); font-weight:650; }
+  .stop .dot{ width:15px; height:15px; border-radius:50%; background:#fff; border:4px solid var(--good); transition:all .4s; }
+  .stop.future .dot{ width:13px; height:13px; border:3px solid #d8d6cd; }
+  .stop.current .dot{ width:20px; height:20px; background:var(--accent); border:4px solid #fff; box-shadow:0 0 0 4px rgba(255,91,38,.2); margin-top:-2px; }
+  .stop .pl{ position:absolute; top:24px; font-size:11px; color:var(--tx4); white-space:nowrap; font-weight:550; }
+  .stop.current .pl{ color:var(--tx); font-weight:800; font-size:12px; }
   .stop.done .pl{ color:var(--tx3); }
   .pcard.watch .stop .dot{ background:var(--red); }
   .pcard.watch .stop.future .dot{ background:var(--fill2); }
@@ -435,11 +576,13 @@
   /* ============ na mysli ============ */
   .mind{ background:var(--card); border-radius:var(--r); padding:18px 20px; display:flex; flex-direction:column; gap:14px; box-shadow:var(--sh); }
   .mind-input{ display:flex; gap:8px; }
+  .mind-input{ background:var(--fill); border-radius:999px; padding:5px 5px 5px 8px; }
   .mind-input input{
-    flex:1; border:none; background:var(--fill); border-radius:12px;
-    padding:11px 14px; font-family:inherit; font-size:13.5px; color:var(--tx); transition:box-shadow .15s;
+    flex:1; border:none; background:transparent; border-radius:999px;
+    padding:11px 14px; font-family:inherit; font-size:14px; color:var(--tx); transition:box-shadow .15s;
   }
-  .mind-input input:focus{ outline:none; box-shadow:0 0 0 2px var(--accent); background:#fff; }
+  .mind-input input:focus{ outline:none; }
+  .mind-input:focus-within{ box-shadow:0 0 0 2px var(--accent); background:#fff; }
   .mind-row{
     display:flex; align-items:center; gap:10px;
     padding:9px 11px; border-radius:11px; cursor:pointer; font-size:13.5px;
@@ -450,6 +593,35 @@
   .mind-row .cat{ width:7px; height:7px; border-radius:50%; flex:none; }
   .mind-row .cat-name{ margin-left:auto; font-size:11.5px; color:var(--tx3); }
   .mind-note{ font-size:11.5px; color:var(--tx4); }
+  /* přepínač dní */
+  .daypick{ display:flex; gap:3px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:5px; box-shadow:0 6px 18px -10px rgba(24,22,18,.18); }
+  .daypick button{
+    border:none; background:transparent; cursor:pointer; border-radius:11px; padding:6px 0 5px;
+    display:flex; flex-direction:column; align-items:center; gap:1px; width:46px;
+    transition:background .12s, transform .12s;
+  }
+  .daypick button:hover{ background:var(--fill); }
+  .daypick .dw{ font-family:var(--mono); font-size:9px; font-weight:500; text-transform:uppercase; letter-spacing:.08em; color:var(--tx4); line-height:1; }
+  .daypick .dn{ font-size:15px; font-weight:700; color:var(--tx2); font-variant-numeric:tabular-nums; line-height:1.2; }
+  .daypick button.active{ background:#17150f; }
+  .daypick button.active .dw{ color:#ff8c5e; }
+  .daypick button.active .dn{ color:#fff; }
+  .daypick button.tdy:not(.active) .dn{ color:var(--accent-ink); }
+  .daypick button.tdy:not(.active) .dw{ color:var(--accent-ink); }
+  .daypick .calbtn{ width:40px; justify-content:center; color:var(--tx3); }
+  .daypick .calbtn:hover{ color:var(--tx); }
+  .daypick .calbtn svg{ width:17px; height:17px; }
+  /* kalendářík */
+  .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .cal-head b{ font-size:14px; text-transform:capitalize; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .cal-w{ font-size:10px; font-weight:700; color:var(--tx4); text-align:center; text-transform:uppercase; padding:4px 0; }
+  .cal-d{ border:none; background:transparent; border-radius:9px; padding:9px 0; font-size:13px; font-weight:600; color:var(--tx); cursor:pointer; font-variant-numeric:tabular-nums; transition:background .1s; }
+  .cal-d:hover{ background:var(--fill); }
+  .cal-d.tdy{ color:var(--accent-ink); font-weight:800; }
+  .cal-d.sel{ background:var(--tx); color:#fff; }
+  .cal-d.tdy.sel{ background:var(--accent); color:#fff; }
+  .cal-d.past{ color:var(--tx4); }
 
   /* ============ plocha ============ */
   .ws-header{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; }
@@ -509,15 +681,63 @@
     animation:rise .25s ease both;
   }
 
+  /* ============ sidebar v2 ============ */
+  aside{ padding:22px 12px 18px; }
+  .navcard{
+    background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.72));
+    border:1px solid rgba(255,255,255,.9); border-radius:20px; padding:8px;
+    box-shadow:0 1px 2px rgba(24,22,18,.03), 0 20px 44px -34px rgba(24,22,18,.4);
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .nav-row{ gap:10px; justify-content:flex-start; padding:9px 11px; border-radius:13px; font-weight:550; }
+  .nav-row .ni{ width:24px; height:24px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    background:var(--fill); color:var(--tx3); flex:none; transition:all .13s; }
+  .nav-row .ni svg{ width:13px; height:13px; }
+  .nav-row .lbl{ flex:1; text-align:left; }
+  .nav-row.active{ background:#17150f; color:#fff; font-weight:650; }
+  .nav-row.active .ni{ background:rgba(255,255,255,.14); color:var(--accent); }
+  .nav-row.active .nav-meta{ color:rgba(255,255,255,.55); }
+  .nav-row:hover:not(.active) .ni{ background:var(--fill2); color:var(--tx2); }
+  .proj-item{ padding:8px 11px; border-radius:13px; }
+  .proj-item .nm{ font-weight:600; font-size:13px; }
+  .proj-phase{ font-size:10.5px; padding-left:16px; color:var(--tx4); font-weight:550; }
+  .brand{ padding:2px 10px 10px; }
+
   @media (max-width:900px){
-    .app{ grid-template-columns:1fr; }
+    .app{ grid-template-columns:minmax(0,1fr); }
+    .navcard{ flex-direction:row; align-items:center; flex-wrap:wrap; border-radius:16px; }
+    .navcard .nav-row{ width:auto; flex:0 0 auto; padding:8px 12px 8px 9px; }
+    .navcard .nav-row .lbl{ flex:0 0 auto; }
+    .statrow{ grid-template-columns:repeat(2,1fr); gap:10px; }
+    .stat2{ padding:13px 14px 12px; border-radius:17px; }
+    .stat2 .big{ font-size:26px; }
+    .stat2 .lb{ font-size:11px; }
+    main, aside{ min-width:0; }
     aside{ position:static; height:auto; flex-direction:row; flex-wrap:wrap; align-items:center; padding:16px; gap:10px; }
     aside .nav-label, aside .side-footer{ display:none; }
-    main{ padding:24px 18px 60px; gap:32px; }
+    main{ padding:24px 16px 60px; gap:26px; max-width:100%; }
     .rhythm-grid{ grid-template-columns:1fr; }
+    .rrow-grid{ grid-template-columns:1fr; }
     .hdr{ flex-direction:column; align-items:flex-start; gap:14px; }
     .daymeter{ text-align:left; width:100%; }
     .stop .pl{ display:none; }
+    h1{ font-size:28px; }
+    .hdr-sub{ font-size:13.5px; }
+    .sblock{ padding:18px 16px 20px; border-radius:18px; }
+    /* vodorovné rolování místo přetékání */
+    .toprow{ flex-direction:column; align-items:stretch !important; gap:12px !important; }
+    .scrollx{ overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    .scrollx::-webkit-scrollbar{ display:none; }
+    .daypick{ width:max-content; }
+    .sec-head{ flex-wrap:wrap; gap:10px; }
+    .tl-scroll{ overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+    .tl-scroll::-webkit-scrollbar{ display:none; }
+    .tl-scroll .tl-hours, .tl-scroll .tl-lanes{ min-width:640px; }
+    .week-grid.wk7{ grid-template-columns:repeat(7,minmax(104px,1fr)); min-width:760px; }
+    .week-grid.parts{ grid-template-columns:repeat(2,1fr) !important; }
+    .qchips{ gap:7px; }
+    .dayfoot{ margin-left:0; width:100%; }
+    .legend{ display:none; }
   }
 </style>
 </head>
@@ -528,10 +748,20 @@
       <div class="brand-mark">B</div>
       <div class="brand-name">Boxy</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:2px;">
+    <div class="navcard">
       <button class="nav-row" id="navDnes" onclick="go('dnes')">
-        <span>Dnes</span>
+        <span class="ni"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2.5"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3"/></svg></span>
+        <span class="lbl">Dnes</span>
         <span class="nav-meta" id="navDate"></span>
+      </button>
+      <button class="nav-row" onclick="go('archiv')">
+        <span class="ni"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2.5" width="12" height="3.4" rx="1.2"/><path d="M3.2 5.9v6.4a1.6 1.6 0 0 0 1.6 1.6h6.4a1.6 1.6 0 0 0 1.6-1.6V5.9M6.4 9h3.2"/></svg></span>
+        <span class="lbl">Archiv</span>
+        <span class="nav-meta" id="archCount"></span>
+      </button>
+      <button class="nav-row" onclick="openSettings()">
+        <span class="ni"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.4"/><path d="M12.9 9.9a1.3 1.3 0 0 0 .26 1.44l.05.05a1.6 1.6 0 1 1-2.26 2.26l-.05-.05a1.3 1.3 0 0 0-1.44-.26 1.3 1.3 0 0 0-.79 1.19v.13a1.6 1.6 0 0 1-3.2 0v-.07a1.3 1.3 0 0 0-.85-1.19 1.3 1.3 0 0 0-1.44.26l-.05.05A1.6 1.6 0 1 1 .87 11.4l.05-.05a1.3 1.3 0 0 0 .26-1.44 1.3 1.3 0 0 0-1.19-.79H-.1a1.6 1.6 0 0 1 0-3.2h.07a1.3 1.3 0 0 0 1.19-.85 1.3 1.3 0 0 0-.26-1.44l-.05-.05A1.6 1.6 0 1 1 3.11.87l.05.05a1.3 1.3 0 0 0 1.44.26h.06a1.3 1.3 0 0 0 .79-1.19V-.1a1.6 1.6 0 0 1 3.2 0v.07a1.3 1.3 0 0 0 .79 1.19 1.3 1.3 0 0 0 1.44-.26l.05-.05a1.6 1.6 0 1 1 2.26 2.26l-.5.05a1.3 1.3 0 0 0-.26 1.44v.06a1.3 1.3 0 0 0 1.19.79h.13a1.6 1.6 0 0 1 0 3.2h-.07a1.3 1.3 0 0 0-1.19.79z" transform="translate(1 1) scale(0.86)"/></svg></span>
+        <span class="lbl">Nastavení</span>
       </button>
     </div>
     <div style="display:flex;flex-direction:column;gap:2px;">
@@ -540,8 +770,6 @@
       <button class="btn-ghost-add" onclick="openNewProject()">+ Nový projekt</button>
     </div>
     <div class="side-footer">
-      <button class="nav-row" onclick="go('archiv')"><span>Archiv</span><span class="nav-meta" id="archCount"></span></button>
-      <button class="nav-row" onclick="openSettings()"><span>Nastavení</span></button>
       <div class="syncpill" id="syncPill" hidden><span class="led"></span><span></span></div>
     </div>
   </aside>
@@ -681,6 +909,50 @@ function migrateBoxy(){
 }
 
 let selDate = todayStr();
+let planDate = todayStr();
+function setPlanDate(k){
+  planDate = k;
+  if(state.google.clientId && gConnected() && !G.cache[k]) gFetchDay(k).then(() => render()).catch(() => {});
+  render();
+}
+/* kalendářík — výběr libovolného data */
+let _calView = null;
+function openCalPicker(){
+  const d = parseDate(planDate);
+  _calView = { y: d.getFullYear(), m: d.getMonth() };
+  renderCalPicker();
+}
+function calShift(n){
+  _calView.m += n;
+  if(_calView.m < 0){ _calView.m = 11; _calView.y--; }
+  if(_calView.m > 11){ _calView.m = 0; _calView.y++; }
+  renderCalPicker();
+}
+function renderCalPicker(){
+  const { y, m } = _calView;
+  const startDow = (new Date(y, m, 1).getDay() + 6) % 7;
+  const dim = new Date(y, m + 1, 0).getDate();
+  const today = todayStr();
+  const cells = [];
+  for(let i = 0; i < startDow; i++) cells.push("<span></span>");
+  for(let day = 1; day <= dim; day++){
+    const key = `${y}-${pad(m+1)}-${pad(day)}`;
+    cells.push(`<button type="button" class="cal-d ${key === planDate ? "sel" : ""} ${key === today ? "tdy" : ""} ${key < today ? "past" : ""}"
+      onclick="closeDialog(); setPlanDate('${key}');">${day}</button>`);
+  }
+  const MON = ["leden","únor","březen","duben","květen","červen","červenec","srpen","září","říjen","listopad","prosinec"];
+  dialog("Vyber den", `
+    <div class="cal-head">
+      <button type="button" class="tool-btn" style="width:28px;height:28px;font-size:14px;" onclick="calShift(-1)">‹</button>
+      <b>${MON[m]} ${y}</b>
+      <button type="button" class="tool-btn" style="width:28px;height:28px;font-size:14px;" onclick="calShift(1)">›</button>
+    </div>
+    <div class="cal-grid">
+      ${["Po","Út","St","Čt","Pá","So","Ne"].map(x => `<span class="cal-w">${x}</span>`).join("")}
+      ${cells.join("")}
+    </div>
+  `, null, null);
+}
 let saveTimer = null;
 let applyingRemote = false;
 
@@ -722,6 +994,11 @@ function tint(hex, a){
 function darken(hex){
   const n = parseInt(hex.slice(1), 16);
   const f = c => Math.max(0, Math.round(c * 0.62));
+  return `rgb(${f((n>>16)&255)},${f((n>>8)&255)},${f(n&255)})`;
+}
+function lighten(hex){
+  const n = parseInt(hex.slice(1), 16);
+  const f = c => Math.round(c + (255 - c) * 0.68);
   return `rgb(${f((n>>16)&255)},${f((n>>8)&255)},${f(n&255)})`;
 }
 
@@ -940,7 +1217,7 @@ function nowInfo(){
   return { pct, dayPct, leftH:Math.floor(leftMin/60), leftM:leftMin%60, cur };
 }
 function todaysEvents(){
-  const evs = (G.cache[selDate] || []);
+  const evs = (G.cache[planDate] || []);
   const timed = [], allDay = [];
   evs.forEach(e => {
     if(e.allDay){ allDay.push(e); return; }
@@ -953,7 +1230,7 @@ function todaysEvents(){
   timed.sort((a,b) => a.sh - b.sh);
   return { timed, allDay };
 }
-function planBlocks(){ if(!state.dayPlan[selDate]) state.dayPlan[selDate] = []; return state.dayPlan[selDate]; }
+function planBlocks(){ if(!state.dayPlan[planDate]) state.dayPlan[planDate] = []; return state.dayPlan[planDate]; }
 
 /* ---- týdenní fokus ---- */
 function weekDates(){
@@ -1048,74 +1325,138 @@ function renderDnes(){
 
   const pm = planMode();
   const md = modeData();
-  const planBs = (state.dayPlan[selDate] || []).slice().sort((a,b) => a.sh - b.sh);
+  const isPlanToday = planDate === selDate;
+  const pdD = parseDate(planDate);
+  const pdLab = `${["po","út","st","čt","pá","so","ne"][(pdD.getDay()+6)%7]} ${pdD.getDate()}. ${pdD.getMonth()+1}.`;
+  const planBs = (state.dayPlan[planDate] || []).slice().sort((a,b) => a.sh - b.sh);
 
   const lateAll = state.rhythms.filter(r => rhythmStatus(r) === "late").length;
+  const linkedBlock = (state.dayPlan[planDate] || []).find(b => b.refType === "project" && state.projects.some(p => p.id === b.refId));
+  const linkedProj = linkedBlock ? state.projects.find(p => p.id === linkedBlock.refId) : null;
+  const focusProj = todayFocus.map(f => f.refType === "project" ? state.projects.find(p => p.id === f.refId) : null).find(Boolean);
+  const pushName = focusProj ? clientName(focusProj.clientId) : (todayFocus[0] ? todayFocus[0].title : null);
+  const h1txt = pushName ? `Dnes posouváš ${esc(pushName)}` : "Dnes";
+  const subBits = [
+    todayFocus.length ? `${todayFocus.length === 1 ? "Jeden fokus" : todayFocus.length + " věci ve fokusu"}` : "Zatím bez fokusu — přetáhni si něco na linku",
+    timed.length ? `${timed.length} ${timed.length === 1 ? "schůzka" : timed.length < 5 ? "schůzky" : "schůzek"}` : "žádné schůzky",
+    lateAll ? `<b style="color:var(--red);">${lateAll} zpožděno</b>` : "nic zpožděného"
+  ];
   document.getElementById("main").innerHTML = `
     <div class="hdr">
-      <div><div class="hdr-date">${dateStr}</div><h1>Dnes</h1></div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;">
-        <div class="stats">
-          <div class="stat"><div class="num" style="color:#2563eb;">${todayFocus.length}</div><div class="lbl">fokus dnes</div></div>
-          <div class="stat"><div class="num">${timed.length}</div><div class="lbl">${timed.length === 1 ? "událost" : timed.length > 1 && timed.length < 5 ? "události" : "událostí"}</div></div>
-          <div class="stat"><div class="num" style="color:${lateAll ? "var(--red)" : "var(--tx4)"};">${lateAll}</div><div class="lbl">zpožděno</div></div>
-        </div>
-        <div class="daybar-wrap" style="width:100%;">
-          <div class="daybar"><div style="width:${ni.dayPct}%"></div></div>
-          <div class="daybar-txt" style="margin-top:6px;">${inDay ? `zbývá ${ni.leftH} h ${pad(ni.leftM)} min` : ni.cur < TL_START ? "den ještě nezačal" : "pracovní den skončil"}</div>
-        </div>
+      <div>
+        <div class="hdr-date">${dateStr} · ${pad(now.getHours())}:${pad(now.getMinutes())}</div>
+        <h1>${h1txt}</h1>
+        <div class="hdr-sub">${subBits.join(" · ")}</div>
       </div>
     </div>
 
-    <div>
-      <div class="seg">
+    <div class="statrow">
+      ${(() => {
+        const wk = weekDates();
+        const counts = wk.map(k => (state.weekPlan[k] || []).length);
+        const mx = Math.max(1, ...counts);
+        const rhyAll = state.rhythms.filter(r => clientFilter === "all" || r.clientId === clientFilter);
+        const runOk = rhyAll.filter(r => rhythmStatus(r) === "ok").length;
+        const pctOk = rhyAll.length ? Math.round(runOk / rhyAll.length * 100) : 0;
+        const evDots = timed.slice(0, 5);
+        return `
+        <div class="stat2 blue">
+          <div class="lb"><span class="ico">${ICONS.flag}</span>Fokus tento týden</div>
+          <div class="big">${todayFocus.length}<small>dnes · ${counts.reduce((a,b)=>a+b,0)} týden</small></div>
+          <div class="spark">${counts.map((c, i) => `<i class="${c ? "on" : ""} ${wk[i] === selDate ? "tdy" : ""}" style="height:${c ? Math.max(9, Math.round(c / mx * 26)) : 6}px"></i>`).join("")}</div>
+        </div>
+        <div class="stat2 violet">
+          <div class="lb"><span class="ico">${ICONS.clock}</span>Schůzky ${isPlanToday ? "dnes" : pdLab}</div>
+          <div class="big">${timed.length}${allDay.length ? `<small>+${allDay.length} celodenní</small>` : ""}</div>
+          <div class="dotline">${evDots.length
+            ? evDots.map(e => `<i class="${isPlanToday && ni.cur >= e.sh && ni.cur < e.eh ? "big" : ""}"></i><span class="rail"></span>`).join("")
+            : `<span class="rail"></span>`}</div>
+        </div>
+        <div class="stat2 green">
+          <div class="lb"><span class="ico">${ICONS.cycle}</span>Provoz běží</div>
+          <div class="big">${pctOk}<small>%</small></div>
+          <div class="meter"><i style="width:${pctOk}%"></i></div>
+          <div class="note">${runOk} z ${rhyAll.length || 0} pravidelných věcí v pořádku</div>
+        </div>
+        <div class="stat2 ${lateAll ? "red" : "amber"}">
+          <div class="lb"><span class="ico">${ICONS.shield}</span>${lateAll ? "Vyžaduje pozornost" : "Vše pod kontrolou"}</div>
+          <div class="big">${lateAll}<small>${lateAll === 1 ? "věc" : lateAll > 1 && lateAll < 5 ? "věci" : "věcí"}</small></div>
+          <div class="note">${lateAll ? "podrž dlaždici v Provozu, až to doděláš" : "nic zpožděného — jen tak dál"}</div>
+        </div>`;
+      })()}
+    </div>
+
+    <div class="toprow" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div class="seg scrollx">
         ${[{id:"all", name:"Vše"}].concat(state.clients).map(c =>
           `<button class="${clientFilter === c.id ? "active" : ""}" onclick="setClientFilter('${c.id}')">${c.id !== "all" ? `<span class="cdot" style="background:${clientDot(c.id)}"></span>` : ""}${esc(c.name)}</button>`).join("")}
       </div>
+      <div class="scrollx" style="display:flex;"><div class="daypick" title="Který den plánuješ">
+        ${weekDates().map(k => {
+          const d = parseDate(k);
+          const lab = ["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7];
+          return `<button class="${planDate === k ? "active" : ""} ${k === selDate ? "tdy" : ""}" onclick="setPlanDate('${k}')">
+            <span class="dw">${lab}</span><span class="dn">${d.getDate()}</span>
+          </button>`;
+        }).join("")}
+        ${!weekDates().includes(planDate) ? (() => {
+          const d = parseDate(planDate);
+          const lab = ["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7];
+          return `<button class="active" style="width:auto;padding:6px 11px 5px;" onclick="openCalPicker()">
+            <span class="dw">${lab}</span><span class="dn">${d.getDate()}. ${d.getMonth()+1}.</span>
+          </button>`;
+        })() : ""}
+        <button class="calbtn" onclick="openCalPicker()" title="Vybrat jiné datum">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="2.5"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3"/></svg>
+        </button>
+      </div></div>
     </div>
 
-    <section class="sblock blue">
+    <section class="sblock darkp">
       <div class="sec-head">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.clock}</span><h2>Dnes &amp; týden</h2>
-          <span class="sec-sub">${todayFocus.length ? `dnešní fokus: ${todayFocus.map(f => esc(f.title)).join(" · ")}` : "přetáhni projekt, rytmus nebo blok na den"}</span></div>
-        <div style="display:flex;gap:14px;">
+        <div class="sec-head-l"><h2>Denní linka</h2>
+          <span class="sec-sub">${isPlanToday ? "bloky přetáhni — přesné časy neřešíš" : `plánuješ ${pdLab}`}</span></div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="seg" style="padding:3px;">
+            ${PLAN_MODES.map(([k, lab]) => `<button class="${pm === k ? "active" : ""}" style="padding:6px 13px;font-size:12px;" onclick="setPlanMode('${k}')">${lab}</button>`).join("")}
+          </div>
           ${state.google.clientId
             ? `<button class="sec-link" onclick="gManualRefresh()">${gConnected() ? "Obnovit kalendář" : "Připojit kalendář"}</button>`
             : `<button class="sec-link" onclick="openGModal()">Připojit kalendář</button>`}
         </div>
       </div>
       <div class="tl-card">
+        <div class="tl-scroll">
         <div class="tl-hours">${Array.from({length: TL_SPAN + 1}, (_, i) => `<span>${TL_START+i}:00</span>`).join("")}</div>
         <div class="tl-lanes">
           <div class="lane" id="calLane">
-            <span class="lane-tag">Dnešní schůzky</span>
-            ${timed.map(ev => blockHtml(ev, ni.cur >= ev.eh ? "past" : ni.cur >= ev.sh ? "now" : "")).join("")}
-            ${!timed.length ? `<div class="lane-empty">${!state.google.clientId ? "schůzky se načtou z Google Kalendáře" : G.loading ? "Načítám kalendář…" : G.error ? esc(G.error) : "dnes žádné schůzky"}</div>` : ""}
+            <span class="lane-tag">${isPlanToday ? "Dnešní schůzky" : `Schůzky — ${pdLab}`}</span>
+            ${timed.map(ev => blockHtml(ev, !isPlanToday ? "" : ni.cur >= ev.eh ? "past" : ni.cur >= ev.sh ? "now" : "")).join("")}
+            ${!timed.length ? `<div class="lane-empty">${!state.google.clientId ? "schůzky se načtou z Google Kalendáře" : G.loading ? "Načítám kalendář…" : G.error ? esc(G.error) : isPlanToday ? "dnes žádné schůzky" : "žádné schůzky"}</div>` : ""}
           </div>
           ${pm === "osa" ? `<div class="lane plan" id="planLane"
             ondragover="planDragOver(event)" ondragleave="planDragLeave(event)" ondrop="planDrop(event)" ondblclick="planDblClick(event)">
             <span class="lane-tag">Můj plán</span>
             ${planBs.length ? `<span class="lane-tag" style="left:auto;right:2px;"><button class="sec-link" style="font-size:11px;padding:0;" onclick="clearPlan()">vyčistit</button></span>` : ""}
-            ${planBs.map(b => blockHtml(b, "plan plan-block" + (ni.cur >= b.eh ? " past" : ni.cur >= b.sh && inDay ? " now" : ""),
+            ${planBs.map(b => blockHtml(b, "plan plan-block" + (!isPlanToday ? "" : ni.cur >= b.eh ? " past" : ni.cur >= b.sh && inDay ? " now" : ""),
               `id="pb-${b.id}" onpointerdown="planMoveStart(event,'${b.id}')"`,
-              { bg:tint(b.color || "#94a3b8",.22), tx:darken(b.color || "#94a3b8") })).join("")}
+              { bg:tint(b.color || "#94a3b8",.30), tx:lighten(b.color || "#94a3b8") })).join("")}
             ${!planBs.length ? `<div class="lane-empty">přetáhni sem blok — nebo dvojklikem vytvoř vlastní</div>` : ""}
           </div>` : ""}
-          ${inDay ? `<div class="tl-nowline" style="left:${ni.pct}%;"></div><div class="tl-nowlabel" style="left:${ni.pct}%;">${pad(Math.floor(ni.cur))}:${pad(Math.round((ni.cur % 1) * 60))}</div>` : ""}
+          ${inDay && isPlanToday ? `<div class="tl-nowline" style="left:${ni.pct}%;"></div><div class="tl-nowlabel" style="left:${ni.pct}%;">${pad(Math.floor(ni.cur))}:${pad(Math.round((ni.cur % 1) * 60))}</div>` : ""}
+        </div>
         </div>
         ${allDay.length ? `<div class="allday">${allDay.map(e => `<span>${esc(e.title)}</span>`).join("")}</div>` : ""}
-        <div class="qchips" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--fill);">
-          <span class="q-lbl">Přetáhni:</span>
+        ${isPlanToday ? `<div class="dayline"><div style="width:${ni.dayPct}%"></div></div>` : ""}
+        <div class="qchips" style="margin-top:16px;padding-top:15px;border-top:1px solid var(--fill);">
+          <span class="q-lbl">Přetáhni na linku</span>
           ${quickList().map(q => `<span class="qchip" draggable="true" ondragstart="dragStart(event,'quick','${q.id}')"
             ondblclick="openEditQuick('${q.id}')" title="Dvojklik = upravit"
-            style="background:${tint(q.color,.14)};color:${darken(q.color)};"><span class="grip">⠿</span>${esc(q.title)}</span>`).join("")}
-          <button class="sec-link" style="font-size:12px;" onclick="openAddQuick()" title="Přidat blok">+ blok</button>
-          <span style="flex:1;"></span>
-          <div class="seg" style="padding:2px;">
-            ${PLAN_MODES.map(([k, lab]) => `<button class="${pm === k ? "active" : ""}" style="padding:5px 11px;font-size:12px;" onclick="setPlanMode('${k}')">${lab}</button>`).join("")}
-          </div>
+            style="background:${tint(q.color,.15)};color:${lighten(q.color)};"><span class="grip">⠿</span>${esc(q.title)}</span>`).join("")}
+          <button class="qadd" onclick="openAddQuick()" title="Přidat blok">+ vlastní blok</button>
+          <span class="dayfoot">${!isPlanToday ? "" : inDay ? `do konce dne ${ni.leftH} h ${pad(ni.leftM)} min` : ni.cur < TL_START ? "den ještě nezačal" : "pracovní den skončil"}</span>
         </div>
-        ${pm === "tyden" ? `<div class="week-grid" style="margin-top:12px;">
+        ${pm === "tyden" ? `<div class="week-grid wk7" style="margin-top:12px;">
           ${weekDates().map(k => {
             const d = parseDate(k);
             const isT = k === selDate;
@@ -1129,12 +1470,12 @@ function renderDnes(){
               ${evs.map(e => `<div class="ev"><b>${e.t}</b> ${esc(e.title)}</div>`).join("")}
               ${evsAll.length > 2 ? `<div class="ev">+${evsAll.length - 2} další</div>` : ""}
               ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
-                style="background:${tint(f.color || "#94a3b8",.16)};color:${darken(f.color || "#94a3b8")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
+                style="background:${tint(f.color || "#94a3b8",.20)};color:${lighten(f.color || "#94a3b8")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
               <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat fokus dne">+</button>
             </div>`;
           }).join("")}
         </div>` : ""}
-        ${pm === "casti" ? `<div class="week-grid" style="grid-template-columns:repeat(4,1fr);margin-top:12px;">
+        ${pm === "casti" ? `<div class="week-grid parts" style="grid-template-columns:repeat(4,1fr);margin-top:12px;">
           ${zoneBoxHtml("casti","rano","Ráno","do 9:00", md.casti.rano, 120)}
           ${zoneBoxHtml("casti","dopo","Dopoledne","9–12", md.casti.dopo, 120)}
           ${zoneBoxHtml("casti","odpo","Odpoledne","12–17", md.casti.odpo, 120)}
@@ -1143,6 +1484,12 @@ function renderDnes(){
         <div class="mind-note" style="margin-top:10px;">${MODE_HINTS[pm]}</div>
       </div>
     </section>
+
+    ${linkedProj ? `<div class="linkline">
+      <span class="ll-dot"></span><span class="ll-seg"></span>
+      <span class="ll-txt">blok ${fmtHM(linkedBlock.sh)} = fáze „${esc(linkedProj.phases[Math.min(linkedProj.currentPhaseIndex, linkedProj.phases.length-1)].name)}" z ${esc(linkedProj.name)}</span>
+      <span class="ll-rest"></span>
+    </div>` : ""}
 
     <section class="sblock green">
       <div class="sec-head">
@@ -1203,8 +1550,13 @@ function renderDnes(){
 
     <section class="sblock violet">
       <div class="sec-head">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.flag}</span><h2>Projekty</h2>
-          <span class="sec-sub">${projs.length ? `${projs.length} aktivní` : ""}</span></div>
+        <div class="sec-head-l"><span class="sec-ico">${ICONS.flag}</span><h2>Cesty projektů</h2>
+          <span class="sec-sub">kde jsi a co je další zastávka</span></div>
+        <div class="legend">
+          <span><i style="background:var(--good);"></i>hotovo</span>
+          <span><i style="background:var(--accent);"></i>teď</span>
+          <span><i style="background:#d8d6cd;"></i>dál</span>
+        </div>
       </div>
       ${projs.map(p => renderProjectCard(p, true)).join("")}
       ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádný projekt — přidej ho vlevo v menu" : "Pro tenhle výběr tu nic není"}</div>` : ""}
@@ -1327,11 +1679,11 @@ function planDblClick(e){
   });
 }
 function removePlan(id){
-  state.dayPlan[selDate] = planBlocks().filter(b => b.id !== id);
+  state.dayPlan[planDate] = planBlocks().filter(b => b.id !== id);
   save(); render();
 }
 function clearPlan(){
-  state.dayPlan[selDate] = [];
+  state.dayPlan[planDate] = [];
   save(); render();
 }
 
@@ -1394,8 +1746,8 @@ const MODE_HINTS = {
 function planMode(){ const k = state.settings.planMode; return PLAN_MODES.some(m => m[0] === k) ? k : "tyden"; }
 function setPlanMode(k){ state.settings.planMode = k; save(); render(); }
 function modeData(){
-  if(!state.dayModes[selDate]) state.dayModes[selDate] = {};
-  const d = state.dayModes[selDate];
+  if(!state.dayModes[planDate]) state.dayModes[planDate] = {};
+  const d = state.dayModes[planDate];
   if(!d.casti) d.casti = { rano:[], dopo:[], odpo:[], vecer:[] };
   return d;
 }
@@ -1411,7 +1763,7 @@ function dropItemFrom(d){
 function moveStart(e, src, key, id){
   e.stopPropagation();
   e.dataTransfer.setData("text/plain", JSON.stringify({ type:"move", src, key, id }));
-  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.effectAllowed = "copyMove";
   const t = document.getElementById("trashZone");
   if(t) setTimeout(() => t.classList.add("show"), 0);
 }
@@ -1438,7 +1790,7 @@ function takeMoved(d){
   if(d.type !== "move") return null;
   let arr = null;
   if(d.src === "week") arr = state.weekPlan[d.key];
-  else if(d.src === "casti"){ const dm = state.dayModes[selDate]; arr = dm && dm.casti ? dm.casti[d.key] : null; }
+  else if(d.src === "casti"){ const dm = state.dayModes[planDate]; arr = dm && dm.casti ? dm.casti[d.key] : null; }
   if(!Array.isArray(arr)) return null;
   const i = arr.findIndex(x => x.id === d.id);
   if(i < 0) return null;
@@ -1471,7 +1823,7 @@ function zoneAddDialog(kind, slot, label){
 }
 function zoneChips(kind, slot, items){
   return items.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'${kind}','${slot}','${f.id}')"
-    style="background:${tint(f.color || "#94a3b8",.16)};color:${darken(f.color || "#94a3b8")};">${esc(f.title)}<button class="fx" onclick="zoneRemove('${kind}','${slot}','${f.id}')">✕</button></div>`).join("");
+    style="background:${tint(f.color || "#94a3b8",.20)};color:${lighten(f.color || "#94a3b8")};">${esc(f.title)}<button class="fx" onclick="zoneRemove('${kind}','${slot}','${f.id}')">✕</button></div>`).join("");
 }
 function zoneBoxHtml(kind, slot, label, sub, items, minH){
   const id = `zone-${kind}-${slot}`;
@@ -2605,7 +2957,7 @@ if(state.google.clientId) gRefresh();
 setInterval(() => {
   if(_drag) return;
   const t = todayStr();
-  if(t !== selDate){ selDate = t; G.cache = {}; if(state.google.clientId) gRefresh(); }
+  if(t !== selDate){ selDate = t; planDate = t; G.cache = {}; if(state.google.clientId) gRefresh(); }
   if(view === "dnes" && !document.querySelector(".overlay")) renderDnes();
 }, 30000);
 </script>
