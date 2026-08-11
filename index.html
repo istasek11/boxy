@@ -1304,6 +1304,38 @@
     background:rgba(224,83,60,.16); border-right-color:#e0533b;
   }
 
+
+  /* ---------- Na stole ---------- */
+  .desk-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+  .desknote{
+    position:relative; overflow:hidden; background:var(--fill); border-radius:14px;
+    padding:13px 15px 13px 17px; display:flex; flex-direction:column; gap:5px;
+    box-shadow:inset 4px 0 0 var(--dc,var(--tx4));
+    cursor:grab; user-select:none; -webkit-user-select:none; touch-action:none;
+    transition:background .14s, box-shadow .14s;
+  }
+  .desknote:hover{ background:#fff; }
+  .desknote:active{ cursor:grabbing; }
+  .desknote .dcl{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--tx4); }
+  .desknote .dcl i{ width:7px; height:7px; border-radius:50%; background:var(--dc); flex:none; }
+  .desknote .dtx{ font-size:14px; font-weight:600; color:var(--tx); line-height:1.35; padding-right:18px; }
+  .desknote .dok{ font-size:11.5px; font-weight:600; color:var(--good); }
+  .desknote.done{ box-shadow:inset 4px 0 0 var(--good); }
+  .desknote.done .dtx{ color:var(--tx4); font-weight:550; }
+  .desknote .dx{
+    position:absolute; top:9px; right:9px; width:22px; height:22px; border:none;
+    background:transparent; color:var(--tx4); border-radius:7px; font-size:10px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; opacity:0; transition:all .12s;
+  }
+  .desknote:hover .dx{ opacity:1; }
+  .desknote .dx:hover{ background:var(--fill2); color:var(--red); }
+  .desknote.holding::after{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:0;
+    background:rgba(26,155,92,.16); border-right:2.5px solid var(--good);
+    animation:holdfill .7s linear forwards; pointer-events:none;
+  }
+  .desknote.done.holding::after{ background:rgba(224,83,60,.14); border-right-color:#e0533b; }
+
 </style>
 </head>
 <body>
@@ -1383,7 +1415,7 @@ function blank(){
     settings:{theme:"light", dayStart:8, dayEnd:19, view:"day", taskFilter:"all", collapsed:[], dayGroup:false},
     google:{clientId:"", hidden:[]},
     sync:{url:"", key:""},
-    clients:[], rhythms:[], projects:[], notes:[], history:[], dayPlan:{}, weekPlan:{}, dayModes:{}, quickBlocks:[], systems:[], metrics:[],
+    clients:[], rhythms:[], projects:[], notes:[], desk:[], history:[], dayPlan:{}, weekPlan:{}, dayModes:{}, quickBlocks:[], systems:[], metrics:[],
     boxyMigrated:0,
     updatedAt:0
   };
@@ -1393,7 +1425,7 @@ function payload(){
     version:state.version, tasks:state.tasks, labels:state.labels, sections:state.sections,
     settings:state.settings, google:state.google,
     clients:state.clients, rhythms:state.rhythms, projects:state.projects,
-    notes:state.notes, history:state.history, dayPlan:state.dayPlan, weekPlan:state.weekPlan, dayModes:state.dayModes, quickBlocks:state.quickBlocks, systems:state.systems, metrics:state.metrics,
+    notes:state.notes, desk:state.desk, history:state.history, dayPlan:state.dayPlan, weekPlan:state.weekPlan, dayModes:state.dayModes, quickBlocks:state.quickBlocks, systems:state.systems, metrics:state.metrics,
     boxyMigrated:state.boxyMigrated, updatedAt:state.updatedAt
   };
 }
@@ -1584,6 +1616,73 @@ function isToday(ts){
   return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
 }
 
+/* ---- Na stole: jednorázová operativa ---- */
+function deskList(){ if(!Array.isArray(state.desk)) state.desk = []; return state.desk; }
+function pruneDesk(){
+  const arr = deskList();
+  const keep = arr.filter(d => !(d.done && d.doneAt && !isToday(d.doneAt)));
+  if(keep.length !== arr.length){ state.desk = keep; return true; }
+  return false;
+}
+function addDesk(){
+  const inp = document.getElementById("deskInput");
+  if(!inp) return;
+  const text = (inp.value || "").trim();
+  if(!text) return;
+  const cid = clientFilter !== "all" ? clientFilter
+    : (state.clients[0] ? state.clients[0].id : "interni");
+  deskList().unshift({ id:uid(), clientId:cid, text, done:false, doneAt:0, at:Date.now() });
+  inp.value = "";
+  save(); render();
+  const again = document.getElementById("deskInput"); if(again) again.focus();
+}
+function toggleDesk(id){
+  const d = deskList().find(x => x.id === id); if(!d) return;
+  d.done = !d.done;
+  d.doneAt = d.done ? Date.now() : 0;
+  save(); render();
+  toast(d.done ? `„${d.text}" odbyto` : `„${d.text}" zpátky na stůl`, "Zpět", () => {
+    d.done = !d.done; d.doneAt = d.done ? Date.now() : 0; save(); render();
+  });
+}
+function removeDesk(e, id){
+  if(e && e.stopPropagation) e.stopPropagation();
+  const arr = deskList();
+  const i = arr.findIndex(x => x.id === id); if(i < 0) return;
+  const gone = arr.splice(i, 1)[0];
+  save(); render();
+  toast(`„${gone.text}" smazáno`, "Vrátit", () => { arr.splice(i, 0, gone); save(); render(); });
+}
+function deskHoldStart(e, id){
+  if(e.pointerType === "mouse" && e.button !== 0) return;
+  if(e.target.closest(".dx")) return;
+  phaseHoldCancel();
+  const el = e.currentTarget;
+  el.classList.add("holding");
+  try { el.setPointerCapture(e.pointerId); } catch(_){}
+  _phold = { el, pid:e.pointerId, timer: setTimeout(() => {
+    el.classList.remove("holding");
+    try { el.releasePointerCapture(_phold.pid); } catch(_){}
+    _phold = null;
+    toggleDesk(id);
+  }, 700) };
+}
+
+/* ---- pravidelné věci: horizont Dnes / Týden / Měsíc ---- */
+const HORIZONS = [["den","Dnes"],["tyden","Týden"],["mesic","Měsíc"]];
+const HORIZON_DAYS = { den:0, tyden:7, mesic:31 };
+function rhyHorizon(){
+  const k = state.settings.rhyHorizon;
+  return HORIZONS.some(h => h[0] === k) ? k : "den";
+}
+function setRhyHorizon(k){ state.settings.rhyHorizon = k; save(); render(); }
+function daysUntilDue(r){ return r.everyDays - daysSince(r.lastRunAt); }
+function inHorizon(r){
+  const h = rhyHorizon();
+  if(h === "den" && isToday(r.lastRunAt)) return true;   // ať vidíš i to, co dnes proběhlo
+  return daysUntilDue(r) <= HORIZON_DAYS[h];
+}
+
 function rhythmStatus(r){
   if(isToday(r.lastRunAt)) return "ok";
   const ds = daysSince(r.lastRunAt);
@@ -1637,6 +1736,7 @@ const ICONS = {
   clock:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.4"/></svg>`,
   cycle:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.6 8A5.6 5.6 0 1 1 12 4.05"/><path d="M12.4 1.6v2.8h-2.8"/></svg>`,
   flag:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 14.5v-12"/><path d="M3.5 3h8.2l-1.6 2.75 1.6 2.75H3.5"/></svg>`,
+  desk:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 9.2h12.4"/><path d="M2.6 9.2 4 3.4h8l1.4 5.8"/><path d="M4.2 12.6h7.6"/></svg>`,
   mind:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8v2.4M8 11.8v2.4M1.8 8h2.4M11.8 8h2.4M3.6 3.6l1.7 1.7M10.7 10.7l1.7 1.7M12.4 3.6l-1.7 1.7M5.3 10.7l-1.7 1.7"/></svg>`
 };
 const STATUS_LABEL = { ok:"běží", soon:"blíží se", late:"čeká" };
@@ -2041,6 +2141,9 @@ function renderDnes(){
 
   const projs = state.projects.filter(p => !p.archived && (clientFilter === "all" || p.clientId === clientFilter));
 
+  if(pruneDesk()) save();
+  const deskItems = deskList().filter(d => clientFilter === "all" || d.clientId === clientFilter);
+
   const noteCounts = { all: state.notes.length };
   ["práce","osobní","nákup","zdraví"].forEach(c => noteCounts[c] = state.notes.filter(n => n.category === c).length);
   const notes = state.notes.filter(n => noteFilter === "all" || n.category === noteFilter);
@@ -2180,6 +2283,31 @@ function renderDnes(){
       <span class="ll-rest"></span>
     </div>` : ""}
 
+    <section class="sblock cyan">
+      <div class="sec-head">
+        <div class="sec-head-l"><span class="sec-ico">${ICONS.desk}</span>
+          <div><div class="eyebrow">jednorázové věci</div><h2>Na stole</h2></div></div>
+      </div>
+      <div class="mind-input" style="max-width:640px;">
+        <input id="deskInput" placeholder="Co je potřeba odbýt…" onkeydown="if(event.key==='Enter')addDesk()">
+        <button class="btn-primary" onclick="addDesk()">Položit na stůl</button>
+      </div>
+      ${deskItems.length ? `<div class="desk-grid">
+        ${deskItems.map(d => `<div class="desknote ${d.done ? "done" : ""}"
+          draggable="true" ondragstart="phaseHoldCancel(); dragStart(event,'desk','${d.id}')"
+          onpointerdown="deskHoldStart(event,'${d.id}')"
+          oncontextmenu="event.preventDefault()"
+          style="--dc:${clientDot(d.clientId)}"
+          title="Podrž ~1 s = odbyto · přetažením na den v týdnu naplánuješ">
+          <span class="dcl"><i></i>${esc(clientName(d.clientId))}</span>
+          <span class="dtx">${esc(d.text)}</span>
+          ${d.done ? `<span class="dok">✓ odbyto — přes noc samo zmizí</span>` : ""}
+          <button class="dx" onclick="removeDesk(event,'${d.id}')" title="Smazat">✕</button>
+        </div>`).join("")}
+      </div>` : `<div class="empty-tile" style="background:rgba(255,255,255,.6);">Stůl je prázdný.</div>`}
+      <div class="mind-note">Hotové věci zůstanou na místě a přes noc samy zmizí. Nic se nepočítá.</div>
+    </section>
+
     <section class="sblock green">
       <div class="sec-head stack">
         <div class="sec-head-l"><span class="sec-ico">${ICONS.cycle}</span>
@@ -2190,38 +2318,36 @@ function renderDnes(){
             ${[["all","Vše"],["me","Já"],["claude","Claude"],["both","Spolu"]].map(([k, lab]) =>
               `<button class="${ownerFilter === k ? "active" : ""}" style="padding:5px 10px;font-size:11.5px;" onclick="setOwnerFilter('${k}')">${lab}</button>`).join("")}
           </div>
+          <div class="seg" style="padding:2px;">
+            ${HORIZONS.map(([k, lab]) =>
+              `<button class="${rhyHorizon() === k ? "active" : ""}" style="padding:5px 12px;font-size:11.5px;" onclick="setRhyHorizon('${k}')">${lab}</button>`).join("")}
+          </div>
           <button class="sec-link" onclick="openAddRhythm()">+ Pravidelná</button>
         </div>
       </div>
 
       ${rhyForClient.length ? `<div class="mind-note" style="margin:-4px 0 -2px;">Podržením (~1 s) potvrdíš, že věc proběhla · přetažením na den v týdnu ji naplánuješ</div>` : `<div class="empty-tile" style="background:rgba(255,255,255,.6);">Zatím žádné pravidelné věci</div>`}
 
-      ${CAD_GROUPS.map(([key, label]) => {
-        const inGroup = pending.filter(r => cadBucket(r) === key);
-        if(!inGroup.length) return "";
-        const due = inGroup.filter(r => rhythmStatus(r) !== "ok" && ownerOf(r) !== "claude").sort(dueSort);
-        const claude = inGroup.filter(r => rhythmStatus(r) !== "ok" && ownerOf(r) === "claude").sort(dueSort);
-        const quiet = inGroup.filter(r => rhythmStatus(r) === "ok")
-          .sort((a,b) => (a.everyDays - daysSince(a.lastRunAt)) - (b.everyDays - daysSince(b.lastRunAt)));
-        const lateN = inGroup.filter(r => rhythmStatus(r) === "late").length;
-        const dueN = due.length + claude.length;
-        const po = state.settings.provozOpen || {};
-        const isOpen = key in po ? po[key] : (dueN > 0 || inGroup.some(r => isToday(r.lastRunAt)));
-        return `<div>
-          <button class="cad-head ${isOpen ? "open" : ""}" onclick="toggleProvoz('${key}', ${isOpen})">
-            <span class="chev">▶</span>
-            <span class="t">${label}</span>
-            ${lateN ? `<span class="warn">čeká na tebe</span>` : dueN ? `<span class="warn" style="color:#a05a04;background:var(--amber-soft);">na řadě</span>` : `<span class="okw">běží ✓</span>`}
-          </button>
-          ${isOpen ? `<div class="cad-body" style="margin-top:10px;">
-            ${due.length ? `<div class="rhythm-grid">${due.map(rTileHtml).join("")}</div>` : ""}
-            ${claude.length ? `<div class="sub-label" style="margin-top:2px;">Čeká na Clauda <span class="n">— potvrdí se samo, až dorazí výstup</span></div>
-              <div class="rrow-grid">${claude.map(rClaudeRowHtml).join("")}</div>` : ""}
-            ${quiet.length ? `<div class="rrow-grid" style="${due.length || claude.length ? "margin-top:4px;" : ""}">${quiet.map(rQuietRowHtml).join("")}</div>` : ""}
-          </div>` : ""}
-        </div>`;
-      }).join("")}
-
+      ${(() => {
+        const list = pending.filter(inHorizon);
+        const due = list.filter(r => rhythmStatus(r) !== "ok" && ownerOf(r) !== "claude").sort(dueSort);
+        const claude = list.filter(r => rhythmStatus(r) !== "ok" && ownerOf(r) === "claude").sort(dueSort);
+        const quiet = list.filter(r => rhythmStatus(r) === "ok")
+          .sort((a,b) => daysUntilDue(a) - daysUntilDue(b));
+        if(!rhyForClient.length) return "";
+        if(!list.length) return `<div class="empty-tile" style="background:rgba(255,255,255,.6);">${
+          rhyHorizon() === "den" ? "Dneska tě z pravidelných věcí nic nečeká." :
+          rhyHorizon() === "tyden" ? "Tenhle týden tě z pravidelných věcí nic nečeká." :
+          "Tenhle měsíc tě z pravidelných věcí nic nečeká."}</div>`;
+        return `
+          ${due.length ? `<div class="rhythm-grid">${due.map(rTileHtml).join("")}</div>` : ""}
+          ${claude.length ? `<div class="sub-label" style="margin-top:2px;">Čeká na Clauda <span class="n">— potvrdí se samo, až dorazí výstup</span></div>
+            <div class="rrow-grid">${claude.map(rClaudeRowHtml).join("")}</div>` : ""}
+          ${quiet.length ? `<div class="sub-label" style="margin-top:6px;">${
+              rhyHorizon() === "den" ? "Dnes už proběhlo" : "Dál v tomhle horizontu"
+            }</div>
+            <div class="rrow-grid">${quiet.map(rQuietRowHtml).join("")}</div>` : ""}`;
+      })()}
 
       ${vyList.length ? `<div class="sub-label">Výstupy od Clauda <span class="n">— posledních 7 dní</span></div>
       <div style="display:flex;flex-direction:column;gap:6px;">
@@ -2577,6 +2703,7 @@ function dropItemFrom(d){
   if(d.type === "project"){ const p = state.projects.find(x => x.id === d.id); if(!p) return null; title = p.name; color = clientDot(p.clientId); }
   else if(d.type === "rhythm"){ const r = state.rhythms.find(x => x.id === d.id); if(!r) return null; title = r.name; color = clientDot(r.clientId); }
   else if(d.type === "quick"){ const q = quickList().find(x => x.id === d.id); if(!q) return null; title = q.title; color = q.color; }
+  else if(d.type === "desk"){ const k = deskList().find(x => x.id === d.id); if(!k) return null; title = k.text; color = clientDot(k.clientId); }
   else return null;
   return { id:uid(), refType:d.type, refId:d.id, title, color };
 }
