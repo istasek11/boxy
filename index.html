@@ -1005,8 +1005,8 @@
   .cesta .pcard.watch .stops-left{ background:var(--red-soft); color:#c3364f; }
 
   /* trasa: kompaktnější, bez zbytečné výšky */
-  .cesta .route{ padding:12px 0 52px; margin:0 auto; }
-  .cesta .route .pins{ inset:12px 0 52px; }
+  .cesta .route{ padding:10px 0 18px; margin:0 auto; }
+  .cesta .route .pins{ inset:10px 0 18px; }
   .cesta .route svg{ height:118px; }
   .cesta .route.tiny svg{ height:84px; }
 
@@ -1036,8 +1036,8 @@
   @media (max-width:900px){
     .cesta .pcard, .cesta .pcard:hover{ padding:16px 14px 14px; }
     .cesta .pcard .head-r{ width:100%; justify-content:space-between; }
-    .cesta .route{ padding:10px 0 58px; }
-    .cesta .route .pins{ inset:10px 0 58px; }
+    .cesta .route{ padding:8px 0 26px; }
+    .cesta .route .pins{ inset:8px 0 26px; }
     .pin .lab{ width:86px; max-width:none; }
     .pin.current .lab{ width:112px; }
     /* i na mobilu všechny popisky pod čáru — jinak lezou do hlavičky karty */
@@ -1045,6 +1045,46 @@
     .cesta .pin.current.up .lab{ bottom:auto; top:calc(100% + 10px); }
     .cesta .pin.first .lab, .cesta .pin.last .lab{ transform:translateX(-50%); }
   }
+
+
+  /* ---------- barevné odlišení projektů + sbalování ---------- */
+  .cesta .pcard, .cesta .pcard:hover{
+    background:var(--pc-soft, var(--fill));
+    box-shadow:inset 4px 0 0 var(--pc, var(--line));
+    padding-left:26px;
+  }
+  .pchev{
+    border:none; background:transparent; cursor:pointer; color:var(--tx4);
+    font-size:13px; line-height:1; padding:6px; margin:2px 2px 0 -6px; border-radius:8px;
+    transition:transform .18s, color .12s, background .12s; flex:none; align-self:flex-start;
+  }
+  .pchev:hover{ color:var(--tx); background:rgba(255,255,255,.7); }
+  .cesta .pcard.shut .pchev{ transform:rotate(-90deg); }
+  .cesta .pcard .head-l{ display:flex; align-items:flex-start; gap:6px; }
+  .shut-line{ font-size:13px; color:var(--tx3); margin-top:3px; }
+  .shut-line b{ color:var(--tx2); font-weight:650; }
+  .cesta .pcard.shut{ padding-bottom:18px; }
+  .cesta .pcard.shut .pnote{ display:none; }
+  /* aktuální zastávka zůstává modrá ve všech projektech — „teď" má být hned poznat */
+
+
+  /* ---------- zastávka hotová mimo pořadí + podržení ---------- */
+  .pin.markable{ cursor:pointer; touch-action:none; }
+  .pin.markable .bead{ transition:transform .18s, border-color .18s; }
+  .pin.markable:hover .bead{ transform:scale(1.25); border-color:var(--tx4); }
+  .pin.holding .bead{ animation:beadhold .7s linear forwards; }
+  @keyframes beadhold{
+    from{ transform:scale(1); border-color:#c9c9d4; }
+    60%{ border-color:#7bc9a0; }
+    to{ transform:scale(2); border-color:var(--good); }
+  }
+  .pin.early .bead{
+    background:var(--good); border-color:var(--good); color:#fff;
+    width:17px; height:17px; display:flex; align-items:center; justify-content:center;
+    font-size:9px; font-weight:800; line-height:1;
+  }
+  .pin.early .lab{ color:var(--good); font-weight:600; }
+  .pin.markable:hover .lab{ color:var(--tx2); }
 
 </style>
 </head>
@@ -1404,10 +1444,48 @@ const ownerOf = r => r.owner || "me";
 function setOwnerFilter(k){ ownerFilter = k; render(); }
 const cadBucket = r => r.everyDays <= 1 ? "daily" : r.everyDays <= 14 ? "weekly" : "monthly";
 const CAD_GROUPS = [["daily","Denně"],["weekly","Týdně"],["monthly","Měsíčně a řidčeji"]];
+function toggleProject(id){
+  if(!state.settings.projShut) state.settings.projShut = {};
+  state.settings.projShut[id] = !state.settings.projShut[id];
+  save(); render();
+}
 function toggleProvoz(key, isOpen){
   if(!state.settings.provozOpen) state.settings.provozOpen = {};
   state.settings.provozOpen[key] = !isOpen;
   save(); render();
+}
+
+/* ---- podržení zastávky na trase = hotovo, i mimo pořadí ---- */
+let _phold = null;
+function phaseHoldStart(e, pid, idx){
+  if(e.pointerType === "mouse" && e.button !== 0) return;
+  phaseHoldCancel();
+  const el = e.currentTarget;
+  el.classList.add("holding");
+  _phold = { el, timer: setTimeout(() => {
+    el.classList.remove("holding");
+    _phold = null;
+    togglePhaseDone(pid, idx);
+  }, 700) };
+}
+function phaseHoldCancel(){
+  if(!_phold) return;
+  clearTimeout(_phold.timer);
+  if(_phold.el) _phold.el.classList.remove("holding");
+  _phold = null;
+}
+document.addEventListener("pointerup", phaseHoldCancel);
+document.addEventListener("pointercancel", phaseHoldCancel);
+
+function togglePhaseDone(pid, idx){
+  const pr = state.projects.find(x => x.id === pid);
+  if(!pr || !pr.phases[idx]) return;
+  const ph = pr.phases[idx];
+  ph.done = !ph.done;
+  save(); render();
+  toast(ph.done ? `„${ph.name}" hotovo` : `„${ph.name}" zase čeká`, "Zpět", () => {
+    ph.done = !ph.done; save(); render();
+  });
 }
 
 /* ---- podržení = potvrzení ---- */
@@ -1883,6 +1961,7 @@ function routeD(pts){
   return d;
 }
 function routeHtml(p, cur){
+  const routeCol = clientDot(p.clientId);
   const n = p.phases.length;
   const pts = routePoints(n);
   const uid2 = "rg" + p.id.replace(/[^a-z0-9]/gi, "");
@@ -1892,18 +1971,24 @@ function routeHtml(p, cur){
   return `<div class="route${n <= 2 ? " tiny" : ""}" style="max-width:${wMax}px;">
     <svg viewBox="0 0 ${RT.W} ${RT.H}" preserveAspectRatio="none" aria-hidden="true">
       <defs><linearGradient id="${uid2}" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#1a9b5c"/><stop offset="100%" stop-color="#2f6df6"/>
+        <stop offset="0%" stop-color="${lighten(routeCol)}"/><stop offset="100%" stop-color="${routeCol}"/>
       </linearGradient></defs>
       <path class="ln rest" d="${full}"/>
       ${cur > 0 ? `<path class="ln done" d="${done}" stroke="url(#${uid2})"/>` : ""}
     </svg>
     <div class="pins">
       ${pts.map((pt, i) => {
-        const state = i < cur ? "done" : i === cur ? "current" : "future";
+        const early = i > cur && !!p.phases[i].done;
+        const state = i < cur ? "done" : i === cur ? "current" : early ? "done early" : "future";
         const side = pt.y < RT.MID ? "up" : "down";
         const edge = i === 0 ? " first" : i === n - 1 ? " last" : "";
-        return `<div class="pin ${state} ${side}${edge}" style="left:${pt.x / RT.W * 100}%; top:${pt.y / RT.H * 100}%;">
-          <div class="bead"></div>
+        const holdable = i > cur;
+        return `<div class="pin ${state} ${side}${edge}${holdable ? " markable" : ""}"
+          style="left:${pt.x / RT.W * 100}%; top:${pt.y / RT.H * 100}%;"
+          ${holdable ? `onpointerdown="phaseHoldStart(event,'${p.id}',${i})" onpointerleave="phaseHoldCancel()"
+            oncontextmenu="event.preventDefault()"
+            title="${early ? "Podrž ~1 s a zrušíš hotovo" : "Podrž ~1 s a označíš jako hotové, i když ještě není na řadě"}"` : ""}>
+          <div class="bead">${early ? "✓" : ""}</div>
           <div class="lab">${esc(p.phases[i].name)}</div>
         </div>`;
       }).join("")}
@@ -1917,20 +2002,27 @@ function renderProjectCard(p, draggable){
   const cur = Math.min(p.currentPhaseIndex, n - 1);
   const left = n - cur - 1;
   const leftTxt = p.done ? "u cíle" : left === 0 ? "poslední zastávka" : left === 1 ? "pak už jen jedna zastávka" : `pak ještě ${left} zastávky`;
-  return `<div class="pcard ${watch ? "watch" : ""}" id="card-${p.id}" ${draggable ? `draggable="true" ondragstart="dragStart(event,'project','${p.id}')"` : ""}>
+  const pcol = clientDot(p.clientId);
+  const shut = !!(state.settings.projShut || {})[p.id];
+  return `<div class="pcard ${watch ? "watch" : ""}${shut ? " shut" : ""}" id="card-${p.id}"
+    style="--pc:${pcol}; --pc-soft:${tint(pcol,.09)};"
+    ${draggable ? `draggable="true" ondragstart="dragStart(event,'project','${p.id}')"` : ""}>
     <div class="head">
       <div class="head-l">
-        <div class="eyebrow">${esc(clientName(p.clientId))}${p.deadline ? ` · ${fmtDeadline(p.deadline)}` : ""}</div>
-        <div class="nm"><i style="background:${clientDot(p.clientId)}"></i>${esc(p.name)}</div>
+        <button class="pchev" onclick="toggleProject('${p.id}')" title="${shut ? "Rozbalit" : "Sbalit"}" aria-expanded="${!shut}">▾</button>
+        <div>
+          <div class="eyebrow">${esc(clientName(p.clientId))}${p.deadline ? ` · ${fmtDeadline(p.deadline)}` : ""}</div>
+          <div class="nm"><i style="background:${pcol}"></i>${esc(p.name)}</div>
+          ${shut ? `<div class="shut-line">Teď: <b>${esc(p.phases[cur].name)}</b></div>` : ""}
+        </div>
       </div>
       <div class="head-r">
-        <span class="stops-left">${esc(leftTxt)}</span>
         <button class="btn-primary" ${p.done ? "disabled" : ""} onclick="advancePhase('${p.id}')">
           ${p.done ? "Dojeto ✓" : cur === n - 1 ? "Dojet do cíle" : "Další zastávka →"}</button>
       </div>
     </div>
-    ${routeHtml(p, cur)}
-    ${p.phases[cur].meaning ? `<div class="pmeaning"><span class="lbl">Dokončit tuhle zastávku znamená</span>${esc(p.phases[cur].meaning)}</div>` : ""}
+    ${shut ? "" : routeHtml(p, cur)}
+    ${!shut && p.phases[cur].meaning ? `<div class="pmeaning"><span class="lbl">Dokončit tuhle zastávku znamená</span>${esc(p.phases[cur].meaning)}</div>` : ""}
     <div class="pnote" id="pnote-${p.id}" style="opacity:0;"></div>
     <span class="hover-tools">
       <span class="tool-btn" title="Otevřít plochu" onclick="go('${p.id}')">↗</span>
