@@ -1086,6 +1086,36 @@
   .pin.early .lab{ color:var(--good); font-weight:600; }
   .pin.markable:hover .lab{ color:var(--tx2); }
 
+
+  /* ---------- Denní linka: tabule Po–Pá s navigací týdnů ---------- */
+  .board-head{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    flex-wrap:wrap; margin:20px 0 11px; padding-top:16px;
+    border-top:1px solid rgba(255,255,255,.09);
+  }
+  .board-t{ font-size:13.5px; font-weight:600; color:#c7cad3; }
+  .board-nav{ display:flex; align-items:center; gap:4px; }
+  .bnav{
+    border:none; background:rgba(255,255,255,.08); color:#c7cad3; cursor:pointer;
+    width:28px; height:28px; border-radius:999px; font-size:15px; line-height:1;
+    display:flex; align-items:center; justify-content:center; transition:all .12s;
+  }
+  .bnav:hover{ background:rgba(255,255,255,.18); color:#fff; }
+  .board-range{
+    font-size:13px; font-weight:600; color:#eceef4; min-width:150px; text-align:center;
+  }
+  .week-grid.wk5{ grid-template-columns:repeat(5,1fr); }
+  .darkp .week-grid.wk5 .wday{ min-height:150px; }
+  @media (max-width:900px){
+    .week-grid.wk5{
+      grid-template-columns:repeat(5,minmax(132px,1fr));
+      overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+    }
+    .week-grid.wk5::-webkit-scrollbar{ display:none; }
+    .board-head{ margin-top:16px; }
+    .board-range{ min-width:0; }
+  }
+
 </style>
 </head>
 <body>
@@ -1627,6 +1657,35 @@ function weekDates(){
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   });
 }
+let boardOffset = 0;
+function boardDates(){
+  const n = new Date();
+  const dow = (n.getDay() + 6) % 7;
+  const mon = new Date(n);
+  mon.setDate(n.getDate() - dow + boardOffset * 7);
+  return Array.from({length:5}, (_, i) => {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  });
+}
+const MONTHS_G = ["ledna","února","března","dubna","května","června","července","srpna","září","října","listopadu","prosince"];
+function boardRange(){
+  const ks = boardDates();
+  const a = parseDate(ks[0]), b = parseDate(ks[4]);
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()}.–${b.getDate()}. ${MONTHS_G[a.getMonth()]}`
+    : `${a.getDate()}. ${MONTHS_G[a.getMonth()]} – ${b.getDate()}. ${MONTHS_G[b.getMonth()]}`;
+}
+function shiftBoard(n){
+  boardOffset = n === 0 ? 0 : boardOffset + n;
+  render();
+  if(state.google.clientId && gConnected()){
+    (async () => {
+      for(const k of boardDates()){ if(!G.cache[k]) await gFetchDay(k); }
+      render();
+    })().catch(() => {});
+  }
+}
 function weekEventsFor(key){
   return (G.cache[key] || []).filter(e => !e.allDay).map(e => {
     const s = new Date(e.start);
@@ -1657,8 +1716,8 @@ function removeFocus(key, id){
 }
 function addFocusDialog(key){
   const d = parseDate(key);
-  dialog(`Fokus dne — ${["po","út","st","čt","pá","so","ne"][(d.getDay()+6)%7]} ${d.getDate()}. ${d.getMonth()+1}.`, `
-    <div class="field"><label>Na čem ten den pracuješ</label><input name="title" required placeholder="např. Texty pro nový web"></div>
+  dialog(`${["Pondělí","Úterý","Středa","Čtvrtek","Pátek","Sobota","Neděle"][(d.getDay()+6)%7]} ${d.getDate()}. ${d.getMonth()+1}.`, `
+    <div class="field"><label>Co se ten den má stát</label><input name="title" required placeholder="např. Odeslat fakturu"></div>
   `, "Přidat", fd => {
     if(!state.weekPlan[key]) state.weekPlan[key] = [];
     state.weekPlan[key].push({ id:uid(), refType:"custom", refId:null, title:fd.get("title").trim(), color:"#2f6df6" });
@@ -1780,12 +1839,9 @@ function renderDnes(){
             <h2>Denní linka</h2>
           </div>
           <div class="hero-div"></div>
-          <span class="sec-sub" style="max-width:280px;">${isPlanToday ? "co dneska chceš dělat — bloky přetáhni, přesné časy neřeš" : "plánuješ dopředu"}</span>
+          <span class="sec-sub" style="max-width:260px;">nahoře kalendář, dole týden</span>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
-          <div class="seg" style="padding:3px;">
-            ${PLAN_MODES.map(([k, lab]) => `<button class="${pm === k ? "active" : ""}" style="padding:7px 14px;font-size:12.5px;" onclick="setPlanMode('${k}')">${lab}</button>`).join("")}
-          </div>
           ${state.google.clientId
             ? `<button class="sec-link" onclick="gManualRefresh()">${gConnected() ? "Obnovit kalendář" : "Připojit kalendář"}</button>`
             : `<button class="sec-link" onclick="openGModal()">Připojit kalendář</button>`}
@@ -1800,52 +1856,40 @@ function renderDnes(){
             ${timed.map(ev => blockHtml(ev, !isPlanToday ? "" : ni.cur >= ev.eh ? "past" : ni.cur >= ev.sh ? "now" : "")).join("")}
             ${!timed.length ? `<div class="lane-empty">${!state.google.clientId ? "schůzky se načtou z Google Kalendáře" : G.loading ? "Načítám kalendář…" : G.error ? esc(G.error) : isPlanToday ? "dnes žádné schůzky" : "žádné schůzky"}</div>` : ""}
           </div>
-          ${pm === "osa" ? `<div class="lane plan" id="planLane"
-            ondragover="planDragOver(event)" ondragleave="planDragLeave(event)" ondrop="planDrop(event)" ondblclick="planDblClick(event)">
-            <span class="lane-tag">Můj plán</span>
-            ${planBs.length ? `<span class="lane-tag" style="left:auto;right:2px;"><button class="sec-link" style="font-size:11px;padding:0;" onclick="clearPlan()">vyčistit</button></span>` : ""}
-            ${planBs.map(b => blockHtml(b, "plan plan-block" + (!isPlanToday ? "" : ni.cur >= b.eh ? " past" : ni.cur >= b.sh && inDay ? " now" : ""),
-              `id="pb-${b.id}" onpointerdown="planMoveStart(event,'${b.id}')"`,
-              { bg:tint(b.color || "#1f4bff",.30), tx:lighten(b.color || "#1f4bff") })).join("")}
-            ${!planBs.length ? `<div class="lane-empty">přetáhni sem blok — nebo dvojklikem vytvoř vlastní</div>` : ""}
-          </div>` : ""}
           ${inDay && isPlanToday ? `<div class="tl-nowline" style="left:${ni.pct}%;"></div><div class="tl-nowlabel" style="left:${ni.pct}%;">${pad(Math.floor(ni.cur))}:${pad(Math.round((ni.cur % 1) * 60))}</div>` : ""}
         </div>
         </div>
         ${allDay.length ? `<div class="allday">${allDay.map(e => `<span>${esc(e.title)}</span>`).join("")}</div>` : ""}
-        <div class="qchips" style="margin-top:16px;padding-top:15px;border-top:1px solid var(--fill);">
-          <span class="q-lbl">Přetáhni na linku</span>
-          ${quickList().map(q => `<span class="qchip" draggable="true" ondragstart="dragStart(event,'quick','${q.id}')"
-            ondblclick="openEditQuick('${q.id}')" title="Dvojklik = upravit"
-            style="background:rgba(255,255,255,.10);color:#eceef4;"><i class="qdot" style="background:${q.color}"></i>${esc(q.title)}</span>`).join("")}
-          <button class="qadd" onclick="openAddQuick()" title="Přidat blok">+ vlastní blok</button>
+
+        <div class="board-head">
+          <div class="board-t">Pravidelné věci a co má datum</div>
+          <div class="board-nav">
+            <button class="bnav" onclick="shiftBoard(-1)" title="Předchozí týden">‹</button>
+            <span class="board-range">${boardRange()}</span>
+            <button class="bnav" onclick="shiftBoard(1)" title="Další týden">›</button>
+            ${boardOffset !== 0 ? `<button class="sec-link" style="margin-left:6px;" onclick="shiftBoard(0)">dnes</button>` : ""}
+          </div>
         </div>
-        ${pm === "tyden" ? `<div class="week-grid wk7" style="margin-top:12px;">
-          ${weekDates().map(k => {
+        <div class="week-grid wk5">
+          ${boardDates().map(k => {
             const d = parseDate(k);
-            const isT = k === selDate;
-            const isPast = !isT && d < parseDate(selDate);
+            const isT = k === todayStr();
+            const isPast = !isT && d < parseDate(todayStr());
             const evsAll = weekEventsFor(k);
-            const evs = evsAll.slice(0, 2);
+            const evs = evsAll.slice(0, 3);
             const foc = state.weekPlan[k] || [];
             return `<div class="wday ${isT ? "today" : ""} ${isPast ? "pastday" : ""}" id="wd-${k}"
               ondragover="dayDragOver(event,'${k}')" ondragleave="dayDragLeave(event,'${k}')" ondrop="dropDay(event,'${k}')">
               <div class="dh"><span class="dn">${["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7]}${isT ? " · dnes" : ""}</span><span class="dd">${d.getDate()}. ${d.getMonth()+1}.</span></div>
               ${evs.map(e => `<div class="ev"><b>${e.t}</b> ${esc(e.title)}</div>`).join("")}
-              ${evsAll.length > 2 ? `<div class="ev">+${evsAll.length - 2} další</div>` : ""}
+              ${evsAll.length > 3 ? `<div class="ev">+${evsAll.length - 3} další</div>` : ""}
               ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
-                style="background:${tint(f.color || "#1f4bff",.20)};color:${lighten(f.color || "#1f4bff")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
-              <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat fokus dne">+</button>
+                style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
+              <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat na tenhle den">+</button>
             </div>`;
           }).join("")}
-        </div>` : ""}
-        ${pm === "casti" ? `<div class="week-grid parts" style="grid-template-columns:repeat(4,1fr);margin-top:12px;">
-          ${zoneBoxHtml("casti","rano","Ráno","do 9:00", md.casti.rano, 120)}
-          ${zoneBoxHtml("casti","dopo","Dopoledne","9–12", md.casti.dopo, 120)}
-          ${zoneBoxHtml("casti","odpo","Odpoledne","12–17", md.casti.odpo, 120)}
-          ${zoneBoxHtml("casti","vecer","Večer","po 17:00", md.casti.vecer, 120)}
-        </div>` : ""}
-        <div class="mind-note" style="margin-top:10px;">${MODE_HINTS[pm]}</div>
+        </div>
+        <div class="mind-note" style="margin-top:10px;">Pravidelnou věc přetáhni sem z Provozu · „+" přidá jednorázovou věc na konkrétní den.</div>
       </div>
     </section>
 
