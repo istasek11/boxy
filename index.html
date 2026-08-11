@@ -1250,6 +1250,42 @@
     .cesta .bpin .lab{ max-width:210px; font-size:12.5px !important; }
   }
 
+
+  /* ---------- podržení: čitelná zpětná vazba ---------- */
+  .pin{ -webkit-user-drag:none; user-select:none; -webkit-user-select:none; }
+  .cesta .bpin .lab{
+    position:absolute; padding:5px 9px; margin-left:-9px; border-radius:9px; overflow:hidden;
+  }
+  .cesta .bpin .lab::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:0;
+    background:rgba(26,155,92,.20); border-right:2px solid var(--good);
+    pointer-events:none;
+  }
+  .cesta .bpin.holding .lab::before{ animation:holdfill .7s linear forwards; }
+  .cesta .bpin .btx, .cesta .bpin .badd, .cesta .bpin .sx{ position:relative; z-index:1; }
+  .cesta .bpin:hover .lab{ background:rgba(255,255,255,.6); }
+  .cesta .bpin.holding .bead{ animation:beadhold .7s linear forwards; }
+  /* větší plocha na chycení */
+  .cesta .bpin::before{
+    content:""; position:absolute; left:-10px; right:-10px; top:-11px; bottom:-11px;
+  }
+  .cesta .pin.markable::before{
+    content:""; position:absolute; left:-12px; right:-12px; top:-12px; bottom:-12px;
+  }
+
+
+  /* ---------- psaní kroku přímo v trase ---------- */
+  .bpin.bdraft .bead{ background:#fff; border:3px dashed var(--accent); }
+  .cesta .bpin.bdraft .lab{ padding:0; margin-left:-2px; background:transparent !important; }
+  .stepinput{
+    border:none; background:#fff; border-radius:9px; padding:7px 12px;
+    font-family:inherit; font-size:13.5px; font-weight:550; color:var(--tx);
+    width:270px; box-shadow:0 0 0 2px var(--accent), 0 4px 14px -6px rgba(20,22,28,.3);
+  }
+  .stepinput:focus{ outline:none; }
+  .stepinput::placeholder{ color:var(--tx4); font-weight:450; }
+  @media (max-width:900px){ .stepinput{ width:190px; font-size:13px; } }
+
 </style>
 </head>
 <body>
@@ -1688,11 +1724,15 @@ function toggleStepDone(pid, idx, sid){
 function stepHoldStart(e, pid, idx, sid){
   if(e.pointerType === "mouse" && e.button !== 0) return;
   if(e.target.closest(".sx") || e.target.closest(".badd")) return;
+  e.preventDefault();
   phaseHoldCancel();
   const el = e.currentTarget;
   el.classList.add("holding");
-  _phold = { el, timer: setTimeout(() => {
-    el.classList.remove("holding"); _phold = null;
+  try { el.setPointerCapture(e.pointerId); } catch(_){}
+  _phold = { el, pid:e.pointerId, timer: setTimeout(() => {
+    el.classList.remove("holding");
+    try { el.releasePointerCapture(_phold.pid); } catch(_){}
+    _phold = null;
     toggleStepDone(pid, idx, sid);
   }, 700) };
 }
@@ -1701,12 +1741,15 @@ function stepHoldStart(e, pid, idx, sid){
 let _phold = null;
 function phaseHoldStart(e, pid, idx){
   if(e.pointerType === "mouse" && e.button !== 0) return;
+  e.preventDefault();
   phaseHoldCancel();
   const el = e.currentTarget;
   el.classList.add("holding");
+  try { el.setPointerCapture(e.pointerId); } catch(_){}
   _pholdFired = false;
-  _phold = { el, timer: setTimeout(() => {
+  _phold = { el, pid:e.pointerId, timer: setTimeout(() => {
     el.classList.remove("holding");
+    try { el.releasePointerCapture(_phold.pid); } catch(_){}
     _phold = null;
     _pholdFired = true;
     togglePhaseDone(pid, idx);
@@ -1715,7 +1758,10 @@ function phaseHoldStart(e, pid, idx){
 function phaseHoldCancel(){
   if(!_phold) return;
   clearTimeout(_phold.timer);
-  if(_phold.el) _phold.el.classList.remove("holding");
+  if(_phold.el){
+    _phold.el.classList.remove("holding");
+    try { if(_phold.pid != null) _phold.el.releasePointerCapture(_phold.pid); } catch(_){}
+  }
   _phold = null;
 }
 document.addEventListener("pointerup", phaseHoldCancel);
@@ -2219,12 +2265,40 @@ function routeD(pts){
   return d;
 }
 /* odbočka: svisle dolů pod zastávkou, karta roste podle počtu kroků */
-const BR = { Y0:172, STEP:62, PAD:36, SCALE:0.694, MINX:96, MAXX:600 };
-function branchGeom(par, n){
+const BR = { GAP:104, STEP:62, PAD:36, SCALE:0.694, MINX:96, MAXX:600 };
+function branchGeom(par, rows){
   const x = Math.min(Math.max(par.x, BR.MINX), BR.MAXX);
-  const pts = Array.from({length:n}, (_, i) => ({ x, y: BR.Y0 + i * BR.STEP }));
-  const plus = { x, y: BR.Y0 + n * BR.STEP };
-  return { x, pts, plus, VH: plus.y + BR.PAD };
+  const y0 = par.y + BR.GAP;               // start až pod popiskem zastávky
+  const pts = Array.from({length:rows}, (_, i) => ({ x, y: y0 + i * BR.STEP }));
+  const last = pts.length ? pts[pts.length - 1].y : y0;
+  return { x, y0, pts, VH: last + BR.PAD };
+}
+
+/* psaní kroku rovnou v trase, bez okna */
+let _stepDraft = null, _draftTok = 0;
+function addStep(e, pid, idx, at){
+  if(e && e.stopPropagation) e.stopPropagation();
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const arr = phaseSteps(pr, idx);
+  _stepDraft = { pid, idx, at: (typeof at === "number" ? at : arr.length), tok: ++_draftTok };
+  setStepOpen(pid, idx);
+}
+function cancelDraft(){ _stepDraft = null; render(); }
+function saveDraft(inp, keepGoing){
+  const d = _stepDraft;
+  if(!d || inp.dataset.tok !== String(d.tok)) return;
+  const name = (inp.value || "").trim();
+  const pr = state.projects.find(x => x.id === d.pid);
+  if(!name || !pr){ _stepDraft = null; render(); return; }
+  const arr = phaseSteps(pr, d.idx);
+  const at = Math.min(d.at, arr.length);
+  arr.splice(at, 0, { id:uid(), name, done:false });
+  _stepDraft = keepGoing ? { pid:d.pid, idx:d.idx, at: at + 1, tok: ++_draftTok } : null;
+  save(); render();
+}
+function draftKey(e, inp){
+  if(e.key === "Enter"){ e.preventDefault(); saveDraft(inp, true); }
+  else if(e.key === "Escape"){ e.preventDefault(); cancelDraft(); }
 }
 function routeHtml(p, cur){
   const routeCol = projColor(p);
@@ -2237,13 +2311,18 @@ function routeHtml(p, cur){
   const hasBr = openIdx >= 0 && !!p.phases[openIdx];
   const sts = hasBr ? phaseSteps(p, openIdx) : [];
   const par = pts[openIdx] || pts[0];
-  const g = hasBr ? branchGeom(par, sts.length) : null;
+  const drafting = hasBr && _stepDraft && _stepDraft.pid === p.id && _stepDraft.idx === openIdx;
+  const rows = sts.map((st, i) => ({ st, i }));
+  if(drafting) rows.splice(Math.min(_stepDraft.at, rows.length), 0, { draft:true });
+  const total = rows.length + (drafting ? 0 : 1);
+  const g = hasBr ? branchGeom(par, total) : null;
   const VH = hasBr ? g.VH : RT.H;
   const wMax = Math.min(1000, 330 + (n - 1) * 168);
   const bc = hasBr ? tint(routeCol, .55) : "";
-  const stem = hasBr ? `M ${par.x} ${par.y} C ${par.x} ${par.y + 46}, ${g.x} ${BR.Y0 - 46}, ${g.x} ${BR.Y0}` : "";
-  const rail = hasBr && sts.length > 1 ? `M ${g.x} ${BR.Y0} L ${g.x} ${g.pts[sts.length-1].y}` : "";
-  const tail = hasBr ? `M ${g.x} ${sts.length ? g.pts[sts.length-1].y : BR.Y0} L ${g.x} ${g.plus.y}` : "";
+  const stem = hasBr ? `M ${par.x} ${par.y} C ${par.x} ${par.y + 46}, ${g.x} ${g.y0 - 46}, ${g.x} ${g.y0}` : "";
+  const lastReal = hasBr ? (rows.length ? g.pts[rows.length - 1].y : g.y0) : 0;
+  const rail = hasBr && rows.length > 1 ? `M ${g.x} ${g.y0} L ${g.x} ${lastReal}` : "";
+  const tail = hasBr && !drafting ? `M ${g.x} ${lastReal} L ${g.x} ${g.pts[total - 1].y}` : "";
   return `<div class="route${n <= 2 && !hasBr ? " tiny" : ""}${hasBr ? " hasbranch" : ""}" style="max-width:${hasBr ? 1000 : wMax}px;">
     <svg viewBox="0 0 ${RT.W} ${VH}" preserveAspectRatio="none" aria-hidden="true"
       ${hasBr ? `style="height:${Math.round(VH * BR.SCALE)}px"` : ""}>
@@ -2266,9 +2345,10 @@ function routeHtml(p, cur){
         const nst = (p.phases[i].steps || []).length;
         const opened = openIdx === i;
         return `<div class="pin ${state} ${side}${edge}${holdable ? " markable" : ""}${nst ? " hassteps" : ""}${opened ? " opened" : ""}"
+          draggable="false" ondragstart="event.preventDefault();event.stopPropagation();return false;"
           style="left:${pt.x / RT.W * 100}%; top:${pt.y / VH * 100}%;"
           onclick="phaseClick(event,'${p.id}',${i})"
-          ${holdable ? `onpointerdown="phaseHoldStart(event,'${p.id}',${i})" onpointerleave="phaseHoldCancel()"
+          ${holdable ? `onpointerdown="phaseHoldStart(event,'${p.id}',${i})"
             oncontextmenu="event.preventDefault()"
             title="Klik = odbočka s kroky · podrž ~1 s = ${early ? "zrušit hotovo" : "hotovo i mimo pořadí"}"`
           : `title="Klik = odbočka s kroky"`}>
@@ -2276,20 +2356,30 @@ function routeHtml(p, cur){
           <div class="lab">${esc(p.phases[i].name)}${nst ? `<i class="scaret">⌄</i>` : ""}</div>
         </div>`;
       }).join("")}
-      ${hasBr ? g.pts.map((pt, i) => {
-        const st = sts[i];
+      ${hasBr ? rows.map((row, k) => {
+        const pt = g.pts[k];
+        const pos = `left:${pt.x / RT.W * 100}%; top:${pt.y / VH * 100}%;`;
+        if(row.draft) return `<div class="pin bpin bdraft" style="${pos}">
+          <div class="bead"></div>
+          <div class="lab"><input class="stepinput" data-tok="${_stepDraft.tok}" placeholder="Napiš krok a dej Enter…"
+            onkeydown="draftKey(event,this)" onblur="saveDraft(this,false)"></div>
+        </div>`;
+        const st = row.st;
         return `<div class="pin bpin ${st.done ? "bdone" : ""}"
-          style="left:${pt.x / RT.W * 100}%; top:${pt.y / VH * 100}%;"
-          onpointerdown="stepHoldStart(event,'${p.id}',${openIdx},'${st.id}')" onpointerleave="phaseHoldCancel()"
+          draggable="false" ondragstart="event.preventDefault();event.stopPropagation();return false;"
+          style="${pos}"
+          onpointerdown="stepHoldStart(event,'${p.id}',${openIdx},'${st.id}')"
           oncontextmenu="event.preventDefault()" title="Podrž ~1 s = hotovo">
           <div class="bead">${st.done ? "✓" : ""}</div>
           <div class="lab"><span class="btx">${esc(st.name)}</span>
-            <button class="badd" onclick="addStep(event,'${p.id}',${openIdx},${i + 1})" title="Přidat krok pod tenhle">+</button>
+            <button class="badd" onclick="addStep(event,'${p.id}',${openIdx},${row.i + 1})" title="Přidat krok pod tenhle">+</button>
             <button class="sx" onclick="removeStep(event,'${p.id}',${openIdx},'${st.id}')" title="Odstranit krok">✕</button>
           </div>
         </div>`;
       }).join("") : ""}
-      ${hasBr ? `<div class="pin bpin bplus" style="left:${g.plus.x / RT.W * 100}%; top:${g.plus.y / VH * 100}%;"
+      ${hasBr && !drafting ? `<div class="pin bpin bplus"
+        draggable="false" ondragstart="event.preventDefault();event.stopPropagation();return false;"
+        style="left:${g.pts[total-1].x / RT.W * 100}%; top:${g.pts[total-1].y / VH * 100}%;"
         onclick="addStep(event,'${p.id}',${openIdx})" title="Přidat krok">
         <div class="bead">+</div>
         <div class="lab"><span class="btx">Přidat krok</span></div>
@@ -3674,7 +3764,12 @@ function render(){
   paintRoutes();
 }
 /* dokreslí ujetou část trasy — délku křivky změříme až po vykreslení */
+function focusDraft(){
+  const inp = document.querySelector(".stepinput");
+  if(inp && document.activeElement !== inp){ inp.focus(); }
+}
 function paintRoutes(){
+  focusDraft();
   document.querySelectorAll(".ln.done").forEach(el => {
     let len = 0;
     try { len = el.getTotalLength(); } catch(e){ return; }
