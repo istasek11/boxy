@@ -1256,12 +1256,12 @@
   .cesta .bpin .lab{
     position:absolute; padding:5px 9px; margin-left:-9px; border-radius:9px; overflow:hidden;
   }
-  .cesta .bpin .lab::before{
+  /* výplň se kreslí až během podržení — jinak svítil zelený proužek u každého kroku */
+  .cesta .bpin.holding .lab::before{
     content:""; position:absolute; left:0; top:0; bottom:0; width:0;
     background:rgba(26,155,92,.20); border-right:2px solid var(--good);
-    pointer-events:none;
+    pointer-events:none; animation:holdfill .7s linear forwards;
   }
-  .cesta .bpin.holding .lab::before{ animation:holdfill .7s linear forwards; }
   .cesta .bpin .btx, .cesta .bpin .badd, .cesta .bpin .sx{ position:relative; z-index:1; }
   .cesta .bpin:hover .lab{ background:rgba(255,255,255,.6); }
   .cesta .bpin.holding .bead{ animation:beadhold .7s linear forwards; }
@@ -1285,6 +1285,24 @@
   .stepinput:focus{ outline:none; }
   .stepinput::placeholder{ color:var(--tx4); font-weight:450; }
   @media (max-width:900px){ .stepinput{ width:190px; font-size:13px; } }
+
+
+  /* ---------- odznak „tady vede odbočka" ---------- */
+  .cesta .pin .scaret{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:19px; height:19px; border-radius:7px; margin-left:7px;
+    background:var(--pc-soft,var(--fill2)); color:var(--pc,var(--tx3));
+    vertical-align:-4px; transition:all .15s; flex:none;
+  }
+  .cesta .pin .scaret svg{ width:12px; height:12px; }
+  .cesta .pin.opened .scaret{ background:var(--pc,var(--tx)); color:#fff; }
+  .cesta .pin.hassteps:hover .scaret{ transform:scale(1.12); }
+  .cesta .pin.current .lab{ display:inline-flex; align-items:center; justify-content:center; }
+
+  /* odznačení drží červeně, ať je poznat, že to ruším */
+  .cesta .bpin.bdone.holding .lab::before{
+    background:rgba(224,83,60,.16); border-right-color:#e0533b;
+  }
 
 </style>
 </head>
@@ -1720,6 +1738,9 @@ function toggleStepDone(pid, idx, sid){
   const st = phaseSteps(pr, idx).find(x => x.id === sid); if(!st) return;
   st.done = !st.done;
   save(); render();
+  toast(st.done ? `„${st.name}" hotovo` : `„${st.name}" zase čeká`, "Zpět", () => {
+    st.done = !st.done; save(); render();
+  });
 }
 function stepHoldStart(e, pid, idx, sid){
   if(e.pointerType === "mouse" && e.button !== 0) return;
@@ -2353,7 +2374,7 @@ function routeHtml(p, cur){
             title="Klik = odbočka s kroky · podrž ~1 s = ${early ? "zrušit hotovo" : "hotovo i mimo pořadí"}"`
           : `title="Klik = odbočka s kroky"`}>
           <div class="bead">${early ? "✓" : ""}</div>
-          <div class="lab">${esc(p.phases[i].name)}${nst ? `<i class="scaret">⌄</i>` : ""}</div>
+          <div class="lab">${esc(p.phases[i].name)}${nst ? `<i class="scaret" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 1.5v4.2a2 2 0 0 0 2 2h4"/><circle cx="3.5" cy="1.5" r="0"/><path d="M8 5.8l1.7 1.9L8 9.6"/></svg></i>` : ""}</div>
         </div>`;
       }).join("")}
       ${hasBr ? rows.map((row, k) => {
