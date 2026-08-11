@@ -985,6 +985,7 @@
      CESTA — přehlednost: každý projekt vlastní karta, popisky jednotně dole
      ===================================================================== */
   .cesta{ gap:0; }
+  .cesta{ padding-top:0; }
   .cesta .pcard, .cesta .pcard:hover{
     background:var(--fill); border:1px solid transparent !important;
     border-radius:16px; padding:20px 22px 18px; box-shadow:none; gap:0;
@@ -1689,16 +1690,6 @@ function renderDnes(){
     </div>
 
     <section class="sblock violet cesta">
-      <div class="sec-head">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.flag}</span>
-          <div><div class="eyebrow">kam to jde</div><h2>Cesta</h2></div>
-        </div>
-        <div class="legend">
-          <span><i style="background:var(--good);"></i>za tebou</span>
-          <span><i style="background:var(--accent);"></i>teď</span>
-          <span><i style="background:#d8d6cd;"></i>před tebou</span>
-        </div>
-      </div>
       ${projs.map(p => renderProjectCard(p, true)).join("")}
       ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádná cesta — přidej projekt vlevo v menu a rozvrhni si zastávky" : "Pro tenhle výběr tu nic není"}</div>` : ""}
     </section>
@@ -1913,7 +1904,7 @@ function routeHtml(p, cur){
         const edge = i === 0 ? " first" : i === n - 1 ? " last" : "";
         return `<div class="pin ${state} ${side}${edge}" style="left:${pt.x / RT.W * 100}%; top:${pt.y / RT.H * 100}%;">
           <div class="bead"></div>
-          <div class="lab">${i === cur ? `<span class="youare">teď jsi tady</span>` : ""}${esc(p.phases[i].name)}</div>
+          <div class="lab">${esc(p.phases[i].name)}</div>
         </div>`;
       }).join("")}
     </div>
