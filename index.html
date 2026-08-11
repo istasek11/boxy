@@ -1116,6 +1116,75 @@
     .board-range{ min-width:0; }
   }
 
+
+  /* ---------- podkroky zastávky ---------- */
+  .pin.hassteps{ cursor:pointer; }
+  .pin .scaret{
+    font-style:normal; font-size:11px; margin-left:5px; color:var(--tx4);
+    display:inline-block; transition:transform .18s;
+  }
+  .pin.opened .scaret{ transform:rotate(180deg); color:var(--accent); }
+  .pin.hassteps .bead{ box-shadow:0 0 0 3px rgba(255,255,255,.85); }
+  .pin:not(.markable){ cursor:pointer; }
+
+  .steps{
+    background:#fff; border-radius:14px; padding:14px 16px 12px; margin:2px 0 14px;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .steps-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:8px; flex-wrap:wrap;
+  }
+  .steps-t{ font-size:12.5px; color:var(--tx3); }
+  .steps-t b{ color:var(--tx); font-weight:650; }
+  .stepr{
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:10px;
+    padding:9px 10px; border-radius:10px; font-size:13.5px; color:var(--tx);
+    cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:none;
+    transition:background .13s;
+  }
+  .stepr:hover{ background:var(--fill); }
+  .stepr + .stepr{ box-shadow:inset 0 1px 0 var(--line); }
+  .stepr .sdot{
+    width:17px; height:17px; border-radius:50%; flex:none;
+    border:2px solid var(--fill2); background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px; font-weight:800; color:#fff; transition:all .2s;
+  }
+  .stepr.done .sdot{ background:var(--good); border-color:var(--good); }
+  .stepr.done .stx{ color:var(--tx4); }
+  .stepr .stx{ flex:1; min-width:0; }
+  .stepr .sx{
+    border:none; background:transparent; color:var(--tx4); cursor:pointer;
+    width:22px; height:22px; border-radius:7px; font-size:11px; flex:none;
+    opacity:0; transition:opacity .12s, background .12s;
+  }
+  .stepr:hover .sx{ opacity:1; }
+  .stepr .sx:hover{ background:var(--fill2); color:var(--red); }
+  .stepr.holding::after{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:0;
+    background:rgba(26,155,92,.15); border-right:2.5px solid var(--good);
+    animation:holdfill .7s linear forwards; pointer-events:none;
+  }
+  .steps-empty{ font-size:13px; color:var(--tx4); padding:4px 10px 8px; }
+  .stepadd{
+    align-self:flex-start; border:none; background:transparent; color:var(--tx3);
+    font-size:13px; font-weight:600; cursor:pointer; padding:8px 10px;
+    border-radius:9px; transition:all .12s;
+  }
+  .stepadd:hover{ background:var(--accent-soft); color:var(--accent-ink); }
+
+  /* výběr barvy projektu */
+  .swatches{ display:flex; flex-wrap:wrap; gap:8px; }
+  .sw{ cursor:pointer; line-height:0; }
+  .sw input{ position:absolute; opacity:0; width:0; height:0; }
+  .sw span{
+    display:block; width:26px; height:26px; border-radius:50%;
+    box-shadow:0 0 0 2px #fff, 0 0 0 3px transparent; transition:box-shadow .13s, transform .13s;
+  }
+  .sw:hover span{ transform:scale(1.1); }
+  .sw input:checked + span{ box-shadow:0 0 0 2px #fff, 0 0 0 3.5px var(--tx); transform:scale(1.1); }
+
 </style>
 </head>
 <body>
@@ -1485,6 +1554,81 @@ function toggleProvoz(key, isOpen){
   save(); render();
 }
 
+/* ---- barva projektu (vlastní, jinak stabilně odvozená z id) ---- */
+const PROJ_PALETTE = ["#2f6df6","#7b5cf0","#12a8bd","#e8559b","#d18f0a","#1a9b5c",
+                      "#e0533b","#4c7ef3","#a24bd6","#0f9a86","#c2417a","#b3771a"];
+function projColor(pr){
+  if(pr && pr.color) return pr.color;
+  const id = String((pr && pr.id) || "");
+  let h = 0;
+  for(let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return PROJ_PALETTE[h % PROJ_PALETTE.length];
+}
+
+/* ---- podkroky zastávky ---- */
+function phaseSteps(pr, i){
+  const ph = pr.phases[i];
+  if(!ph) return [];
+  if(!Array.isArray(ph.steps)) ph.steps = [];
+  return ph.steps;
+}
+function openStepIdx(pr, cur){
+  const m = state.settings.stepOpen || {};
+  if(Object.prototype.hasOwnProperty.call(m, pr.id)) return m[pr.id];
+  return phaseSteps(pr, cur).length ? cur : -1;
+}
+function setStepOpen(pid, idx){
+  if(!state.settings.stepOpen) state.settings.stepOpen = {};
+  state.settings.stepOpen[pid] = idx;
+  save(); render();
+}
+function toggleStepPanel(pid, idx){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const cur = Math.min(pr.currentPhaseIndex, pr.phases.length - 1);
+  setStepOpen(pid, openStepIdx(pr, cur) === idx ? -1 : idx);
+}
+let _pholdFired = false;
+function phaseClick(e, pid, idx){
+  if(_pholdFired){ _pholdFired = false; return; }
+  toggleStepPanel(pid, idx);
+}
+function addStep(pid, idx){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  dialog(`Krok pod „${pr.phases[idx].name}"`, `
+    <div class="field"><label>Co je potřeba udělat</label><input name="name" required placeholder="např. Zjistit ceny u dodavatele"></div>
+  `, "Přidat", fd => {
+    phaseSteps(pr, idx).push({ id:uid(), name:fd.get("name").trim(), done:false });
+    setStepOpen(pid, idx);
+    closeDialog();
+  });
+}
+function removeStep(e, pid, idx, sid){
+  e.stopPropagation();
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const arr = phaseSteps(pr, idx);
+  const i = arr.findIndex(x => x.id === sid); if(i < 0) return;
+  const gone = arr.splice(i, 1)[0];
+  save(); render();
+  toast(`„${gone.name}" odstraněno`, "Vrátit", () => { arr.splice(i, 0, gone); save(); render(); });
+}
+function toggleStepDone(pid, idx, sid){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const st = phaseSteps(pr, idx).find(x => x.id === sid); if(!st) return;
+  st.done = !st.done;
+  save(); render();
+}
+function stepHoldStart(e, pid, idx, sid){
+  if(e.pointerType === "mouse" && e.button !== 0) return;
+  if(e.target.closest(".sx")) return;
+  phaseHoldCancel();
+  const el = e.currentTarget;
+  el.classList.add("holding");
+  _phold = { el, timer: setTimeout(() => {
+    el.classList.remove("holding"); _phold = null;
+    toggleStepDone(pid, idx, sid);
+  }, 700) };
+}
+
 /* ---- podržení zastávky na trase = hotovo, i mimo pořadí ---- */
 let _phold = null;
 function phaseHoldStart(e, pid, idx){
@@ -1492,9 +1636,11 @@ function phaseHoldStart(e, pid, idx){
   phaseHoldCancel();
   const el = e.currentTarget;
   el.classList.add("holding");
+  _pholdFired = false;
   _phold = { el, timer: setTimeout(() => {
     el.classList.remove("holding");
     _phold = null;
+    _pholdFired = true;
     togglePhaseDone(pid, idx);
   }, 700) };
 }
@@ -1611,7 +1757,7 @@ function renderSidebar(){
       </div>` +
       cp.map(p => `
       <button class="nav-row proj-item ${view === p.id ? "active" : ""}" style="padding-left:26px;" onclick="go('${p.id}')">
-        <span class="nm"><span class="proj-name">${esc(p.name)}</span></span>
+        <span class="nm"><span class="proj-dot" style="background:${projColor(p)}"></span><span class="proj-name">${esc(p.name)}</span></span>
         <span class="proj-phase" style="padding-left:0;">${esc((p.phases[p.currentPhaseIndex]||{}).name || "")}</span>
       </button>`).join("");
   }).join("");
@@ -2005,7 +2151,8 @@ function routeD(pts){
   return d;
 }
 function routeHtml(p, cur){
-  const routeCol = clientDot(p.clientId);
+  const routeCol = projColor(p);
+  const openIdx = openStepIdx(p, cur);
   const n = p.phases.length;
   const pts = routePoints(n);
   const uid2 = "rg" + p.id.replace(/[^a-z0-9]/gi, "");
@@ -2027,13 +2174,17 @@ function routeHtml(p, cur){
         const side = pt.y < RT.MID ? "up" : "down";
         const edge = i === 0 ? " first" : i === n - 1 ? " last" : "";
         const holdable = i > cur;
-        return `<div class="pin ${state} ${side}${edge}${holdable ? " markable" : ""}"
+        const nst = (p.phases[i].steps || []).length;
+        const opened = openIdx === i;
+        return `<div class="pin ${state} ${side}${edge}${holdable ? " markable" : ""}${nst ? " hassteps" : ""}${opened ? " opened" : ""}"
           style="left:${pt.x / RT.W * 100}%; top:${pt.y / RT.H * 100}%;"
+          onclick="phaseClick(event,'${p.id}',${i})"
           ${holdable ? `onpointerdown="phaseHoldStart(event,'${p.id}',${i})" onpointerleave="phaseHoldCancel()"
             oncontextmenu="event.preventDefault()"
-            title="${early ? "Podrž ~1 s a zrušíš hotovo" : "Podrž ~1 s a označíš jako hotové, i když ještě není na řadě"}"` : ""}>
+            title="Klik = kroky pod zastávkou · podrž ~1 s = ${early ? "zrušit hotovo" : "hotovo i mimo pořadí"}"`
+          : `title="Klik = kroky pod touhle zastávkou"`}>
           <div class="bead">${early ? "✓" : ""}</div>
-          <div class="lab">${esc(p.phases[i].name)}</div>
+          <div class="lab">${esc(p.phases[i].name)}${nst ? `<i class="scaret">⌄</i>` : ""}</div>
         </div>`;
       }).join("")}
     </div>
@@ -2046,7 +2197,7 @@ function renderProjectCard(p, draggable){
   const cur = Math.min(p.currentPhaseIndex, n - 1);
   const left = n - cur - 1;
   const leftTxt = p.done ? "u cíle" : left === 0 ? "poslední zastávka" : left === 1 ? "pak už jen jedna zastávka" : `pak ještě ${left} zastávky`;
-  const pcol = clientDot(p.clientId);
+  const pcol = projColor(p);
   const shut = !!(state.settings.projShut || {})[p.id];
   return `<div class="pcard ${watch ? "watch" : ""}${shut ? " shut" : ""}" id="card-${p.id}"
     style="--pc:${pcol}; --pc-soft:${tint(pcol,.09)};"
@@ -2066,6 +2217,26 @@ function renderProjectCard(p, draggable){
       </div>
     </div>
     ${shut ? "" : routeHtml(p, cur)}
+    ${shut ? "" : (() => {
+      const oi = openStepIdx(p, cur);
+      if(oi < 0 || !p.phases[oi]) return "";
+      const sts = p.phases[oi].steps || [];
+      return `<div class="steps">
+        <div class="steps-head">
+          <span class="steps-t">Kroky pod zastávkou <b>${esc(p.phases[oi].name)}</b></span>
+          <button class="sec-link" onclick="setStepOpen('${p.id}',-1)">skrýt</button>
+        </div>
+        ${sts.map(st => `<div class="stepr ${st.done ? "done" : ""}"
+          onpointerdown="stepHoldStart(event,'${p.id}',${oi},'${st.id}')" onpointerleave="phaseHoldCancel()"
+          oncontextmenu="event.preventDefault()" title="Podrž ~1 s = hotovo">
+          <span class="sdot">${st.done ? "✓" : ""}</span>
+          <span class="stx">${esc(st.name)}</span>
+          <button class="sx" onclick="removeStep(event,'${p.id}',${oi},'${st.id}')" title="Odstranit">✕</button>
+        </div>`).join("")}
+        ${!sts.length ? `<div class="steps-empty">Zatím tu žádné kroky nejsou.</div>` : ""}
+        <button class="stepadd" onclick="addStep('${p.id}',${oi})">+ Přidat krok</button>
+      </div>`;
+    })()}
     ${!shut && p.phases[cur].meaning ? `<div class="pmeaning"><span class="lbl">Dokončit tuhle zastávku znamená</span>${esc(p.phases[cur].meaning)}</div>` : ""}
     <div class="pnote" id="pnote-${p.id}" style="opacity:0;"></div>
     <span class="hover-tools">
@@ -2612,6 +2783,12 @@ function phasesFromText(txt){
   });
 }
 
+function colorField(sel){
+  return `<div class="field"><label>Barva projektu</label>
+    <div class="swatches">${PROJ_PALETTE.map(c =>
+      `<label class="sw"><input type="radio" name="color" value="${c}" ${sel === c ? "checked" : ""}>
+        <span style="background:${c}"></span></label>`).join("")}</div></div>`;
+}
 function openNewProject(){
   dialog("Nový projekt", `
     <div class="field"><label>Název</label><input name="name" required placeholder="např. Nový web"></div>
@@ -2619,6 +2796,7 @@ function openNewProject(){
       <div class="field"><label>Oblast</label><select name="client">${clientOptions("interni")}</select></div>
       <div class="field"><label>Termín</label><input name="deadline" type="date"></div>
     </div>
+    ${colorField(PROJ_PALETTE[0])}
     <div class="field"><label>Fáze — jedna na řádek („Název = co znamená dokončit")</label>
       <textarea name="phases" placeholder="Návrh = schválený wireframe&#10;Obsah = texty hotové&#10;Spuštění = běží naostro"></textarea>
     </div>
@@ -2626,6 +2804,7 @@ function openNewProject(){
     const phases = phasesFromText(fd.get("phases") || "");
     state.projects.push({
       id:uid(), clientId:fd.get("client"), name:fd.get("name").trim(),
+      color:fd.get("color") || null,
       deadline:fd.get("deadline") || null,
       phases: phases.length >= 2 ? phases : [{name:"Začátek", meaning:""},{name:"Hotovo", meaning:""}],
       currentPhaseIndex:0, archived:false, done:false,
@@ -2644,15 +2823,21 @@ function openEditProject(pid){
       <div class="field"><label>Oblast</label><select name="client">${clientOptions(p.clientId)}</select></div>
       <div class="field"><label>Termín</label><input name="deadline" type="date" value="${p.deadline || ""}"></div>
     </div>
+    ${colorField(projColor(p))}
     <div class="field"><label>Fáze — jedna na řádek („Název = co znamená dokončit")</label>
       <textarea name="phases">${esc(phasesTxt)}</textarea>
     </div>
   `, "Uložit", fd => {
     p.name = fd.get("name").trim();
+    p.color = fd.get("color") || p.color || null;
     p.clientId = fd.get("client");
     p.deadline = fd.get("deadline") || null;
     const phases = phasesFromText(fd.get("phases") || "");
     if(phases.length >= 2){
+      // kroky a stav „hotovo mimo pořadí" zachovej podle názvu zastávky
+      const old = {};
+      p.phases.forEach(ph => { old[ph.name] = { steps: ph.steps || [], done: !!ph.done }; });
+      phases.forEach(ph => { const o = old[ph.name]; if(o){ ph.steps = o.steps; ph.done = o.done; } });
       p.phases = phases;
       p.currentPhaseIndex = Math.min(p.currentPhaseIndex, phases.length - 1);
     }
