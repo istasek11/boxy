@@ -1649,6 +1649,72 @@
     .cesta .pcard, .cesta .pcard:hover{ padding:16px 16px 12px 18px; }
   }
 
+  /* =====================================================================
+     ZÓNY — každá sekce má vlastní plochu, barvu a vzduch kolem
+     ===================================================================== */
+  .zone{
+    --zbg:#eef0f6; --zac:#5b6478; --zring:rgba(30,38,60,.055);
+    background:var(--zbg);
+    border-radius:22px;
+    padding:24px 24px 26px;
+    box-shadow:inset 0 0 0 1px var(--zring);
+  }
+  main > .zone{ margin-bottom:22px; }
+  .colmain > .zone + .zone{ margin-top:22px; }
+  .zone .seclabel{ padding:0 0 18px !important; }
+  .zone .seclabel::before{
+    content:""; width:9px; height:9px; border-radius:3px; align-self:center;
+    background:var(--zac); flex:0 0 auto;
+  }
+
+  .z-den{    --zbg:#edeef3; --zac:#5b6478; }
+  .z-cesty{  --zbg:#e0e9fb; --zac:#2f6bf0; }
+  .z-stul{   --zbg:#fbeedc; --zac:#bd8226; }
+  .z-provoz{ --zbg:#e1efe8; --zac:#26855f; }
+  .z-listky{ --zbg:#e7e4f0; --zac:#6d5aa8; padding:22px 20px 24px; }
+
+  /* obsah v zóně: bílá plocha, měkký stín (zóna sama stín nemá) */
+  .zone .topline, .zone .desk-wrap, .zone .prov-wrap{
+    box-shadow:0 1px 2px rgba(20,22,28,.05), 0 6px 18px -14px rgba(20,22,28,.3);
+  }
+  .zone .cesta .pcard, .zone .cesta .pcard:hover{
+    box-shadow:inset 3px 0 0 var(--pc), 0 1px 2px rgba(20,22,28,.05),
+               0 6px 18px -14px rgba(20,22,28,.3) !important;
+  }
+  .zone .desknote{ background:#fff; }
+  .zone .empty-tile{ background:rgba(255,255,255,.6) !important; }
+  .provoz .wday{ background:#f3f5f9; }
+
+  /* lístečky sedí rovnou na ploše zóny — žádná další karta */
+  .z-listky .sticky-panel{ background:transparent !important; box-shadow:none !important; padding:0 !important; }
+  .z-listky .mind-input{ background:#fff; }
+  .z-listky .seg{ background:rgba(255,255,255,.72); }
+  .z-listky .sec-ico{ background:rgba(255,255,255,.7); }
+  .z-listky .mind-note{ color:#8a83a5; }
+
+  @media (max-width:1240px){
+    .cols{ grid-template-columns:minmax(0,1fr) !important; gap:18px; }
+    .colside{ position:static !important; }
+    .z-listky{ margin-top:18px; }
+  }
+
+  aside.colside{
+    background:transparent !important; box-shadow:none !important;
+    border-radius:0 !important; padding:0 !important;
+    height:auto !important; overflow:visible !important;
+    display:block !important; gap:0 !important; color:var(--tx) !important;
+    position:sticky; top:14px;
+  }
+
+  @media (max-width:900px){
+    .zone{ padding:18px 14px 20px; border-radius:16px; }
+    aside.colside{ position:static; }
+    .z-listky{ padding:18px 14px 20px; }
+    main > .zone{ margin-bottom:14px; }
+    .colmain > .zone + .zone{ margin-top:14px; }
+    .zone .seclabel{ padding:0 0 14px !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -2574,6 +2640,7 @@ function renderDnes(){
       <button class="sec-link" onclick="setClientFilter('all')">zobrazit vše</button>
     </div>` : ""}
 
+    <div class="zone z-den">
     <div class="seclabel">Dnešní schůzky</div>
     <section class="topline">
       <div class="tlx-head">
@@ -2594,15 +2661,20 @@ function renderDnes(){
       </div>
       ${allDay.length ? `<div class="allday">${allDay.map(e => `<span>${esc(e.title)}</span>`).join("")}</div>` : ""}
     </section>
+    </div>
 
     <div class="cols">
     <div class="colmain">
+    <div class="zone z-cesty">
     <div class="seclabel">Cesty <span>kam projekty míří</span></div>
     <section class="sblock violet cesta">
       ${projs.map(p => renderProjectCard(p, true)).join("")}
       ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádná cesta — přidej projekt vlevo v menu a rozvrhni si zastávky" : "Pro tenhle výběr tu nic není"}</div>` : ""}
     </section>
 
+    </div>
+
+    <div class="zone z-stul">
     <div class="seclabel">Na stole <span>jednorázové věci</span></div>
     <section class="sblock cyan">
       <div class="desk-wrap">
@@ -2630,6 +2702,9 @@ function renderDnes(){
       </div>
     </section>
 
+    </div>
+
+    <div class="zone z-provoz">
     <div class="seclabel">Provoz <span>co běží samo</span></div>
     <section class="sblock provoz">
       <div class="prov-wrap">
@@ -2718,10 +2793,12 @@ function renderDnes(){
       </div>` : ""}
       </div>
     </section>
+    </div>
 
     </div>
 
     <aside class="colside">
+      <div class="zone z-listky">
       <section class="sblock amber sticky-panel">
         <div class="sec-head">
           <div class="sec-head-l"><span class="sec-ico">${ICONS.mind}</span>
@@ -2746,6 +2823,7 @@ function renderDnes(){
         </div>
         <div class="mind-note">Křížkem lísteček sundáš. Nic se nepočítá.</div>
       </section>
+      </div>
     </aside>
     </div>
   `;
