@@ -2021,6 +2021,21 @@
     content:""; position:absolute; inset:0; pointer-events:none;
     background:radial-gradient(120% 92% at 22% -10%, rgba(255,255,255,.36), rgba(255,255,255,0) 62%);
   }
+  .ltile .lfav{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1;
+    width:50px; height:50px; border-radius:13px; object-fit:contain;
+    background:#fff; padding:8px; opacity:0; transition:opacity .2s, transform .16s;
+    box-shadow:0 4px 12px -5px rgba(8,10,16,.55);
+  }
+  .ltile .lfav.on{ opacity:1; }
+  .ltile:hover .lfav.on{ transform:translate(-50%,-50%) scale(1.06); }
+  .imgpick{ display:inline-flex; align-items:center; gap:8px; margin-top:8px; cursor:pointer; }
+  .imgpick input{ display:none; }
+  .imgpick span{
+    font-size:12.5px; font-weight:600; color:var(--tx2); background:var(--fill);
+    border-radius:9px; padding:8px 12px; transition:all .12s;
+  }
+  .imgpick span:hover{ background:var(--fill2); color:var(--tx); }
   .ltile .lglyph{
     position:relative; z-index:1; color:#fff; font-size:30px; font-weight:800; letter-spacing:-.02em;
     line-height:1; text-shadow:0 2px 8px rgba(0,0,0,.22);
@@ -2055,6 +2070,7 @@
     .hubgrid{ grid-template-columns:repeat(auto-fill,minmax(142px,1fr)); gap:10px; }
     .ltile .lcover{ height:70px; }
     .ltile .lglyph{ font-size:25px; }
+    .ltile .lfav{ width:42px; height:42px; border-radius:11px; padding:7px; }
     .ltile .lbody{ padding:10px 11px 12px; }
     .ltile .ln{ font-size:13px; }
     .hgtools{ margin-left:0; width:100%; }
@@ -3149,6 +3165,7 @@ function renderDnes(){
           <button class="ltile" onclick="openHubLink('${l.id}')" title="${esc(l.url || l.name)}">
             <span class="lcover" style="background:linear-gradient(145deg, ${lc} 0%, ${darken(lc, .24)} 100%);">
               <span class="lglyph">${linkMark(l)}</span>
+              ${tileImgHtml(l)}
               <span class="ltools">
                 <span class="lb" onclick="editHubLink(event,'${l.id}')" title="Upravit">✎</span>
                 <span class="lb" onclick="removeHubLink(event,'${l.id}')" title="Odebrat">✕</span>
@@ -3847,7 +3864,7 @@ function editHubLink(e, id){
     <div class="field"><label>Název</label><input name="name" required value="${esc(l.name)}"></div>
     <div class="field"><label>Odkaz nebo cesta</label><input name="url" value="${esc(l.url || "")}"></div>
     <div class="field-row">
-      <div class="field"><label>Emoji (prázdné = písmeno)</label>
+      <div class="field"><label>Emoji (přebije logo)</label>
         <input name="icon" maxlength="4" value="${esc(l.icon || "")}" placeholder="🛒"></div>
       <div class="field"><label>Skupina</label>
         <select name="grp"><option value="">bez skupiny</option>
@@ -3855,12 +3872,23 @@ function editHubLink(e, id){
         </select></div>
     </div>
     <div class="field"><label>Oblast</label><select name="client">${clientOptions(l.clientId)}</select></div>
+    <div class="field"><label>Vlastní obrázek / logo</label>
+      <input name="iconUrl" value="${esc(l.iconUrl || "")}" placeholder="odkaz na obrázek (nepovinné)">
+      <label class="imgpick">
+        <input type="file" accept="image/*" onchange="uploadTileImage(this,'${l.id}')">
+        <span>Nahrát obrázek z počítače</span>
+      </label>
+      ${(l.iconFile || l.iconUrl) ? `<button type="button" class="sec-link" onclick="clearTileImage('${l.id}')">odebrat obrázek — vrátit logo webu</button>` : ""}
+      <div class="mind-note" id="imgMsg">Když nic nevyplníš, vezmu logo přímo z webu odkazu.</div>
+    </div>
   `, "Uložit", fd => {
     l.name = (fd.get("name") || "").trim() || l.name;
     l.url = normUrl(fd.get("url") || "");
     l.icon = (fd.get("icon") || "").trim();
     l.groupId = fd.get("grp") || null;
     l.clientId = fd.get("client") || l.clientId;
+    const iu = (fd.get("iconUrl") || "").trim();
+    if(iu !== (l.iconUrl || "")){ l.iconUrl = iu; if(iu) l.iconFile = ""; }
     save(); closeDialog(); render();
   });
 }
@@ -4099,6 +4127,58 @@ function saveProjStatus(pid, el){
 function padKey(e, el){
   if(e.key === "Escape"){ e.preventDefault(); el.dataset.cancel = "1"; el.blur(); }
 }
+/* ---- logo dlaždice: nejdřív favicon přímo ze stránky, pak záložní služba, pak písmeno ---- */
+function favOk(img){
+  img.classList.add("on");
+  const g = img.parentElement.querySelector(".lglyph");
+  if(g) g.style.display = "none";
+}
+function favNext(img){
+  const step = Number(img.dataset.step || 0);
+  const h = img.dataset.host || "";
+  if(step === 0 && h){ img.dataset.step = "1"; img.src = "https://icons.duckduckgo.com/ip3/" + h + ".ico"; return; }
+  img.remove();
+}
+let _tileUrls = [];
+function paintTileImages(){
+  _tileUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch(_){} });
+  _tileUrls = [];
+  document.querySelectorAll("img.lfav[data-file]").forEach(img => {
+    const id = img.dataset.file; if(!id) return;
+    fileGet(id).then(blob => {
+      if(!blob){ img.remove(); return; }
+      const u = URL.createObjectURL(blob);
+      _tileUrls.push(u);
+      img.src = u;
+    }).catch(() => img.remove());
+  });
+}
+function tileImgHtml(l){
+  if(l.iconFile) return `<img class="lfav" data-file="${esc(l.iconFile)}" alt="" onload="favOk(this)" onerror="this.remove()">`;
+  if(l.iconUrl)  return `<img class="lfav" src="${esc(l.iconUrl)}" alt="" onload="favOk(this)" onerror="this.remove()">`;
+  if(l.icon)     return "";
+  if(!isUrlish(l.url)) return "";
+  const h = hostFromUrl(l.url);
+  if(!h || h === "bez odkazu") return "";
+  return `<img class="lfav" src="https://${esc(h)}/favicon.ico" data-step="0" data-host="${esc(h)}" alt="" onload="favOk(this)" onerror="favNext(this)">`;
+}
+function uploadTileImage(input, id){
+  const f = (input.files || [])[0]; if(!f) return;
+  const l = hubLinks().find(x => x.id === id); if(!l) return;
+  const fid = uid();
+  filePut(fid, f).then(() => {
+    l.iconFile = fid; l.iconUrl = "";
+    save(); closeDialog(); render();
+  }).catch(() => { const m = document.getElementById("imgMsg"); if(m) m.textContent = "Obrázek se nepodařilo uložit."; });
+}
+function clearTileImage(id){
+  const l = hubLinks().find(x => x.id === id); if(!l) return;
+  const old = l.iconFile;
+  l.iconFile = ""; l.iconUrl = "";
+  save(); closeDialog(); render();
+  if(old) fileDel(old);
+}
+
 function addProjLink(pid){
   const p = state.projects.find(x => x.id === pid); if(!p) return;
   const nm = document.getElementById("lkName"), ur = document.getElementById("lkUrl");
@@ -5303,6 +5383,7 @@ function render(){
   sbSetStatus(SB.status);
   paintRoutes();
   centerToday();
+  paintTileImages();
 }
 /* na úzkém okně přiroluj pruh dnů tak, aby dnešek byl vidět */
 function centerToday(){
