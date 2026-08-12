@@ -921,7 +921,7 @@
   .legend{ color:var(--tx4); }
 
   /* ---------- tmavá karta denní linky (kontrast, jako v referenci) ---------- */
-  .sblock.darkp{ background:var(--ink); border-radius:18px; box-shadow:var(--card-sh); color:#f2f2f6; }
+  .sblock.darkp{ background:var(--ink); border-radius:18px; box-shadow:var(--card-sh); color:#f2f2f6; padding-top:22px; }
   .darkp h2{ color:#fff; font-size:19px; }
   .darkp .eyebrow{ color:#8f9cff !important; }
   .darkp .sec-sub{ color:#8b8f9c; }
@@ -2306,16 +2306,6 @@ function renderDnes(){
     </section>
 
     <section class="sblock darkp">
-      <div class="hero-head">
-        <div class="hero-id">
-          <div>
-            <div class="eyebrow" style="color:#6e6c62;">${isPlanToday ? "dnešek" : pdLab}</div>
-            <h2>Denní linka</h2>
-          </div>
-          <div class="hero-div"></div>
-          <span class="sec-sub" style="max-width:260px;">pravidelné věci a co má datum</span>
-        </div>
-      </div>
       <div class="tl-card">
         <div class="board-head" style="margin-top:0;padding-top:0;border-top:none;">
           <div class="board-t">Pravidelné věci a co má datum</div>
