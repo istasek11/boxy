@@ -1336,6 +1336,74 @@
   }
   .desknote.done.holding::after{ background:rgba(224,83,60,.14); border-right-color:#e0533b; }
 
+
+  /* ---------- časová osa jako pruh nahoře ---------- */
+  main{ max-width:1400px; }
+  .topline{
+    background:#fff; border-radius:18px; box-shadow:var(--card-sh);
+    padding:16px 20px 18px; display:flex; flex-direction:column; gap:12px;
+  }
+  .tlx-head{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .tlx-t{ font-size:13.5px; font-weight:650; color:var(--tx2); }
+  .topline .tl-hours{ margin-bottom:10px; }
+  .topline .tl-hours span{ font-size:11px; color:var(--tx4); font-weight:500; font-family:inherit; }
+  .topline .lane{ height:46px; background:var(--fill); border-radius:10px; }
+  .topline .lane.slim{ height:34px; }
+  .topline .lane-empty{ color:var(--tx4); font-size:12.5px; }
+  .topline .tl-lanes{ background:repeating-linear-gradient(to right, var(--fill2) 0 1px, transparent 1px calc(100%/11)); }
+
+  /* ---------- dva sloupce ---------- */
+  .cols{ display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:16px; align-items:start; }
+  .colmain{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+  .colside{ position:sticky; top:14px; }
+  .sticky-panel{ display:flex; flex-direction:column; gap:12px; }
+
+  /* ---------- lístečky ---------- */
+  .stickies{ display:flex; flex-direction:column; gap:11px; }
+  .sticky{
+    position:relative; border-radius:3px; padding:13px 30px 26px 14px;
+    font-size:13.5px; line-height:1.42; color:#3b3524;
+    background:#fff3b0;
+    box-shadow:0 1px 2px rgba(20,22,28,.10), 0 9px 18px -12px rgba(20,22,28,.34);
+    transform:rotate(var(--rot,0deg));
+    transition:transform .14s, box-shadow .14s, opacity .3s;
+  }
+  .sticky:hover{ transform:rotate(0deg) translateY(-2px); box-shadow:0 2px 4px rgba(20,22,28,.12), 0 14px 24px -12px rgba(20,22,28,.4); }
+  .sticky.fading{ opacity:0; }
+  .sticky .stx{ display:block; word-break:break-word; }
+  .sticky .scat{ position:absolute; left:14px; bottom:8px; font-size:10.5px; opacity:.55; }
+  .sticky .sxx{
+    position:absolute; top:6px; right:6px; width:22px; height:22px; border:none;
+    background:transparent; color:rgba(59,53,36,.45); border-radius:6px; font-size:10px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:all .12s;
+  }
+  .sticky:hover .sxx{ opacity:1; }
+  .sticky .sxx:hover{ background:rgba(59,53,36,.12); color:#3b3524; }
+  .sticky.c-práce{ background:#fff3b0; }
+  .sticky.c-osobní{ background:#ffd8e8; color:#4a2a38; }
+  .sticky.c-osobní .scat{ color:#4a2a38; }
+  .sticky.c-nákup{ background:#cfe6ff; color:#1f3550; }
+  .sticky.c-nákup .scat{ color:#1f3550; }
+  .sticky.c-zdraví{ background:#d3f4dd; color:#22402f; }
+  .sticky.c-zdraví .scat{ color:#22402f; }
+  .sticky-panel .mind-input{ background:var(--fill); padding:4px 4px 4px 6px; min-width:0; }
+  .sticky-panel .mind-input input{ padding:9px 8px; font-size:13px; min-width:0; }
+  .sticky-panel .mind-input .btn-primary{ padding:9px 15px; font-size:12.5px; flex:none; }
+  .sticky-panel .seg{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; max-width:100%; }
+  .sticky-panel .seg::-webkit-scrollbar{ display:none; }
+  .sticky-panel .seg button{ flex:none; }
+
+  @media (max-width:1240px){
+    .cols{ grid-template-columns:minmax(0,1fr); }
+    .colside{ position:static; }
+    .stickies{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); }
+  }
+  @media (max-width:900px){
+    .topline{ padding:14px 14px 16px; border-radius:16px; }
+    .topline .tl-hours, .topline .tl-lanes{ min-width:640px; }
+  }
+
 </style>
 </head>
 <body>
@@ -2210,6 +2278,28 @@ function renderDnes(){
       </div></div>
     </div>
 
+    <section class="topline">
+      <div class="tlx-head">
+        <span class="tlx-t">${isPlanToday ? "Dnešní schůzky" : `Schůzky — ${pdLab}`}</span>
+        ${state.google.clientId
+          ? `<button class="sec-link" onclick="gManualRefresh()">${gConnected() ? "Obnovit kalendář" : "Připojit kalendář"}</button>`
+          : `<button class="sec-link" onclick="openGModal()">Připojit kalendář</button>`}
+      </div>
+      <div class="tl-scroll">
+        <div class="tl-hours">${Array.from({length: TL_SPAN + 1}, (_, i) => `<span>${TL_START+i}:00</span>`).join("")}</div>
+        <div class="tl-lanes">
+          <div class="lane${!timed.length && !state.google.clientId ? " slim" : ""}" id="calLane">
+            ${timed.map(ev => blockHtml(ev, !isPlanToday ? "" : ni.cur >= ev.eh ? "past" : ni.cur >= ev.sh ? "now" : "")).join("")}
+            ${!timed.length ? `<div class="lane-empty">${!state.google.clientId ? "schůzky se načtou z Google Kalendáře" : G.loading ? "Načítám kalendář…" : G.error ? esc(G.error) : isPlanToday ? "dnes žádné schůzky" : "žádné schůzky"}</div>` : ""}
+          </div>
+          ${inDay && isPlanToday ? `<div class="tl-nowline" style="left:${ni.pct}%;"></div><div class="tl-nowlabel" style="left:${ni.pct}%;">${pad(Math.floor(ni.cur))}:${pad(Math.round((ni.cur % 1) * 60))}</div>` : ""}
+        </div>
+      </div>
+      ${allDay.length ? `<div class="allday">${allDay.map(e => `<span>${esc(e.title)}</span>`).join("")}</div>` : ""}
+    </section>
+
+    <div class="cols">
+    <div class="colmain">
     <section class="sblock violet cesta">
       ${projs.map(p => renderProjectCard(p, true)).join("")}
       ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádná cesta — přidej projekt vlevo v menu a rozvrhni si zastávky" : "Pro tenhle výběr tu nic není"}</div>` : ""}
@@ -2223,29 +2313,11 @@ function renderDnes(){
             <h2>Denní linka</h2>
           </div>
           <div class="hero-div"></div>
-          <span class="sec-sub" style="max-width:260px;">nahoře kalendář, dole týden</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          ${state.google.clientId
-            ? `<button class="sec-link" onclick="gManualRefresh()">${gConnected() ? "Obnovit kalendář" : "Připojit kalendář"}</button>`
-            : `<button class="sec-link" onclick="openGModal()">Připojit kalendář</button>`}
+          <span class="sec-sub" style="max-width:260px;">pravidelné věci a co má datum</span>
         </div>
       </div>
       <div class="tl-card">
-        <div class="tl-scroll">
-        <div class="tl-hours">${Array.from({length: TL_SPAN + 1}, (_, i) => `<span>${TL_START+i}:00</span>`).join("")}</div>
-        <div class="tl-lanes">
-          <div class="lane${!timed.length && !state.google.clientId ? " slim" : ""}" id="calLane">
-            <span class="lane-tag">${isPlanToday ? "Dnešní schůzky" : `Schůzky — ${pdLab}`}</span>
-            ${timed.map(ev => blockHtml(ev, !isPlanToday ? "" : ni.cur >= ev.eh ? "past" : ni.cur >= ev.sh ? "now" : "")).join("")}
-            ${!timed.length ? `<div class="lane-empty">${!state.google.clientId ? "schůzky se načtou z Google Kalendáře" : G.loading ? "Načítám kalendář…" : G.error ? esc(G.error) : isPlanToday ? "dnes žádné schůzky" : "žádné schůzky"}</div>` : ""}
-          </div>
-          ${inDay && isPlanToday ? `<div class="tl-nowline" style="left:${ni.pct}%;"></div><div class="tl-nowlabel" style="left:${ni.pct}%;">${pad(Math.floor(ni.cur))}:${pad(Math.round((ni.cur % 1) * 60))}</div>` : ""}
-        </div>
-        </div>
-        ${allDay.length ? `<div class="allday">${allDay.map(e => `<span>${esc(e.title)}</span>`).join("")}</div>` : ""}
-
-        <div class="board-head">
+        <div class="board-head" style="margin-top:0;padding-top:0;border-top:none;">
           <div class="board-t">Pravidelné věci a co má datum</div>
           <div class="board-nav">
             <button class="bnav" onclick="shiftBoard(-1)" title="Předchozí týden">‹</button>
@@ -2364,30 +2436,33 @@ function renderDnes(){
     </section>
 
 
-    <section class="sblock amber">
-      <div class="sec-head">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.mind}</span>
-          <div><div class="eyebrow">ať to nenosíš v hlavě</div><h2>Na mysli</h2></div></div>
-        <div class="seg" style="padding:2px;">
-          ${[["all","Vše"],["práce","Práce"],["osobní","Osobní"],["nákup","Nákup"],["zdraví","Zdraví"]].map(([k, lab]) =>
-            `<button class="${noteFilter === k ? "active" : ""}" style="padding:5px 11px;font-size:12px;" onclick="setNoteFilter('${k}')">${lab}<span class="cnt">${noteCounts[k]}</span></button>`).join("")}
+    </div>
+
+    <aside class="colside">
+      <section class="sblock amber sticky-panel">
+        <div class="sec-head">
+          <div class="sec-head-l"><span class="sec-ico">${ICONS.mind}</span>
+            <div><div class="eyebrow">ať to nenosíš v hlavě</div><h2>Lístečky</h2></div></div>
         </div>
-      </div>
-      <div class="mind">
         <div class="mind-input">
-          <input id="mindInput" placeholder="Co ti leží v hlavě…" onkeydown="if(event.key==='Enter')addNote()">
-          <button class="btn-primary" onclick="addNote()">Odložit</button>
+          <input id="mindInput" placeholder="Rychlá poznámka…" onkeydown="if(event.key==='Enter')addNote()">
+          <button class="btn-primary" onclick="addNote()">Přilepit</button>
         </div>
-        <div>
-          ${notes.map(n => `<div class="mind-row" id="note-${n.id}" onclick="removeNote('${n.id}')">
-            <span class="cat" style="background:${NOTE_DOT[n.category] || "#1f4bff"}"></span>
-            <span>${esc(n.text)}</span>
-            <span class="cat-name">${esc(n.category)}</span>
-          </div>`).join("") || `<div class="mind-note" style="padding:6px 11px;">Nic tu není — čistá hlava.</div>`}
+        <div class="seg scrollx" style="padding:2px;">
+          ${[["all","Vše"],["práce","Práce"],["osobní","Osobní"],["nákup","Nákup"],["zdraví","Zdraví"]].map(([k, lab]) =>
+            `<button class="${noteFilter === k ? "active" : ""}" style="padding:5px 10px;font-size:11.5px;" onclick="setNoteFilter('${k}')">${lab}</button>`).join("")}
         </div>
-        <div class="mind-note">Klepnutím položka zmizí — nic se nepočítá.</div>
-      </div>
-    </section>
+        <div class="stickies">
+          ${notes.map((n, i) => `<div class="sticky c-${esc(n.category)}" id="note-${n.id}" style="--rot:${(i % 2 ? 1 : -1) * (0.5 + (i % 3) * 0.35)}deg;">
+            <span class="stx">${esc(n.text)}</span>
+            <span class="scat">${esc(n.category)}</span>
+            <button class="sxx" onclick="removeNote('${n.id}')" title="Sundat lísteček">✕</button>
+          </div>`).join("") || `<div class="mind-note" style="padding:4px 2px;">Nic tu není — čistá hlava.</div>`}
+        </div>
+        <div class="mind-note">Křížkem lísteček sundáš. Nic se nepočítá.</div>
+      </section>
+    </aside>
+    </div>
   `;
 }
 
@@ -2842,7 +2917,13 @@ function addNote(){
 function removeNote(id){
   const el = document.getElementById("note-" + id);
   if(el) el.classList.add("fading");
-  setTimeout(() => { state.notes = state.notes.filter(n => n.id !== id); save(); render(); }, 300);
+  const i = state.notes.findIndex(n => n.id === id);
+  if(i < 0) return;
+  const gone = state.notes[i];
+  setTimeout(() => {
+    state.notes.splice(i, 1); save(); render();
+    toast(`„${gone.text}" sundáno`, "Vrátit", () => { state.notes.splice(i, 0, gone); save(); render(); });
+  }, 260);
 }
 
 /* ============================================================
