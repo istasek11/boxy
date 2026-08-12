@@ -1681,23 +1681,29 @@
     box-shadow:inset 3px 0 0 var(--pc), 0 1px 2px rgba(20,22,28,.05),
                0 6px 18px -14px rgba(20,22,28,.3) !important;
   }
-  /* lístky na stole = samostatné kartičky, ne splynutí s podkladem */
+  /* lístky na stole = papírky, ne splynutí s podkladem */
   .zone .desknote{
-    background:#fff; border-radius:12px; padding:13px 15px 13px 16px;
-    box-shadow:inset 3px 0 0 var(--dc,var(--tx4)),
-               0 0 0 1px rgba(20,22,28,.085),
-               0 3px 10px -7px rgba(20,22,28,.3);
+    background:#fdf2df; border-radius:12px; padding:14px 16px 14px 17px;
+    box-shadow:inset 4px 0 0 var(--dc,#c0862a),
+               0 0 0 1px rgba(170,120,35,.34),
+               0 4px 12px -8px rgba(120,84,20,.55);
   }
   .zone .desknote:hover{
-    box-shadow:inset 3px 0 0 var(--dc,var(--tx4)),
-               0 0 0 1px rgba(20,22,28,.14),
-               0 6px 16px -9px rgba(20,22,28,.4);
+    background:#fef7ea;
+    box-shadow:inset 4px 0 0 var(--dc,#c0862a),
+               0 0 0 1px rgba(170,120,35,.55),
+               0 8px 18px -9px rgba(120,84,20,.7);
   }
+  .zone .desknote .dcl{ color:#9a7327; }
+  .zone .desknote .dtx{ color:#231a08; }
   .zone .desknote.done{
-    box-shadow:inset 3px 0 0 var(--good),
-               0 0 0 1px rgba(20,22,28,.085),
-               0 3px 10px -7px rgba(20,22,28,.3);
+    background:#eef8f1;
+    box-shadow:inset 4px 0 0 var(--good),
+               0 0 0 1px rgba(26,155,92,.32),
+               0 4px 12px -8px rgba(20,100,60,.5);
   }
+  .zone .desknote.done .dcl{ color:#5b8a6d; }
+  .z-stul .desk-wrap{ background:#fffdf8; }
   .zone .empty-tile{ background:rgba(255,255,255,.6) !important; }
   .provoz .wday{ background:#f3f5f9; }
 
@@ -1882,6 +1888,32 @@
     .aftercard{ align-items:flex-start; }
     .aftercard .arow{ width:100%; }
     .filedrop{ padding:20px 14px; }
+  }
+
+  /* --- pruh dnů pod časovou osou --- */
+  .daystrip{
+    background:#fff; border-radius:16px; padding:18px 20px 20px; margin-top:14px;
+    box-shadow:0 1px 2px rgba(20,22,28,.05), 0 6px 18px -14px rgba(20,22,28,.3);
+  }
+  .daystrip .board-head{ margin:0 0 14px; }
+  .daystrip .week-grid{ gap:10px; }
+  .daystrip .wday{
+    background:#f4f5f9; border-radius:12px; min-height:120px;
+    box-shadow:inset 0 0 0 1px rgba(20,22,28,.06);
+  }
+  .daystrip .wday.today{ background:var(--accent-soft); box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .daystrip .wday.pastday{ opacity:.62; }
+  .daystrip .wday .dh .dn{ color:var(--tx2); font-size:12px; }
+  .daystrip .wday.today .dh .dn{ color:var(--accent-ink); }
+  .daystrip .wday .dh .dd{ color:var(--tx4); font-size:11px; }
+  .daystrip .wday .ev{ color:var(--tx3); }
+  .daystrip .wday .ev b{ color:var(--tx2); }
+  .daystrip .wday .addf{ color:var(--tx4); }
+  .daystrip .wday .addf:hover{ background:#fff; color:var(--tx2); }
+  .daystrip .wday.drop-on{ background:#dfe8fb; box-shadow:inset 0 0 0 2px var(--accent); }
+
+  @media (max-width:900px){
+    .daystrip{ padding:14px 12px 16px; border-radius:14px; }
   }
 
 </style>
@@ -2810,7 +2842,7 @@ function renderDnes(){
     </div>` : ""}
 
     <div class="zone z-den">
-    <div class="seclabel">Dnešní schůzky</div>
+    <div class="seclabel">Kalendář <span>schůzky a co na který den padá</span></div>
     <section class="topline">
       <div class="tlx-head">
         <span class="tlx-t">${isPlanToday ? "dnes" : pdLab}</span>
@@ -2830,6 +2862,53 @@ function renderDnes(){
       </div>
       ${allDay.length ? `<div class="allday">${allDay.map(e => `<span>${esc(e.title)}</span>`).join("")}</div>` : ""}
     </section>
+
+    <div class="daystrip">
+      <div class="board-head">
+        <div class="board-t">Co připadá na které dny</div>
+        <div class="board-nav">
+          <button class="bnav" onclick="shiftBoard(-1)" title="Předchozí týden">‹</button>
+          <span class="board-range">${boardRange()}</span>
+          <button class="bnav" onclick="shiftBoard(1)" title="Další týden">›</button>
+          ${boardOffset !== 0 ? `<button class="sec-link" style="margin-left:6px;" onclick="shiftBoard(0)">dnes</button>` : ""}
+          <button class="sec-link" style="margin-left:10px;" onclick="openAddRhythm()">+ Pravidelná</button>
+        </div>
+      </div>
+      <div class="week-grid wk5">
+        ${boardDates().map(k => {
+          const d = parseDate(k);
+          const isT = k === todayStr();
+          const isPast = !isT && d < parseDate(todayStr());
+          const evsAll = weekEventsFor(k);
+          const evs = evsAll.slice(0, 2);
+          const rhy = pending.filter(r => rhythmOccursOn(r, k));
+          const foc = state.weekPlan[k] || [];
+          return `<div class="wday ${isT ? "today" : ""} ${isPast ? "pastday" : ""}" id="wd-${k}"
+            ondragover="dayDragOver(event,'${k}')" ondragleave="dayDragLeave(event,'${k}')" ondrop="dropDay(event,'${k}')">
+            <div class="dh"><span class="dn">${["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7]}${isT ? " · dnes" : ""}</span><span class="dd">${d.getDate()}. ${d.getMonth()+1}.</span></div>
+            ${evs.map(e => `<div class="ev"><b>${e.t}</b> ${esc(e.title)}</div>`).join("")}
+            ${evsAll.length > 2 ? `<div class="ev">+${evsAll.length - 2} další</div>` : ""}
+            ${rhy.map(r => rhyChipHtml(r, isT)).join("")}
+            ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
+              style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
+            <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat na tenhle den">+</button>
+          </div>`;
+        }).join("")}
+      </div>
+      <div class="mind-note" style="margin-top:10px;">Podržením chipu potvrdíš, že věc proběhla · „+" přidá jednorázovou věc na konkrétní den.</div>
+      ${vyList.length ? `<div class="sub-label" style="margin-top:18px;">Výstupy od Clauda <span class="n">— posledních 7 dní</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${vyList.slice(0, 6).map(row => {
+          const dd = new Date(row.created_at);
+          return `<div class="vy-row">
+            <span style="color:#7b5cf0;font-weight:800;">✳</span>
+            <span class="t">${esc(row.title || row.rhythm_name || "Výstup")}</span>
+            <span class="meta">${esc(row.area || "")} · ${CZ_DAYS[dd.getDay()]} ${dd.getDate()}. ${dd.getMonth()+1}.</span>
+            ${row.url ? `<a href="${esc(row.url)}" target="_blank" rel="noopener">Stáhnout ↓</a>` : ""}
+          </div>`;
+        }).join("")}
+      </div>` : ""}
+    </div>
     </div>
 
     <div class="cols">
@@ -2871,97 +2950,6 @@ function renderDnes(){
       </div>
     </section>
 
-    </div>
-
-    <div class="zone z-provoz">
-    <div class="seclabel">Provoz <span>co běží samo</span></div>
-    <section class="sblock provoz">
-      <div class="prov-wrap">
-      <div class="prov-head">
-        <div class="prov-tools">
-          <div class="seg" style="padding:2px;">
-            ${[["all","Vše"],["me","Já"],["claude","Claude"],["both","Spolu"]].map(([k, lab]) =>
-              `<button class="${ownerFilter === k ? "active" : ""}" style="padding:5px 11px;font-size:11.5px;" onclick="setOwnerFilter('${k}')">${lab}</button>`).join("")}
-          </div>
-          <div class="seg" style="padding:2px;">
-            ${BOARD_VIEWS.map(([k, lab]) =>
-              `<button class="${boardView() === k ? "active" : ""}" style="padding:5px 13px;font-size:11.5px;" onclick="setBoardView('${k}')">${lab}</button>`).join("")}
-          </div>
-          <button class="sec-link" onclick="openAddRhythm()">+ Pravidelná</button>
-        </div>
-      </div>
-
-      ${boardView() === "tyden" ? `
-      <div class="board-head">
-        <div class="board-t">Co připadá na které dny</div>
-        <div class="board-nav">
-          <button class="bnav" onclick="shiftBoard(-1)" title="Předchozí týden">‹</button>
-          <span class="board-range">${boardRange()}</span>
-          <button class="bnav" onclick="shiftBoard(1)" title="Další týden">›</button>
-          ${boardOffset !== 0 ? `<button class="sec-link" style="margin-left:6px;" onclick="shiftBoard(0)">dnes</button>` : ""}
-        </div>
-      </div>
-      <div class="week-grid wk5">
-        ${boardDates().map(k => {
-          const d = parseDate(k);
-          const isT = k === todayStr();
-          const isPast = !isT && d < parseDate(todayStr());
-          const evsAll = weekEventsFor(k);
-          const evs = evsAll.slice(0, 2);
-          const rhy = pending.filter(r => rhythmOccursOn(r, k));
-          const foc = state.weekPlan[k] || [];
-          return `<div class="wday ${isT ? "today" : ""} ${isPast ? "pastday" : ""}" id="wd-${k}"
-            ondragover="dayDragOver(event,'${k}')" ondragleave="dayDragLeave(event,'${k}')" ondrop="dropDay(event,'${k}')">
-            <div class="dh"><span class="dn">${["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7]}${isT ? " · dnes" : ""}</span><span class="dd">${d.getDate()}. ${d.getMonth()+1}.</span></div>
-            ${evs.map(e => `<div class="ev"><b>${e.t}</b> ${esc(e.title)}</div>`).join("")}
-            ${evsAll.length > 2 ? `<div class="ev">+${evsAll.length - 2} další</div>` : ""}
-            ${rhy.map(r => rhyChipHtml(r, isT)).join("")}
-            ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
-              style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
-            <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat na tenhle den">+</button>
-          </div>`;
-        }).join("")}
-      </div>
-      <div class="mind-note" style="margin-top:10px;">Podržením chipu potvrdíš, že věc proběhla · „+" přidá jednorázovou věc na konkrétní den.</div>
-      ` : `
-      <div class="board-head">
-        <div class="board-t">Co tě čeká v příštích 30 dnech</div>
-      </div>
-      <div class="monthlist">
-        ${(() => {
-          const rows = upcomingByDay(pending, 30);
-          if(!rows.length) return `<div class="empty-tile" >Příští měsíc tě z pravidelných věcí nic nečeká.</div>`;
-          return rows.map(row => `<div class="mrow">
-            <div class="mday">
-              <b>${["Po","Út","St","Čt","Pá","So","Ne"][(row.d.getDay()+6)%7]}</b>
-              <span>${row.d.getDate()}. ${row.d.getMonth()+1}.</span>
-              ${dayOffsetOf(row.key) === 0 ? `<i>dnes</i>` : ""}
-            </div>
-            <div class="mitems">
-              ${row.items.map(r => rhyChipHtml(r, dayOffsetOf(row.key) === 0)).join("")}
-              ${row.plan.map(f => `<span class="focus-chip" style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}</span>`).join("")}
-            </div>
-          </div>`).join("");
-        })()}
-      </div>
-      `}
-
-      ${!rhyForClient.length ? `<div class="empty-tile" style="margin-top:10px;">Zatím žádné pravidelné věci</div>` : ""}
-
-      ${vyList.length ? `<div class="sub-label" style="margin-top:20px;">Výstupy od Clauda <span class="n">— posledních 7 dní</span></div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        ${vyList.slice(0, 6).map(row => {
-          const dd = new Date(row.created_at);
-          return `<div class="vy-row">
-            <span style="color:#7b5cf0;font-weight:800;">✳</span>
-            <span class="t">${esc(row.title || row.rhythm_name || "Výstup")}</span>
-            <span class="meta">${esc(row.area || "")} · ${CZ_DAYS[dd.getDay()]} ${dd.getDate()}. ${dd.getMonth()+1}.</span>
-            ${row.url ? `<a href="${esc(row.url)}" target="_blank" rel="noopener">Stáhnout ↓</a>` : ""}
-          </div>`;
-        }).join("")}
-      </div>` : ""}
-      </div>
-    </section>
     </div>
 
     </div>
@@ -4907,6 +4895,15 @@ function render(){
   }
   sbSetStatus(SB.status);
   paintRoutes();
+  centerToday();
+}
+/* na úzkém okně přiroluj pruh dnů tak, aby dnešek byl vidět */
+function centerToday(){
+  const g = document.querySelector(".daystrip .week-grid");
+  if(!g || g.scrollWidth <= g.clientWidth + 4) return;
+  const t = g.querySelector(".wday.today");
+  if(!t) return;
+  g.scrollLeft = Math.max(0, t.offsetLeft - (g.clientWidth - t.offsetWidth) / 2);
 }
 /* dokreslí ujetou část trasy — délku křivky změříme až po vykreslení */
 function focusDraft(){
