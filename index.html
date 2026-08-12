@@ -1995,52 +1995,68 @@
     transition:all .12s;
   }
   .hchip:hover{ background:var(--fill2); color:var(--tx); }
-  .hchip .n{ font-size:11px; font-weight:700; color:var(--tx4); background:#fff; border-radius:6px; padding:1px 6px; }
-  .hchip.on{ background:var(--ink); color:#fff; }
-  .hchip.on .n{ background:rgba(255,255,255,.18); color:#fff; }
+  .hchip .n{ font-size:11.5px; font-weight:600; color:var(--tx4); }
+  .hchip:hover .n{ color:var(--tx3); }
+  .hchip.on{ background:var(--ink); color:#fff; box-shadow:0 4px 12px -6px rgba(20,22,28,.6); }
+  .hchip.on .n{ color:rgba(255,255,255,.6); }
   .hchip.add{ background:transparent; color:var(--tx3); box-shadow:inset 0 0 0 1.5px var(--line); }
   .hchip.add:hover{ background:var(--fill); color:var(--tx); }
   .hgtools{ display:flex; gap:10px; margin-left:auto; }
 
-  .hubgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(186px,1fr)); gap:12px; }
+  .hubgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(184px,1fr)); gap:13px; }
   .ltile{
-    position:relative; background:#fff; border:none; border-radius:16px; padding:18px 16px 16px;
-    display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-width:0;
-    min-height:132px; cursor:pointer; text-align:left; font:inherit;
-    box-shadow:0 0 0 1px rgba(20,22,28,.08), 0 4px 14px -9px rgba(20,22,28,.34);
-    transition:box-shadow .15s, transform .15s;
+    position:relative; background:#fff; border:none; border-radius:17px; padding:0; overflow:hidden;
+    display:flex; flex-direction:column; align-items:stretch; min-width:0;
+    cursor:pointer; text-align:left; font:inherit;
+    box-shadow:0 0 0 1px rgba(20,22,28,.07), 0 5px 16px -10px rgba(20,22,28,.4);
+    transition:box-shadow .16s, transform .16s;
   }
-  .ltile:hover{ transform:translateY(-2px); box-shadow:0 0 0 1px rgba(20,22,28,.16), 0 12px 24px -10px rgba(20,22,28,.46); }
-  .ltile:active{ transform:translateY(0); }
-  .ltile .lico{
-    width:46px; height:46px; border-radius:13px; flex:none; color:#fff; margin-bottom:10px;
-    display:flex; align-items:center; justify-content:center; font-size:21px; font-weight:750;
-    box-shadow:0 4px 10px -5px rgba(20,22,28,.55);
+  .ltile:hover{ transform:translateY(-3px); box-shadow:0 0 0 1px rgba(20,22,28,.12), 0 16px 28px -12px rgba(20,22,28,.5); }
+  .ltile:active{ transform:translateY(-1px); }
+
+  .ltile .lcover{
+    position:relative; height:86px; display:flex; align-items:center; justify-content:center; overflow:hidden;
   }
+  .ltile .lcover::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(120% 92% at 22% -10%, rgba(255,255,255,.36), rgba(255,255,255,0) 62%);
+  }
+  .ltile .lglyph{
+    position:relative; z-index:1; color:#fff; font-size:30px; font-weight:800; letter-spacing:-.02em;
+    line-height:1; text-shadow:0 2px 8px rgba(0,0,0,.22);
+    transition:transform .16s;
+  }
+  .ltile:hover .lglyph{ transform:scale(1.06); }
+
+  .ltile .lbody{ display:flex; flex-direction:column; gap:6px; padding:12px 14px 13px; min-width:0; flex:1; }
   .ltile .ln{
-    font-size:14.5px; font-weight:700; color:var(--tx); letter-spacing:-.012em; line-height:1.28;
-    width:100%; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    font-size:14px; font-weight:700; color:var(--tx); letter-spacing:-.012em; line-height:1.3;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   }
   .ltile .lh{
-    font-size:12px; color:var(--tx4); margin-top:auto; padding-top:6px;
-    width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-size:11.5px; color:var(--tx4); display:flex; align-items:center; gap:6px; margin-top:auto;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
+  .ltile .lh .ldot{ width:6px; height:6px; border-radius:50%; flex:none; }
+  .ltile .lh .lfold{ font-size:10px; font-style:normal; flex:none; }
+
   .ltile .ltools{
-    position:absolute; top:8px; right:8px; display:flex; gap:2px; opacity:0; transition:opacity .12s;
+    position:absolute; top:8px; right:8px; z-index:2; display:flex; gap:3px; opacity:0; transition:opacity .14s;
   }
   .ltile:hover .ltools{ opacity:1; }
   .ltile .lb{
-    width:24px; height:24px; border-radius:8px; display:flex; align-items:center; justify-content:center;
-    font-size:11px; color:var(--tx4); background:var(--fill); transition:all .12s;
+    width:25px; height:25px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:#fff; background:rgba(12,14,20,.24); backdrop-filter:blur(6px);
+    transition:background .12s;
   }
-  .ltile .lb:hover{ background:var(--fill2); color:var(--tx); }
-  .ltile .lb:last-child:hover{ color:var(--red); }
+  .ltile .lb:hover{ background:rgba(12,14,20,.46); }
 
   @media (max-width:900px){
-    .hubgrid{ grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; }
-    .ltile{ min-height:112px; padding:14px 12px 12px; }
-    .ltile .lico{ width:38px; height:38px; border-radius:11px; font-size:18px; margin-bottom:8px; }
-    .ltile .ln{ font-size:13.5px; }
+    .hubgrid{ grid-template-columns:repeat(auto-fill,minmax(142px,1fr)); gap:10px; }
+    .ltile .lcover{ height:70px; }
+    .ltile .lglyph{ font-size:25px; }
+    .ltile .lbody{ padding:10px 11px 12px; }
+    .ltile .ln{ font-size:13px; }
     .hgtools{ margin-left:0; width:100%; }
     .ltile .ltools{ opacity:1; }
   }
@@ -2301,6 +2317,11 @@ function tint(hex, a){
 function darken(hex){
   const n = parseInt(hex.slice(1), 16);
   const f = c => Math.max(0, Math.round(c * 0.62));
+  return `rgb(${f((n>>16)&255)},${f((n>>8)&255)},${f(n&255)})`;
+}
+function darken(hex, k){
+  const n = parseInt(hex.slice(1), 16);
+  const f = c => Math.max(0, Math.round(c * (1 - k)));
   return `rgb(${f((n>>16)&255)},${f((n>>8)&255)},${f(n&255)})`;
 }
 function lighten(hex){
@@ -3124,15 +3145,20 @@ function renderDnes(){
         </div>
 
         ${hubShown.length ? `<div class="hubgrid">
-          ${hubShown.map(l => `<button class="ltile" onclick="openHubLink('${l.id}')" title="${esc(l.url || l.name)}">
-            <span class="lico" style="background:${linkColor(l)};">${linkMark(l)}</span>
-            <span class="ln">${esc(l.name)}</span>
-            <span class="lh">${esc(isUrlish(l.url) ? hostFromUrl(l.url) : (l.url ? "cesta ke složce" : "bez odkazu"))}</span>
-            <span class="ltools">
-              <span class="lb" onclick="editHubLink(event,'${l.id}')" title="Upravit">✎</span>
-              <span class="lb" onclick="removeHubLink(event,'${l.id}')" title="Odebrat">✕</span>
+          ${hubShown.map(l => { const lc = linkColor(l); const isU = isUrlish(l.url); return `
+          <button class="ltile" onclick="openHubLink('${l.id}')" title="${esc(l.url || l.name)}">
+            <span class="lcover" style="background:linear-gradient(145deg, ${lc} 0%, ${darken(lc, .24)} 100%);">
+              <span class="lglyph">${linkMark(l)}</span>
+              <span class="ltools">
+                <span class="lb" onclick="editHubLink(event,'${l.id}')" title="Upravit">✎</span>
+                <span class="lb" onclick="removeHubLink(event,'${l.id}')" title="Odebrat">✕</span>
+              </span>
             </span>
-          </button>`).join("")}
+            <span class="lbody">
+              <span class="ln">${esc(l.name)}</span>
+              <span class="lh">${isU ? `<i class="ldot" style="background:${lc};"></i>` : `<i class="lfold">📁</i>`}${esc(isU ? hostFromUrl(l.url) : (l.url ? "cesta ke složce" : "bez odkazu"))}</span>
+            </span>
+          </button>`; }).join("")}
         </div>` : `<div class="empty-tile">${linkGroup === "all"
             ? "Zatím tu nic není — název a odkaz nahoře, Enter a je to."
             : "V téhle skupině zatím nic není."}</div>`}
