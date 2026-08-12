@@ -1681,7 +1681,23 @@
     box-shadow:inset 3px 0 0 var(--pc), 0 1px 2px rgba(20,22,28,.05),
                0 6px 18px -14px rgba(20,22,28,.3) !important;
   }
-  .zone .desknote{ background:#fff; }
+  /* lístky na stole = samostatné kartičky, ne splynutí s podkladem */
+  .zone .desknote{
+    background:#fff; border-radius:12px; padding:13px 15px 13px 16px;
+    box-shadow:inset 3px 0 0 var(--dc,var(--tx4)),
+               0 0 0 1px rgba(20,22,28,.085),
+               0 3px 10px -7px rgba(20,22,28,.3);
+  }
+  .zone .desknote:hover{
+    box-shadow:inset 3px 0 0 var(--dc,var(--tx4)),
+               0 0 0 1px rgba(20,22,28,.14),
+               0 6px 16px -9px rgba(20,22,28,.4);
+  }
+  .zone .desknote.done{
+    box-shadow:inset 3px 0 0 var(--good),
+               0 0 0 1px rgba(20,22,28,.085),
+               0 3px 10px -7px rgba(20,22,28,.3);
+  }
   .zone .empty-tile{ background:rgba(255,255,255,.6) !important; }
   .provoz .wday{ background:#f3f5f9; }
 
@@ -1713,6 +1729,95 @@
     main > .zone{ margin-bottom:14px; }
     .colmain > .zone + .zone{ margin-top:14px; }
     .zone .seclabel{ padding:0 0 14px !important; }
+  }
+
+  /* =====================================================================
+     STRÁNKA PROJEKTU
+     ===================================================================== */
+  .nmlink{
+    background:none; border:none; padding:0; margin:0; font:inherit; color:inherit;
+    letter-spacing:inherit; cursor:pointer; text-align:left; border-radius:4px;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .nmlink .nmgo{ font-size:.62em; color:var(--tx4); opacity:0; transition:opacity .12s, transform .12s; transform:translateX(-3px); }
+  .nmlink:hover{ color:var(--accent-ink); }
+  .nmlink:hover .nmgo{ opacity:1; transform:none; }
+
+  .ws-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 2px 0; }
+  .backlink{
+    border:none; background:transparent; color:var(--tx3); font:inherit; font-size:13.5px; font-weight:600;
+    cursor:pointer; padding:7px 12px 7px 8px; border-radius:10px; transition:all .12s;
+  }
+  .backlink:hover{ background:#e7eaf2; color:var(--tx); }
+  .ws-acts{ display:flex; gap:8px; }
+  .ws-hdr{ display:block !important; padding:10px 2px 4px; }
+  .ws-hdr .hdr-date{ display:flex; align-items:center; gap:8px; }
+  .wsdot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .ws-hdr h1{ margin-top:2px; }
+  .ws-hdr .hdr-sub{ margin-top:8px; }
+  .ws-hdr .hdr-sub b{ color:var(--tx); font-weight:700; }
+  .ws-cesta .hover-tools{ display:none !important; }
+  .ws-cesta .pcard .head-l{ display:none; }
+  .ws-cesta .pcard .head{ justify-content:flex-end; }
+
+  .ws-card{
+    background:#fff; border-radius:16px; padding:20px 22px;
+    box-shadow:0 1px 2px rgba(20,22,28,.05), 0 6px 18px -14px rgba(20,22,28,.3);
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .ws-facts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .fact{
+    background:var(--fill); border-radius:12px; padding:11px 13px;
+    display:flex; flex-direction:column; gap:4px; min-width:0;
+  }
+  .fact span{ font-size:11.5px; color:var(--tx4); font-weight:550; }
+  .fact b{ font-size:14px; font-weight:700; color:var(--tx); display:flex; align-items:center; gap:7px; min-width:0; }
+  .fact b i{ width:8px; height:8px; border-radius:50%; flex:none; }
+
+  .padlbl{ font-size:11.5px; color:var(--tx4); font-weight:600; margin-bottom:7px; }
+  .padtx{
+    outline:none; cursor:text; white-space:pre-wrap; word-break:break-word;
+    font-size:14.5px; line-height:1.65; color:var(--tx2); min-height:132px;
+    background:var(--fill); border-radius:12px; padding:14px 16px;
+    transition:background .12s, box-shadow .12s;
+  }
+  .padtx.one{ min-height:0; font-size:14px; }
+  .padtx:hover{ background:#eef0f6; }
+  .padtx:focus{ background:#fff; box-shadow:inset 0 0 0 2px var(--accent); color:var(--tx); }
+  .padtx:empty::before{ content:attr(data-ph); color:var(--tx4); }
+
+  .linkbar{ display:flex; gap:8px; flex-wrap:wrap; }
+  .linkbar input{
+    flex:1 1 160px; min-width:0; border:none; background:var(--fill); border-radius:11px;
+    padding:11px 13px; font:inherit; font-size:14px; color:var(--tx); outline:none;
+  }
+  .linkbar input:focus{ background:#fff; box-shadow:inset 0 0 0 2px var(--accent); }
+  .linkbar .btn-primary{ flex:none; }
+  .linkgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; }
+  .linkcard{
+    position:relative; background:#fff; border-radius:12px; padding:13px 15px;
+    display:flex; flex-direction:column; gap:5px; min-width:0;
+    box-shadow:inset 3px 0 0 var(--accent), 0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3);
+    transition:box-shadow .14s;
+  }
+  .linkcard:hover{ box-shadow:inset 3px 0 0 var(--accent), 0 0 0 1px rgba(20,22,28,.14), 0 6px 16px -9px rgba(20,22,28,.4); }
+  .linkcard .lkn{ font-size:14px; font-weight:650; color:var(--tx); outline:none; border-radius:4px; padding-right:18px; }
+  .linkcard .lkn:hover{ background:var(--fill); box-shadow:0 0 0 3px var(--fill); }
+  .linkcard .lkd{ font-size:12.5px; color:var(--tx3); }
+  .linkcard .lkh{ font-size:11.5px; color:var(--accent-ink); text-decoration:none; font-weight:600; }
+  .linkcard .lkh:hover{ text-decoration:underline; }
+  .linkcard .lkh.off{ color:var(--tx4); font-weight:500; }
+  .linkcard .lkx{
+    position:absolute; top:8px; right:8px; width:22px; height:22px; border:none; background:transparent;
+    color:var(--tx4); border-radius:7px; font-size:10px; cursor:pointer; opacity:0; transition:all .12s;
+  }
+  .linkcard:hover .lkx{ opacity:1; }
+  .linkcard .lkx:hover{ background:var(--fill2); color:var(--red); }
+
+  @media (max-width:900px){
+    .ws-card{ padding:16px 14px; border-radius:14px; }
+    .ws-top{ padding:2px 0 0; }
+    .ws-acts .btn-light{ padding:8px 12px; font-size:12.5px; }
   }
 
 </style>
@@ -2993,7 +3098,7 @@ function renderProjectCard(p, draggable){
         <button class="pchev" onclick="toggleProject('${p.id}')" title="${shut ? "Rozbalit" : "Sbalit"}" aria-expanded="${!shut}">▾</button>
         <div>
           <div class="eyebrow">${esc(clientName(p.clientId))}${p.deadline ? ` · ${fmtDeadline(p.deadline)}` : ""}</div>
-          <div class="nm"><i style="background:${pcol}"></i>${esc(p.name)}</div>
+          <div class="nm"><i style="background:${pcol}"></i><button class="nmlink" draggable="false" ondragstart="event.preventDefault();event.stopPropagation();return false;" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation();go('${p.id}')" title="Otevřít stránku projektu">${esc(p.name)}<span class="nmgo">↗</span></button></div>
           ${shut ? `<div class="shut-line">Teď: <b>${esc(p.phases[cur].name)}</b></div>` : ""}
         </div>
       </div>
@@ -3337,39 +3442,128 @@ function removeNote(id){
    ============================================================ */
 function hostFromUrl(url){ try { return new URL(url).hostname.replace(/^www\./, ""); } catch(e){ return "bez odkazu"; } }
 
+function projNotes(p){ return typeof p.notes === "string" ? p.notes : ""; }
+function saveProjNotes(pid, el){
+  const p = state.projects.find(x => x.id === pid); if(!p) return;
+  const t = el.innerText.replace(/ /g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  if(t === projNotes(p)) return;
+  p.notes = t; save();
+}
+function saveProjStatus(pid, el){
+  const p = state.projects.find(x => x.id === pid); if(!p) return;
+  const t = el.innerText.replace(/ /g, " ").trim();
+  if(t === (p.status || "")) return;
+  p.status = t; save();
+}
+function padKey(e, el){
+  if(e.key === "Escape"){ e.preventDefault(); el.dataset.cancel = "1"; el.blur(); }
+}
+function addProjLink(pid){
+  const p = state.projects.find(x => x.id === pid); if(!p) return;
+  const nm = document.getElementById("lkName"), ur = document.getElementById("lkUrl");
+  const name = (nm.value || "").trim(), href = (ur.value || "").trim();
+  if(!name && !href) return;
+  if(!Array.isArray(p.groups) || !p.groups.length) p.groups = [{ title:"Odkazy", links:[] }];
+  p.groups[0].links.push({
+    name: name || hostFromUrl(href),
+    desc: "",
+    href: href || "#",
+    host: href ? hostFromUrl(href) : "bez odkazu"
+  });
+  save(); render();
+  const n2 = document.getElementById("lkName"); if(n2) n2.focus();
+}
+function saveLinkName(pid, gi, li, el){
+  const p = state.projects.find(x => x.id === pid); if(!p) return;
+  const t = el.innerText.replace(/ /g, " ").trim();
+  if(!t || t === p.groups[gi].links[li].name) return;
+  p.groups[gi].links[li].name = t; save();
+}
+
 function renderWorkspace(p){
-  if(!Array.isArray(p.groups) || !p.groups.length) p.groups = [{title:"Odkazy", links:[]}];
+  if(!Array.isArray(p.groups) || !p.groups.length) p.groups = [{ title:"Odkazy", links:[] }];
+  const pcol = projColor(p);
+  const n = p.phases.length;
+  const cur = Math.min(p.currentPhaseIndex, n - 1);
+  const left = n - cur - 1;
+  const leftTxt = p.done ? "u cíle" : left === 0 ? "poslední zastávka" : left === 1 ? "zbývá jedna zastávka" : `zbývají ${left} ${left < 5 ? "zastávky" : "zastávek"}`;
+  const nt = projNotes(p);
+  const links = [];
+  p.groups.forEach((g, gi) => (g.links || []).forEach((l, li) => links.push({ l, gi, li })));
+
   document.getElementById("main").innerHTML = `
-    <div class="ws-header">
-      <div>
-        <div class="hdr-date">${esc(clientName(p.clientId))}</div>
-        <h1>${esc(p.name)}</h1>
-        <div style="font-size:13.5px;color:var(--tx2);margin-top:8px;">
-          Fáze ${p.currentPhaseIndex+1} z ${p.phases.length} — ${esc((p.phases[p.currentPhaseIndex]||{}).name || "")} · termín ${fmtDeadline(p.deadline)}
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;">
+    <div class="ws-top">
+      <button class="backlink" onclick="go('dnes')">← Dnes</button>
+      <div class="ws-acts">
         <button class="btn-light" onclick="openEditProject('${p.id}')">Upravit</button>
-        <button class="btn-light" onclick="archiveProject('${p.id}')">${p.archived ? "Obnovit" : "Archivovat"}</button>
+        <button class="btn-light" onclick="archiveProject('${p.id}')">${p.archived ? "Obnovit z archivu" : "Do archivu"}</button>
       </div>
     </div>
-    ${renderProjectCard(p, false)}
-    ${p.groups.map((g, gi) => `
-      <section>
-        <div class="sec-head"><div class="sec-head-l"><h2>${esc(g.title)}</h2><span class="sec-sub">${g.links.length ? `${g.links.length} · klik otevře zdroj` : ""}</span></div></div>
-        <div class="grid-links">
-          ${g.links.map((l, li) => `
-            <div class="tile" onclick="openLink('${p.id}',${gi},${li})">
-              <div style="display:flex;flex-direction:column;gap:4px;padding-right:14px;">
-                <div class="tile-name">${esc(l.name)}</div>
-                ${l.desc ? `<div class="tile-desc">${esc(l.desc)}</div>` : ""}
-              </div>
-              <span class="tile-host">${esc(l.host)} ↗</span>
-              <button class="tile-x" onclick="event.stopPropagation(); removeLink('${p.id}',${gi},${li})">✕</button>
-            </div>`).join("")}
-          <button class="tile-add" style="min-height:84px;" onclick="openAddLink('${p.id}',${gi})">+ Odkaz</button>
+
+    <div class="hdr ws-hdr">
+      <div class="hdr-date"><span class="wsdot" style="background:${pcol}"></span>${esc(clientName(p.clientId))}</div>
+      <h1>${esc(p.name)}</h1>
+      <div class="hdr-sub">${p.done ? "Dojeto až do cíle." : `Teď na zastávce <b>${esc(p.phases[cur].name)}</b> — ${leftTxt}.`}</div>
+    </div>
+
+    <div class="zone z-cesty">
+      <div class="seclabel">Cesta <span>kudy to jde</span></div>
+      <section class="sblock cesta ws-cesta">${renderProjectCard(p, false)}</section>
+    </div>
+
+    <div class="zone z-den">
+      <div class="seclabel">Kontext <span>komu, dokdy, v jakém stavu</span></div>
+      <div class="ws-card">
+        <div class="ws-facts">
+          <div class="fact"><span>Oblast</span><b><i style="background:${clientDot(p.clientId)}"></i>${esc(clientName(p.clientId))}</b></div>
+          <div class="fact"><span>Teď na zastávce</span><b>${esc(p.phases[cur].name)}</b></div>
+          <div class="fact"><span>Do cíle</span><b>${p.done ? "dojeto" : leftTxt}</b></div>
+          <div class="fact"><span>Termín</span><b>${esc(fmtDeadline(p.deadline))}</b></div>
         </div>
-      </section>`).join("")}
+        <div class="ws-state">
+          <div class="padlbl">Stav vlastními slovy</div>
+          <div class="padtx one" contenteditable="true" spellcheck="false"
+            data-ph="Jak to teď stojí — jednou větou…"
+            onkeydown="padKey(event,this)"
+            onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveProjStatus('${p.id}',this)}">${esc(p.status || "")}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="zone z-stul">
+      <div class="seclabel">Poznámky <span>co je potřeba vědět</span></div>
+      <div class="ws-card">
+        <div class="padtx" contenteditable="true" spellcheck="false"
+          data-ph="Sem si piš cokoliv k projektu — čísla, kontakty, co se domluvilo, na co nezapomenout…"
+          onkeydown="padKey(event,this)"
+          onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveProjNotes('${p.id}',this)}">${esc(nt)}</div>
+        <div class="mind-note">Ukládá se samo, jakmile klepneš vedle. Escape = zpět.</div>
+      </div>
+    </div>
+
+    <div class="zone z-provoz">
+      <div class="seclabel">Odkazy <span>kam se chodí</span></div>
+      <div class="ws-card">
+        <div class="linkbar">
+          <input id="lkName" placeholder="Název" onkeydown="if(event.key==='Enter')document.getElementById('lkUrl').focus()">
+          <input id="lkUrl" placeholder="https://…" onkeydown="if(event.key==='Enter')addProjLink('${p.id}')">
+          <button class="btn-primary" onclick="addProjLink('${p.id}')">Přidat</button>
+        </div>
+        ${links.length ? `<div class="linkgrid">
+          ${links.map(({ l, gi, li }) => `<div class="linkcard">
+            <span class="lkn" contenteditable="true" spellcheck="false"
+              onkeydown="editKey(event,this)"
+              onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveLinkName('${p.id}',${gi},${li},this)}"
+              title="Klepni a uprav název">${esc(l.name)}</span>
+            ${l.desc ? `<span class="lkd">${esc(l.desc)}</span>` : ""}
+            ${l.href && l.href !== "#"
+              ? `<a class="lkh" href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.host)} ↗</a>`
+              : `<span class="lkh off">bez odkazu</span>`}
+            <button class="lkx" onclick="removeLink('${p.id}',${gi},${li})" title="Smazat">✕</button>
+          </div>`).join("")}
+        </div>` : `<div class="empty-tile">Zatím tu nic není — název a URL nahoře, Enter a je to.</div>`}
+      </div>
+    </div>
   `;
 }
 
