@@ -2130,7 +2130,7 @@
   .mmedges{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
   .mnode{
     position:absolute; max-width:210px; min-width:96px;
-    background:#fff; border-radius:12px; padding:11px 30px 11px 13px;
+    background:#fff; border-radius:12px; padding:11px 15px 11px 14px;
     box-shadow:inset 3px 0 0 var(--mc), 0 0 0 1px rgba(20,22,28,.09), 0 4px 12px -8px rgba(20,22,28,.45);
     cursor:grab; user-select:none; touch-action:none; transition:box-shadow .14s;
   }
@@ -2147,16 +2147,44 @@
   .mnode.editing{ cursor:text; z-index:6; }
   .mnode.editing .mtx{ user-select:text; box-shadow:0 0 0 2px var(--accent); }
   .mnode .mtx:empty::before{ content:"napiš myšlenku…"; color:var(--tx4); font-weight:500; }
-  .mnode .nb{
-    position:absolute; right:6px; border:none; background:transparent; color:var(--tx4);
-    width:20px; height:19px; border-radius:6px; font-size:11px; cursor:pointer;
-    opacity:0; transition:all .12s; display:flex; align-items:center; justify-content:center;
+  /* plovoucí lišta nad bublinou */
+  .mnode .ntools{
+    position:absolute; top:-13px; right:6px; display:flex; gap:2px; padding:2px;
+    background:#fff; border-radius:9px; opacity:0; transition:opacity .13s;
+    box-shadow:0 0 0 1px rgba(20,22,28,.09), 0 4px 10px -6px rgba(20,22,28,.5);
   }
-  .mnode .nplus{ top:5px; }
-  .mnode .nx{ bottom:5px; font-size:8.5px; }
-  .mnode:hover .nb{ opacity:1; }
-  .mnode .nb:hover{ background:var(--fill2); color:var(--tx); }
-  .mnode .nx:hover{ color:var(--red); }
+  .mnode:hover .ntools, .mnode.editing .ntools{ opacity:1; }
+  .mnode .nb{
+    border:none; background:transparent; color:var(--tx4);
+    width:21px; height:20px; border-radius:7px; font-size:9px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:all .12s;
+  }
+  .mnode .nb:hover{ background:var(--fill); color:var(--red); }
+
+  /* „+" jako pokračování větve na pravé hraně */
+  .mnode .nadd{
+    position:absolute; right:-13px; top:50%; transform:translateY(-50%);
+    width:24px; height:24px; border-radius:50%; border:none; cursor:pointer;
+    background:#fff; color:var(--mc); font-size:15px; font-weight:700; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 1.5px var(--mc), 0 3px 8px -4px rgba(20,22,28,.5);
+    opacity:0; transition:opacity .13s, transform .13s;
+  }
+  .mnode:hover .nadd{ opacity:1; }
+  .mnode .nadd:hover{ transform:translateY(-50%) scale(1.14); }
+
+  /* sbalení větve — kolečko s počtem */
+  .mnode .ncol{
+    position:absolute; right:-11px; top:50%; transform:translateY(-50%);
+    min-width:20px; height:20px; padding:0 5px; border-radius:10px; border:none; cursor:pointer;
+    background:var(--mc); color:#fff; font-size:11px; font-weight:750; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 2px #fff, 0 3px 8px -4px rgba(20,22,28,.55);
+    transition:transform .13s, opacity .13s;
+  }
+  .mnode .ncol:hover{ transform:translateY(-50%) scale(1.12); }
+  .mnode.haskids .nadd{ right:-42px; }
+  .mnode.shut .nadd{ display:none; }
   .mmfoot{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 
   @media (max-width:900px){
@@ -3243,18 +3271,23 @@ function renderDnes(){
         ${theMap ? `
         <div class="mmwrap" id="mmWrap" style="height:${mapHeight(theMap)}px;">
           <svg class="mmedges" id="mmEdges"></svg>
-          ${mapNodes(theMap).map(n => {
+          ${visibleNodes(theMap).map(n => {
             const col = mmBranchColor(theMap, n);
             const isRoot = mapNodes(theMap)[0] && mapNodes(theMap)[0].id === n.id;
             const ed = _mmEdit === n.id;
-            return `<div class="mnode ${isRoot ? "root" : ""} ${ed ? "editing" : ""}" id="mn-${n.id}"
+            const kids = kidsOf(theMap, n.id).length;
+            return `<div class="mnode ${isRoot ? "root" : ""} ${ed ? "editing" : ""} ${n.shut ? "shut" : ""} ${kids ? "haskids" : ""}" id="mn-${n.id}"
               style="left:${n.x}px; top:${n.y}px; --mc:${col};"
               onpointerdown="nodeDown(event,'${n.id}')">
               <span class="mtx" ${ed ? `contenteditable="true" spellcheck="false"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}else if(event.key==='Escape'){event.preventDefault();this.dataset.cancel='1';this.blur();}"
                 onblur="if(this.dataset.cancel){this.dataset.cancel='';_mmEdit=null;render();}else{saveNodeText('${n.id}',this)}"` : ""}>${esc(n.text)}</span>
-              <button class="nb nplus" onclick="addChild(event,'${n.id}')" title="Připojit další">+</button>
-              <button class="nb nx" onclick="delNode(event,'${n.id}')" title="Smazat">✕</button>
+              <span class="ntools">
+                <button class="nb nx" onpointerdown="event.stopPropagation()" onclick="delNode(event,'${n.id}')" title="Smazat">✕</button>
+              </span>
+              <button class="nadd" onpointerdown="event.stopPropagation()" onclick="addChild(event,'${n.id}')" title="Připojit další">+</button>
+              ${kids ? `<button class="ncol" onpointerdown="event.stopPropagation()" onclick="toggleNode(event,'${n.id}')"
+                  title="${n.shut ? "Rozbalit větev" : "Sbalit větev"}">${n.shut ? descCount(theMap, n.id) : "−"}</button>` : ""}
             </div>`;
           }).join("")}
         </div>
@@ -4000,6 +4033,29 @@ function removeMap(){
   mapId = (mapList()[0] || {}).id || null;
   save(); render();
 }
+function kidsOf(m, nid){ return mapNodes(m).filter(n => n.parent === nid); }
+function descCount(m, nid){
+  let n = 0;
+  kidsOf(m, nid).forEach(k => { n += 1 + descCount(m, k.id); });
+  return n;
+}
+function isHidden(m, node){
+  let p = node.parent, guard = 0;
+  while(p && guard++ < 200){
+    const par = mapNodes(m).find(x => x.id === p);
+    if(!par) return false;
+    if(par.shut) return true;
+    p = par.parent;
+  }
+  return false;
+}
+function visibleNodes(m){ return mapNodes(m).filter(n => !isHidden(m, n)); }
+function toggleNode(e, nid){
+  if(e) e.stopPropagation();
+  const n = findNode(nid); if(!n) return;
+  n.shut = !n.shut;
+  save(); render();
+}
 function mmBranchColor(m, node){
   let n = node, guard = 0;
   while(n && n.parent && guard++ < 50){
@@ -4069,7 +4125,7 @@ function drawMapEdges(){
   if(!svg || !wrap || !m) return;
   const wb = wrap.getBoundingClientRect();
   const seg = [];
-  mapNodes(m).forEach(n => {
+  visibleNodes(m).forEach(n => {
     if(!n.parent) return;
     const a = document.getElementById("mn-" + n.parent);
     const b = document.getElementById("mn-" + n.id);
@@ -4121,7 +4177,7 @@ function nodeUp(){
   drawMapEdges();
 }
 function mapHeight(m){
-  const ns = mapNodes(m);
+  const ns = visibleNodes(m);
   if(!ns.length) return 320;
   return Math.max(320, Math.max(...ns.map(n => n.y)) + 130);
 }
