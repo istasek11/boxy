@@ -2120,6 +2120,50 @@
     .desknote .dtag, .sticky .stag{ opacity:1; }
   }
 
+  /* --- mind mapa --- */
+  .z-mind{ --zbg:#e6e9f2; --zac:#4a5a8a; }
+  .mmwrap{
+    position:relative; background:var(--fill); border-radius:14px; overflow:hidden;
+    background-image:radial-gradient(rgba(20,22,28,.09) 1px, transparent 1px);
+    background-size:22px 22px;
+  }
+  .mmedges{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .mnode{
+    position:absolute; max-width:210px; min-width:96px;
+    background:#fff; border-radius:12px; padding:11px 30px 11px 13px;
+    box-shadow:inset 3px 0 0 var(--mc), 0 0 0 1px rgba(20,22,28,.09), 0 4px 12px -8px rgba(20,22,28,.45);
+    cursor:grab; user-select:none; touch-action:none; transition:box-shadow .14s;
+  }
+  .mnode:hover{ box-shadow:inset 3px 0 0 var(--mc), 0 0 0 1px rgba(20,22,28,.18), 0 8px 18px -9px rgba(20,22,28,.55); }
+  .mnode.dragging{ cursor:grabbing; z-index:5; box-shadow:inset 3px 0 0 var(--mc), 0 0 0 1px rgba(20,22,28,.22), 0 16px 28px -12px rgba(20,22,28,.6); }
+  .mnode.root{ background:var(--mc); box-shadow:0 0 0 1px rgba(20,22,28,.12), 0 6px 16px -8px rgba(20,22,28,.6); }
+  .mnode.root .mtx{ color:#fff; font-weight:750; }
+  .mnode.root .nb{ color:rgba(255,255,255,.75); }
+  .mnode.root .nb:hover{ background:rgba(255,255,255,.22); color:#fff; }
+  .mnode .mtx{
+    display:block; font-size:13.5px; font-weight:600; color:var(--tx); line-height:1.35;
+    word-break:break-word; outline:none; border-radius:4px;
+  }
+  .mnode.editing{ cursor:text; z-index:6; }
+  .mnode.editing .mtx{ user-select:text; box-shadow:0 0 0 2px var(--accent); }
+  .mnode .mtx:empty::before{ content:"napiš myšlenku…"; color:var(--tx4); font-weight:500; }
+  .mnode .nb{
+    position:absolute; right:6px; border:none; background:transparent; color:var(--tx4);
+    width:20px; height:19px; border-radius:6px; font-size:11px; cursor:pointer;
+    opacity:0; transition:all .12s; display:flex; align-items:center; justify-content:center;
+  }
+  .mnode .nplus{ top:5px; }
+  .mnode .nx{ bottom:5px; font-size:8.5px; }
+  .mnode:hover .nb{ opacity:1; }
+  .mnode .nb:hover{ background:var(--fill2); color:var(--tx); }
+  .mnode .nx:hover{ color:var(--red); }
+  .mmfoot{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+
+  @media (max-width:900px){
+    .mnode{ max-width:170px; }
+    .mnode .nb{ opacity:1; }
+  }
+
 </style>
 </head>
 <body>
@@ -2981,6 +3025,7 @@ function renderDnes(){
   const deskItems = deskList().filter(d => clientFilter === "all" || d.clientId === clientFilter);
   const hubForArea = hubLinks().filter(l => clientFilter === "all" || l.clientId === clientFilter);
   const hubShown = hubForArea.filter(l => linkGroup === "all" || l.groupId === linkGroup);
+  const theMap = curMap();
   const tagsAll = tagList();
   const activeTag = tagsAll.find(t => t.id === tagFilter) || tagsAll[0] || null;
   const stripView = stripViewMode();
@@ -3181,6 +3226,43 @@ function renderDnes(){
       </div>
     </section>
 
+    </div>
+
+    <div class="zone z-mind">
+      <div class="seclabel">Mind mapa <span>rozmyslet si to nahlas</span></div>
+      <div class="ws-card">
+        <div class="hubchips">
+          ${mapList().map(m => `<button class="hchip ${theMap && theMap.id === m.id ? "on" : ""}" onclick="setMap('${m.id}')">
+            ${esc(m.name)}<span class="n">${mapNodes(m).length}</span></button>`).join("")}
+          <button class="hchip add" onclick="newMap()">+ Nová mapa</button>
+          ${theMap ? `<span class="hgtools">
+            <button class="sec-link" onclick="renameMap()">přejmenovat</button>
+            <button class="sec-link" onclick="removeMap()">smazat mapu</button>
+          </span>` : ""}
+        </div>
+        ${theMap ? `
+        <div class="mmwrap" id="mmWrap" style="height:${mapHeight(theMap)}px;">
+          <svg class="mmedges" id="mmEdges"></svg>
+          ${mapNodes(theMap).map(n => {
+            const col = mmBranchColor(theMap, n);
+            const isRoot = mapNodes(theMap)[0] && mapNodes(theMap)[0].id === n.id;
+            const ed = _mmEdit === n.id;
+            return `<div class="mnode ${isRoot ? "root" : ""} ${ed ? "editing" : ""}" id="mn-${n.id}"
+              style="left:${n.x}px; top:${n.y}px; --mc:${col};"
+              onpointerdown="nodeDown(event,'${n.id}')">
+              <span class="mtx" ${ed ? `contenteditable="true" spellcheck="false"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}else if(event.key==='Escape'){event.preventDefault();this.dataset.cancel='1';this.blur();}"
+                onblur="if(this.dataset.cancel){this.dataset.cancel='';_mmEdit=null;render();}else{saveNodeText('${n.id}',this)}"` : ""}>${esc(n.text)}</span>
+              <button class="nb nplus" onclick="addChild(event,'${n.id}')" title="Připojit další">+</button>
+              <button class="nb nx" onclick="delNode(event,'${n.id}')" title="Smazat">✕</button>
+            </div>`;
+          }).join("")}
+        </div>
+        <div class="mmfoot">
+          <button class="fbtn" onclick="addFreeNode()">+ Volná bublina</button>
+          <span class="mind-note">Klepnutím bublinu přepíšeš, tažením přesuneš, „+" na ní připojí další.</span>
+        </div>` : `<div class="empty-tile">Zatím žádná mapa — „+ Nová mapa" a piš, co ti leží v hlavě.</div>`}
+      </div>
     </div>
 
     <div class="zone z-tags">
@@ -3883,6 +3965,166 @@ function removeNote(id){
    PLOCHA PROJEKTU
    ============================================================ */
 function hostFromUrl(url){ try { return new URL(url).hostname.replace(/^www\./, ""); } catch(e){ return "bez odkazu"; } }
+
+/* ============================================================
+   MIND MAPA — volný brainstorming
+   ============================================================ */
+let mapId = null, _mmEdit = null, _mm = null;
+function mapList(){ if(!Array.isArray(state.maps)) state.maps = []; return state.maps; }
+function curMap(){
+  const ms = mapList();
+  return ms.find(m => m.id === mapId) || ms[0] || null;
+}
+function setMap(id){ mapId = id; _mmEdit = null; render(); }
+function mapNodes(m){ if(!m) return []; if(!Array.isArray(m.nodes)) m.nodes = []; return m.nodes; }
+function findNode(nid){ const m = curMap(); return mapNodes(m).find(n => n.id === nid) || null; }
+function newMap(){
+  dialog("Nová mapa", `
+    <div class="field"><label>O čem to je</label><input name="name" required placeholder="např. Blendea — co dál"></div>
+  `, "Vytvořit", fd => {
+    const nm = (fd.get("name") || "").trim(); if(!nm){ closeDialog(); return; }
+    const m = { id:uid(), name:nm, nodes:[{ id:uid(), text:nm, x:40, y:150, parent:null }] };
+    mapList().push(m); mapId = m.id;
+    save(); closeDialog(); render();
+  });
+}
+function renameMap(){
+  const m = curMap(); if(!m) return;
+  dialog("Upravit mapu", `
+    <div class="field"><label>Název</label><input name="name" required value="${esc(m.name)}"></div>
+  `, "Uložit", fd => { m.name = (fd.get("name") || "").trim() || m.name; save(); closeDialog(); render(); });
+}
+function removeMap(){
+  const m = curMap(); if(!m) return;
+  state.maps = mapList().filter(x => x.id !== m.id);
+  mapId = (mapList()[0] || {}).id || null;
+  save(); render();
+}
+function mmBranchColor(m, node){
+  let n = node, guard = 0;
+  while(n && n.parent && guard++ < 50){
+    const par = mapNodes(m).find(x => x.id === n.parent);
+    if(!par) break;
+    if(!par.parent) break;              // n je přímé dítě kořene
+    n = par;
+  }
+  if(!n || !n.parent){
+    const first = mapNodes(m)[0];
+    return (first && first.id === (n ? n.id : null)) ? "#2f6df6" : "#7c8496";  // kořen vs. volná bublina
+  }
+  const kids = mapNodes(m).filter(x => x.parent === n.parent);
+  const i = Math.max(0, kids.findIndex(x => x.id === n.id));
+  return DOT_COLORS[i % DOT_COLORS.length];
+}
+function addChild(e, nid){
+  if(e) e.stopPropagation();
+  const m = curMap(); if(!m) return;
+  const par = findNode(nid); if(!par) return;
+  const sibs = mapNodes(m).filter(n => n.parent === nid).length;
+  const nd = { id:uid(), text:"", x: par.x + 210, y: par.y + (sibs ? sibs * 74 : 0) - (sibs ? 0 : 0), parent: nid };
+  mapNodes(m).push(nd);
+  _mmEdit = nd.id;
+  save(); render();
+}
+function addFreeNode(){
+  const m = curMap(); if(!m) return;
+  const ns = mapNodes(m);
+  const maxY = ns.length ? Math.max(...ns.map(n => n.y)) : 60;
+  const nd = { id:uid(), text:"", x:40, y: maxY + 84, parent:null };
+  ns.push(nd); _mmEdit = nd.id;
+  save(); render();
+}
+function delNode(e, nid){
+  if(e) e.stopPropagation();
+  const m = curMap(); if(!m) return;
+  const ns = mapNodes(m);
+  const n = ns.find(x => x.id === nid); if(!n) return;
+  ns.forEach(x => { if(x.parent === nid) x.parent = n.parent; });
+  m.nodes = ns.filter(x => x.id !== nid);
+  if(_mmEdit === nid) _mmEdit = null;
+  save(); render();
+}
+function saveNodeText(nid, el){
+  if(_mmEdit !== nid) return;            // blur, který přišel až po překreslení
+  _mmEdit = null;
+  const n = findNode(nid); if(!n){ render(); return; }
+  const t = el.innerText.trim();
+  if(t === n.text){ render(); return; }
+  n.text = t; save(); render();
+}
+function startEditNode(nid){ _mmEdit = nid; render(); }
+function focusNode(){
+  if(!_mmEdit) return;
+  const el = document.querySelector(".mnode.editing .mtx");
+  if(el && document.activeElement !== el){
+    el.focus();
+    const r = document.createRange(); r.selectNodeContents(el);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  }
+}
+function drawMapEdges(){
+  const svg = document.getElementById("mmEdges");
+  const wrap = document.getElementById("mmWrap");
+  const m = curMap();
+  if(!svg || !wrap || !m) return;
+  const wb = wrap.getBoundingClientRect();
+  const seg = [];
+  mapNodes(m).forEach(n => {
+    if(!n.parent) return;
+    const a = document.getElementById("mn-" + n.parent);
+    const b = document.getElementById("mn-" + n.id);
+    if(!a || !b) return;
+    const ab = a.getBoundingClientRect(), bb = b.getBoundingClientRect();
+    const x1 = ab.left - wb.left + ab.width, y1 = ab.top - wb.top + ab.height / 2;
+    const x2 = bb.left - wb.left,            y2 = bb.top - wb.top + bb.height / 2;
+    const mx = (x1 + x2) / 2;
+    seg.push(`<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" fill="none" stroke="${mmBranchColor(m, n)}" stroke-width="2.5" stroke-opacity=".45" stroke-linecap="round"/>`);
+  });
+  svg.innerHTML = seg.join("");
+}
+function nodeDown(e, nid){
+  if(e.target.closest(".nb")) return;
+  if(e.pointerType === "mouse" && e.button !== 0) return;
+  if(_mmEdit === nid) return;
+  const n = findNode(nid); if(!n) return;
+  const el = document.getElementById("mn-" + nid); if(!el) return;
+  e.preventDefault();
+  try { el.setPointerCapture(e.pointerId); } catch(_){}
+  _mm = { nid, el, sx:e.clientX, sy:e.clientY, ox:n.x, oy:n.y, moved:false, pid:e.pointerId };
+  el.addEventListener("pointermove", nodeMove);
+  el.addEventListener("pointerup", nodeUp, { once:true });
+  el.addEventListener("pointercancel", nodeUp, { once:true });
+}
+function nodeMove(e){
+  if(!_mm) return;
+  const dx = e.clientX - _mm.sx, dy = e.clientY - _mm.sy;
+  if(!_mm.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+  _mm.moved = true;
+  _mm.el.classList.add("dragging");
+  const wrap = document.getElementById("mmWrap");
+  const maxX = wrap ? Math.max(0, wrap.clientWidth - _mm.el.offsetWidth - 6) : 9999;
+  const x = Math.min(maxX, Math.max(0, _mm.ox + dx));
+  const y = Math.max(0, _mm.oy + dy);
+  _mm.el.style.left = x + "px";
+  _mm.el.style.top = y + "px";
+  _mm.x = x; _mm.y = y;
+  drawMapEdges();
+}
+function nodeUp(){
+  const d = _mm; _mm = null;
+  if(!d) return;
+  d.el.removeEventListener("pointermove", nodeMove);
+  d.el.classList.remove("dragging");
+  if(!d.moved){ startEditNode(d.nid); return; }
+  const n = findNode(d.nid);
+  if(n){ n.x = Math.round(d.x); n.y = Math.round(d.y); save(); }
+  drawMapEdges();
+}
+function mapHeight(m){
+  const ns = mapNodes(m);
+  if(!ns.length) return 320;
+  return Math.max(320, Math.max(...ns.map(n => n.y)) + 130);
+}
 
 /* ============================================================
    ŠTÍTKY — vytáhni si k sobě, co spolu souvisí
@@ -5501,6 +5743,8 @@ function render(){
   sbSetStatus(SB.status);
   paintRoutes();
   centerToday();
+  drawMapEdges();
+  focusNode();
 }
 /* na úzkém okně přiroluj pruh dnů tak, aby dnešek byl vidět */
 function centerToday(){
