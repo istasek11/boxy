@@ -2001,7 +2001,12 @@
   .hchip.on .n{ color:rgba(255,255,255,.6); }
   .hchip.add{ background:transparent; color:var(--tx3); box-shadow:inset 0 0 0 1.5px var(--line); }
   .hchip.add:hover{ background:var(--fill); color:var(--tx); }
-  .hgtools{ display:flex; gap:10px; margin-left:auto; }
+  .hgtools{ display:flex; gap:12px; margin-left:auto; align-items:center; }
+  .hgtools .sec-link{
+    background:transparent; box-shadow:none; padding:4px 2px;
+    font-size:12px; font-weight:550; color:var(--tx4);
+  }
+  .hgtools .sec-link:hover{ background:transparent; color:var(--tx2); text-decoration:underline; }
 
   .hubgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(184px,1fr)); gap:13px; }
   .ltile{
@@ -2021,21 +2026,6 @@
     content:""; position:absolute; inset:0; pointer-events:none;
     background:radial-gradient(120% 92% at 22% -10%, rgba(255,255,255,.36), rgba(255,255,255,0) 62%);
   }
-  .ltile .lfav{
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1;
-    width:50px; height:50px; border-radius:13px; object-fit:contain;
-    background:#fff; padding:8px; opacity:0; transition:opacity .2s, transform .16s;
-    box-shadow:0 4px 12px -5px rgba(8,10,16,.55);
-  }
-  .ltile .lfav.on{ opacity:1; }
-  .ltile:hover .lfav.on{ transform:translate(-50%,-50%) scale(1.06); }
-  .imgpick{ display:inline-flex; align-items:center; gap:8px; margin-top:8px; cursor:pointer; }
-  .imgpick input{ display:none; }
-  .imgpick span{
-    font-size:12.5px; font-weight:600; color:var(--tx2); background:var(--fill);
-    border-radius:9px; padding:8px 12px; transition:all .12s;
-  }
-  .imgpick span:hover{ background:var(--fill2); color:var(--tx); }
   .ltile .lglyph{
     position:relative; z-index:1; color:#fff; font-size:30px; font-weight:800; letter-spacing:-.02em;
     line-height:1; text-shadow:0 2px 8px rgba(0,0,0,.22);
@@ -2070,11 +2060,64 @@
     .hubgrid{ grid-template-columns:repeat(auto-fill,minmax(142px,1fr)); gap:10px; }
     .ltile .lcover{ height:70px; }
     .ltile .lglyph{ font-size:25px; }
-    .ltile .lfav{ width:42px; height:42px; border-radius:11px; padding:7px; }
     .ltile .lbody{ padding:10px 11px 12px; }
     .ltile .ln{ font-size:13px; }
     .hgtools{ margin-left:0; width:100%; }
     .ltile .ltools{ opacity:1; }
+  }
+
+  /* --- štítky --- */
+  .z-tags{ --zbg:#eeeae4; --zac:#8a6b52; }
+  .hchip.tchip .tc{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .tagpick{ display:flex; flex-direction:column; gap:2px; max-height:230px; overflow:auto; }
+  .tagopt{ display:flex; align-items:center; gap:10px; padding:8px 6px; border-radius:9px; cursor:pointer; }
+  .tagopt:hover{ background:var(--fill); }
+  .tagopt input{ width:16px; height:16px; accent-color:var(--accent); }
+  .tagopt span{ display:flex; align-items:center; gap:8px; font-size:14px; color:var(--tx); }
+  .tagopt span i{ width:9px; height:9px; border-radius:50%; }
+
+  .tgrid{ display:flex; flex-direction:column; gap:8px; }
+  .trow{
+    position:relative; background:#fff; border-radius:11px; padding:11px 34px 11px 13px;
+    display:flex; align-items:center; gap:12px; min-width:0;
+    box-shadow:0 0 0 1px rgba(20,22,28,.08), 0 3px 10px -8px rgba(20,22,28,.35);
+  }
+  .trow .tk{
+    font-size:10.5px; font-weight:700; letter-spacing:.03em; color:var(--tx4);
+    background:var(--fill); border-radius:6px; padding:3px 7px; flex:none;
+  }
+  .trow .tt{ font-size:14px; font-weight:600; color:var(--tx); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .trow .tt:hover{ color:var(--accent-ink); }
+  .trow .tt i{ font-style:normal; font-weight:500; color:var(--tx4); margin-left:9px; font-size:12.5px; }
+  .trow .tx{
+    position:absolute; right:8px; top:50%; transform:translateY(-50%); width:22px; height:22px;
+    border:none; background:transparent; color:var(--tx4); border-radius:7px; font-size:9px;
+    cursor:pointer; opacity:0; transition:all .12s;
+  }
+  .trow:hover .tx{ opacity:1; }
+  .trow .tx:hover{ background:var(--fill2); color:var(--red); }
+
+  /* tiché tečky štítků na položkách */
+  .tdots{ display:inline-flex; gap:3px; }
+  .tdots i{ width:6px; height:6px; border-radius:50%; display:block; }
+  .pcard .tdots{ position:absolute; left:26px; bottom:10px; }
+  .desknote .tdots{ position:absolute; left:17px; bottom:7px; }
+  .sticky .tdots{ position:absolute; right:9px; top:27px; }
+
+  .desknote .dtag, .sticky .stag{
+    position:absolute; border:none; background:transparent; cursor:pointer;
+    width:22px; height:22px; border-radius:7px; font-size:11px; opacity:0; transition:all .12s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .desknote .dtag{ top:9px; right:32px; color:var(--tx4); }
+  .desknote:hover .dtag{ opacity:1; }
+  .desknote .dtag:hover{ background:var(--fill2); }
+  .sticky .stag{ top:6px; right:28px; color:rgba(59,53,36,.5); }
+  .sticky:hover .stag{ opacity:1; }
+  .sticky .stag:hover{ background:rgba(59,53,36,.12); }
+
+  @media (max-width:900px){
+    .desknote .dtag, .sticky .stag{ opacity:1; }
   }
 
 </style>
@@ -2938,6 +2981,8 @@ function renderDnes(){
   const deskItems = deskList().filter(d => clientFilter === "all" || d.clientId === clientFilter);
   const hubForArea = hubLinks().filter(l => clientFilter === "all" || l.clientId === clientFilter);
   const hubShown = hubForArea.filter(l => linkGroup === "all" || l.groupId === linkGroup);
+  const tagsAll = tagList();
+  const activeTag = tagsAll.find(t => t.id === tagFilter) || tagsAll[0] || null;
   const stripView = stripViewMode();
   const stripDays = stripView === "den" ? [planDate] : boardDates();
 
@@ -3127,6 +3172,8 @@ function renderDnes(){
             onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveDeskText('${d.id}',this)}"
             onkeydown="editKey(event,this)" title="Klepni a uprav">${esc(d.text)}</span>
           ${d.done ? `<span class="dok">✓ odbyto — přes noc samo zmizí</span>` : ""}
+          ${tagDotsHtml(d)}
+          <button class="dtag" onpointerdown="event.stopPropagation()" onclick="openTagPicker(event,'desk','${d.id}')" title="Štítky">🏷</button>
           <button class="dx" onclick="removeDesk(event,'${d.id}')" title="Smazat">✕</button>
         </div>`).join("")}
       </div>` : `<div class="empty-tile" style="background:rgba(255,255,255,.6);">Stůl je prázdný.</div>`}
@@ -3134,6 +3181,40 @@ function renderDnes(){
       </div>
     </section>
 
+    </div>
+
+    <div class="zone z-tags">
+      <div class="seclabel">Štítky <span>co si chceš vytáhnout pohromadě</span></div>
+      <div class="ws-card">
+        <div class="hubchips">
+          ${tagsAll.map(t => `<button class="hchip tchip ${activeTag && activeTag.id === t.id ? "on" : ""}" onclick="setTagFilter('${t.id}')">
+            <i class="tc" style="background:${t.color}"></i>${esc(t.name)}<span class="n">${tagCount(t.id)}</span></button>`).join("")}
+          <button class="hchip add" onclick="newTagDialog()">+ Nový štítek</button>
+          ${activeTag ? `<span class="hgtools">
+            <button class="sec-link" onclick="renameTag()">přejmenovat</button>
+            <button class="sec-link" onclick="removeTag()">smazat štítek</button>
+          </span>` : ""}
+        </div>
+        ${!tagsAll.length
+          ? `<div class="empty-tile">Zatím žádný štítek. Přidáš ho u projektu, věci na stole nebo lístečku přes 🏷 — a tady je pak najdeš pohromadě.</div>`
+          : (() => {
+              const it = taggedItems(activeTag.id);
+              const total = it.projects.length + it.desk.length + it.notes.length;
+              if(!total) return `<div class="empty-tile">Pod „${esc(activeTag.name)}" zatím nic není. Označ věci přes 🏷 u projektu, na stole nebo na lístečku.</div>`;
+              const row = (kind, id, lab, txt, sub) => `<div class="trow">
+                <span class="tk">${lab}</span>
+                <span class="tt" ${kind === "project" ? `onclick="go('${id}')" style="cursor:pointer;"` : ""}>${esc(txt)}${sub ? `<i>${esc(sub)}</i>` : ""}</span>
+                <button class="tx" onclick="untag(event,'${kind}','${id}','${activeTag.id}')" title="Odebrat štítek">✕</button>
+              </div>`;
+              return `<div class="tgrid">
+                ${it.projects.map(p => row("project", p.id, "Projekt", p.name,
+                    (p.phases[Math.min(p.currentPhaseIndex, p.phases.length-1)] || {}).name || "")).join("")}
+                ${it.desk.map(d => row("desk", d.id, "Na stole", d.text, clientName(d.clientId))).join("")}
+                ${it.notes.map(n => row("note", n.id, "Lísteček", n.text, n.category || "")).join("")}
+              </div>`;
+            })()}
+        <div class="mind-note">Štítky jdou napříč oblastmi — před callem si tu vytáhneš všechno, co s ním souvisí.</div>
+      </div>
     </div>
 
     <div class="zone z-hub">
@@ -3165,7 +3246,6 @@ function renderDnes(){
           <button class="ltile" onclick="openHubLink('${l.id}')" title="${esc(l.url || l.name)}">
             <span class="lcover" style="background:linear-gradient(145deg, ${lc} 0%, ${darken(lc, .24)} 100%);">
               <span class="lglyph">${linkMark(l)}</span>
-              ${tileImgHtml(l)}
               <span class="ltools">
                 <span class="lb" onclick="editHubLink(event,'${l.id}')" title="Upravit">✎</span>
                 <span class="lb" onclick="removeHubLink(event,'${l.id}')" title="Odebrat">✕</span>
@@ -3216,6 +3296,8 @@ function renderDnes(){
               : n.due
                 ? `<button class="sdue on" onclick="openNoteDue(event,'${n.id}')" title="Změnit datum">${esc(fmtDeadline(n.due))}<span class="dx2" onclick="clearNoteDue(event,'${n.id}')" title="Zrušit datum">✕</span></button>`
                 : `<button class="sdue" onclick="openNoteDue(event,'${n.id}')" title="Přidat datum — objeví se v kalendáři">+ datum</button>`}
+            ${tagDotsHtml(n)}
+            <button class="stag" draggable="false" ondragstart="event.preventDefault();event.stopPropagation();return false;" onpointerdown="event.stopPropagation()" onclick="openTagPicker(event,'note','${n.id}')" title="Štítky">🏷</button>
             <button class="sxx" onclick="removeNote('${n.id}')" title="Sundat lísteček">✕</button>
           </div>`).join("") || `<div class="mind-note" style="padding:4px 2px;">Nic tu není — čistá hlava.</div>`}
         </div>
@@ -3403,7 +3485,9 @@ function renderProjectCard(p, draggable){
     ${shut ? "" : routeHtml(p, cur)}
     ${!shut && p.phases[cur].meaning ? `<div class="pmeaning"><span class="lbl">Dokončit tuhle zastávku znamená</span>${esc(p.phases[cur].meaning)}</div>` : ""}
     <div class="pnote" id="pnote-${p.id}" style="opacity:0;"></div>
+    ${tagDotsHtml(p)}
     <span class="hover-tools">
+      <span class="tool-btn" title="Štítky" onclick="openTagPicker(event,'project','${p.id}')">🏷</span>
       <span class="tool-btn" title="Otevřít plochu" onclick="go('${p.id}')">↗</span>
       <span class="tool-btn" title="Upravit" onclick="openEditProject('${p.id}')">✎</span>
     </span>
@@ -3801,6 +3885,103 @@ function removeNote(id){
 function hostFromUrl(url){ try { return new URL(url).hostname.replace(/^www\./, ""); } catch(e){ return "bez odkazu"; } }
 
 /* ============================================================
+   ŠTÍTKY — vytáhni si k sobě, co spolu souvisí
+   ============================================================ */
+let tagFilter = null;
+function tagList(){ if(!Array.isArray(state.tags)) state.tags = []; return state.tags; }
+function tagById(id){ return tagList().find(t => t.id === id) || null; }
+function setTagFilter(id){ tagFilter = id; render(); }
+function tagHost(kind, id){
+  if(kind === "project") return state.projects.find(x => x.id === id);
+  if(kind === "desk") return deskList().find(x => x.id === id);
+  if(kind === "note") return state.notes.find(x => x.id === id);
+  return null;
+}
+function tagsOf(o){ return Array.isArray(o && o.tags) ? o.tags : []; }
+function tagDotsHtml(o){
+  const ts = tagsOf(o).map(tagById).filter(Boolean);
+  if(!ts.length) return "";
+  return `<span class="tdots" title="${esc(ts.map(t => t.name).join(" · "))}">${
+    ts.slice(0, 4).map(t => `<i style="background:${t.color}"></i>`).join("")}</span>`;
+}
+function openTagPicker(e, kind, id){
+  if(e){ e.stopPropagation(); e.preventDefault(); }
+  const o = tagHost(kind, id); if(!o) return;
+  const cur = new Set(tagsOf(o));
+  const ts = tagList();
+  dialog("Štítky", `
+    ${ts.length ? `<div class="field"><label>Kam to patří</label>
+      <div class="tagpick">
+        ${ts.map(t => `<label class="tagopt">
+          <input type="checkbox" name="t_${t.id}" ${cur.has(t.id) ? "checked" : ""}>
+          <span><i style="background:${t.color}"></i>${esc(t.name)}</span>
+        </label>`).join("")}
+      </div></div>` : `<div class="mind-note">Zatím žádný štítek — napiš první.</div>`}
+    <div class="field"><label>Nový štítek</label>
+      <input name="newtag" placeholder="např. Call s Ivčou"></div>
+  `, "Uložit", fd => {
+    const keep = tagList().filter(t => fd.get("t_" + t.id)).map(t => t.id);
+    const nn = (fd.get("newtag") || "").trim();
+    if(nn){
+      let t = tagList().find(x => x.name.toLowerCase() === nn.toLowerCase());
+      if(!t){
+        t = { id:uid(), name:nn, color: DOT_COLORS[tagList().length % DOT_COLORS.length] };
+        tagList().push(t);
+      }
+      if(!keep.includes(t.id)) keep.push(t.id);
+      tagFilter = t.id;
+    }
+    o.tags = keep;
+    save(); closeDialog(); render();
+  });
+}
+function untag(e, kind, id, tid){
+  if(e) e.stopPropagation();
+  const o = tagHost(kind, id); if(!o) return;
+  o.tags = tagsOf(o).filter(x => x !== tid);
+  save(); render();
+}
+function newTagDialog(){
+  dialog("Nový štítek", `
+    <div class="field"><label>Název</label><input name="name" required placeholder="např. Call s Ivčou"></div>
+  `, "Přidat", fd => {
+    const nm = (fd.get("name") || "").trim();
+    if(!nm){ closeDialog(); return; }
+    const t = { id:uid(), name:nm, color: DOT_COLORS[tagList().length % DOT_COLORS.length] };
+    tagList().push(t); tagFilter = t.id;
+    save(); closeDialog(); render();
+  });
+}
+function renameTag(){
+  const t = tagById(tagFilter); if(!t) return;
+  dialog("Upravit štítek", `
+    <div class="field"><label>Název</label><input name="name" required value="${esc(t.name)}"></div>
+  `, "Uložit", fd => {
+    t.name = (fd.get("name") || "").trim() || t.name;
+    save(); closeDialog(); render();
+  });
+}
+function removeTag(){
+  const t = tagById(tagFilter); if(!t) return;
+  state.tags = tagList().filter(x => x.id !== t.id);
+  [state.projects, deskList(), state.notes].forEach(arr =>
+    (arr || []).forEach(o => { if(Array.isArray(o.tags)) o.tags = o.tags.filter(x => x !== t.id); }));
+  tagFilter = (tagList()[0] || {}).id || null;
+  save(); render();
+}
+function taggedItems(tid){
+  return {
+    projects: state.projects.filter(p => !p.archived && tagsOf(p).includes(tid)),
+    desk: deskList().filter(d => tagsOf(d).includes(tid)),
+    notes: (state.notes || []).filter(n => tagsOf(n).includes(tid))
+  };
+}
+function tagCount(tid){
+  const r = taggedItems(tid);
+  return r.projects.length + r.desk.length + r.notes.length;
+}
+
+/* ============================================================
    ROZCESTNÍK — odkazy, na které chodíš pořád dokola
    ============================================================ */
 let linkGroup = "all";
@@ -3864,7 +4045,7 @@ function editHubLink(e, id){
     <div class="field"><label>Název</label><input name="name" required value="${esc(l.name)}"></div>
     <div class="field"><label>Odkaz nebo cesta</label><input name="url" value="${esc(l.url || "")}"></div>
     <div class="field-row">
-      <div class="field"><label>Emoji (přebije logo)</label>
+      <div class="field"><label>Emoji (prázdné = písmeno)</label>
         <input name="icon" maxlength="4" value="${esc(l.icon || "")}" placeholder="🛒"></div>
       <div class="field"><label>Skupina</label>
         <select name="grp"><option value="">bez skupiny</option>
@@ -3872,23 +4053,12 @@ function editHubLink(e, id){
         </select></div>
     </div>
     <div class="field"><label>Oblast</label><select name="client">${clientOptions(l.clientId)}</select></div>
-    <div class="field"><label>Vlastní obrázek / logo</label>
-      <input name="iconUrl" value="${esc(l.iconUrl || "")}" placeholder="odkaz na obrázek (nepovinné)">
-      <label class="imgpick">
-        <input type="file" accept="image/*" onchange="uploadTileImage(this,'${l.id}')">
-        <span>Nahrát obrázek z počítače</span>
-      </label>
-      ${(l.iconFile || l.iconUrl) ? `<button type="button" class="sec-link" onclick="clearTileImage('${l.id}')">odebrat obrázek — vrátit logo webu</button>` : ""}
-      <div class="mind-note" id="imgMsg">Když nic nevyplníš, vezmu logo přímo z webu odkazu.</div>
-    </div>
   `, "Uložit", fd => {
     l.name = (fd.get("name") || "").trim() || l.name;
     l.url = normUrl(fd.get("url") || "");
     l.icon = (fd.get("icon") || "").trim();
     l.groupId = fd.get("grp") || null;
     l.clientId = fd.get("client") || l.clientId;
-    const iu = (fd.get("iconUrl") || "").trim();
-    if(iu !== (l.iconUrl || "")){ l.iconUrl = iu; if(iu) l.iconFile = ""; }
     save(); closeDialog(); render();
   });
 }
@@ -4127,58 +4297,6 @@ function saveProjStatus(pid, el){
 function padKey(e, el){
   if(e.key === "Escape"){ e.preventDefault(); el.dataset.cancel = "1"; el.blur(); }
 }
-/* ---- logo dlaždice: nejdřív favicon přímo ze stránky, pak záložní služba, pak písmeno ---- */
-function favOk(img){
-  img.classList.add("on");
-  const g = img.parentElement.querySelector(".lglyph");
-  if(g) g.style.display = "none";
-}
-function favNext(img){
-  const step = Number(img.dataset.step || 0);
-  const h = img.dataset.host || "";
-  if(step === 0 && h){ img.dataset.step = "1"; img.src = "https://icons.duckduckgo.com/ip3/" + h + ".ico"; return; }
-  img.remove();
-}
-let _tileUrls = [];
-function paintTileImages(){
-  _tileUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch(_){} });
-  _tileUrls = [];
-  document.querySelectorAll("img.lfav[data-file]").forEach(img => {
-    const id = img.dataset.file; if(!id) return;
-    fileGet(id).then(blob => {
-      if(!blob){ img.remove(); return; }
-      const u = URL.createObjectURL(blob);
-      _tileUrls.push(u);
-      img.src = u;
-    }).catch(() => img.remove());
-  });
-}
-function tileImgHtml(l){
-  if(l.iconFile) return `<img class="lfav" data-file="${esc(l.iconFile)}" alt="" onload="favOk(this)" onerror="this.remove()">`;
-  if(l.iconUrl)  return `<img class="lfav" src="${esc(l.iconUrl)}" alt="" onload="favOk(this)" onerror="this.remove()">`;
-  if(l.icon)     return "";
-  if(!isUrlish(l.url)) return "";
-  const h = hostFromUrl(l.url);
-  if(!h || h === "bez odkazu") return "";
-  return `<img class="lfav" src="https://${esc(h)}/favicon.ico" data-step="0" data-host="${esc(h)}" alt="" onload="favOk(this)" onerror="favNext(this)">`;
-}
-function uploadTileImage(input, id){
-  const f = (input.files || [])[0]; if(!f) return;
-  const l = hubLinks().find(x => x.id === id); if(!l) return;
-  const fid = uid();
-  filePut(fid, f).then(() => {
-    l.iconFile = fid; l.iconUrl = "";
-    save(); closeDialog(); render();
-  }).catch(() => { const m = document.getElementById("imgMsg"); if(m) m.textContent = "Obrázek se nepodařilo uložit."; });
-}
-function clearTileImage(id){
-  const l = hubLinks().find(x => x.id === id); if(!l) return;
-  const old = l.iconFile;
-  l.iconFile = ""; l.iconUrl = "";
-  save(); closeDialog(); render();
-  if(old) fileDel(old);
-}
-
 function addProjLink(pid){
   const p = state.projects.find(x => x.id === pid); if(!p) return;
   const nm = document.getElementById("lkName"), ur = document.getElementById("lkUrl");
@@ -5383,7 +5501,6 @@ function render(){
   sbSetStatus(SB.status);
   paintRoutes();
   centerToday();
-  paintTileImages();
 }
 /* na úzkém okně přiroluj pruh dnů tak, aby dnešek byl vidět */
 function centerToday(){
