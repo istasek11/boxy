@@ -2221,6 +2221,49 @@
     .hdr.areahdr{ flex-wrap:wrap; }
   }
 
+  /* --- horní navigace sekcí --- */
+  .sectabs{ display:flex; align-items:center; gap:2px; --ac:var(--accent); }
+  .sectabs button{
+    position:relative; border:none; background:transparent; cursor:pointer;
+    font:inherit; font-size:13.5px; font-weight:600; color:var(--tx4);
+    padding:9px 12px 11px; border-radius:9px; white-space:nowrap; transition:color .12s, background .12s;
+  }
+  .sectabs button:hover{ color:var(--tx2); background:rgba(20,22,28,.045); }
+  .sectabs button.on{ color:var(--tx); }
+  .sectabs button.on::after{
+    content:""; position:absolute; left:12px; right:12px; bottom:2px; height:2.5px;
+    border-radius:2px; background:var(--ac);
+  }
+
+  /* --- co je vidět podle záložky --- */
+  main.tabbed .zone{ display:none; }
+  main.tabbed .cols{ display:none; }
+  main.tab-kalendar .z-den{ display:block; }
+  main.tab-cesty .cols, main.tab-stul .cols, main.tab-rozcestnik .cols,
+  main.tab-stitky .cols, main.tab-mapa .cols, main.tab-listky .cols{
+    display:grid; grid-template-columns:minmax(0,1fr);
+  }
+  main.tab-cesty .colside, main.tab-stul .colside, main.tab-rozcestnik .colside,
+  main.tab-stitky .colside, main.tab-mapa .colside{ display:none; }
+  main.tab-listky .colmain{ display:none; }
+  main.tab-listky .colside{ position:static; }
+  main.tab-cesty .z-cesty,
+  main.tab-stul .z-stul,
+  main.tab-rozcestnik .z-hub,
+  main.tab-stitky .z-tags,
+  main.tab-mapa .z-mind,
+  main.tab-listky .z-listky{ display:block; }
+  main.tabbed:not(.tab-kalendar) .daypickwrap{ display:none !important; }
+
+  .toprow > .scrollx{ min-width:0; max-width:100%; }
+  .sectabs{ width:max-content; }
+
+  @media (max-width:900px){
+    .toprow{ gap:8px !important; }
+    .sectabs button{ font-size:12.5px; padding:8px 9px 10px; }
+    .sectabs button.on::after{ left:9px; right:9px; }
+  }
+
 </style>
 </head>
 <body>
@@ -2885,8 +2928,14 @@ let justConfirmed = {};
 
 function go(v){ view = v; render(); }
 
-function goHome(){ clientFilter = "all"; view = "dnes"; render(); }
-function goArea(cid){ clientFilter = cid; view = "dnes"; render(); }
+let secTab = "vse";
+const SEC_TABS = [
+  ["vse","Vše"], ["cesty","Cesty"], ["kalendar","Kalendář"], ["stul","Na stole"],
+  ["listky","Lístečky"], ["rozcestnik","Rozcestník"], ["stitky","Štítky"], ["mapa","Mind mapa"]
+];
+function setSecTab(t){ secTab = t; render(); window.scrollTo({ top:0, behavior:"smooth" }); }
+function goHome(){ clientFilter = "all"; view = "dnes"; secTab = "vse"; render(); }
+function goArea(cid){ clientFilter = cid; view = "dnes"; secTab = "vse"; render(); }
 
 const NAVI = {
   home: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.2 8 2.6l5.5 4.6"/><path d="M4 7.6V13h8V7.6"/></svg>`,
@@ -3142,8 +3191,10 @@ function renderDnes(){
     </div>
 
     <div class="toprow" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-      <div></div>
-      <div class="scrollx" style="display:flex;"><div class="daypick" title="Který den plánuješ">
+      <div class="scrollx"><nav class="sectabs" ${areaC ? `style="--ac:${clientDot(areaC.id)};"` : ""}>
+        ${SEC_TABS.map(([k, lab]) => `<button class="${secTab === k ? "on" : ""}" onclick="setSecTab('${k}')">${lab}</button>`).join("")}
+      </nav></div>
+      <div class="scrollx daypickwrap" style="display:flex;"><div class="daypick" title="Který den plánuješ">
         ${weekDates().map(k => {
           const d = parseDate(k);
           const lab = ["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7];
@@ -5819,6 +5870,8 @@ function gToggleCal(id, visible){
    ROOT
    ============================================================ */
 function render(){
+  const mainEl = document.getElementById("main");
+  if(mainEl) mainEl.className = (view === "dnes" && secTab !== "vse") ? ("tabbed tab-" + secTab) : "";
   renderSidebar();
   if(view === "dnes" || view === "vize") renderDnes();
   else if(view === "archiv") renderArchiv();
