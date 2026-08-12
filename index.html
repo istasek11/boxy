@@ -1820,6 +1820,70 @@
     .ws-acts .btn-light{ padding:8px 12px; font-size:12.5px; }
   }
 
+  /* --- kontext, soubory, po dojezdu --- */
+  .z-soubory{ --zbg:#e9e6f2; --zac:#6d5aa8; }
+  .z-po{     --zbg:#f7e9ec; --zac:#b8455f; }
+
+  .fact .dl{
+    border:none; background:transparent; font:inherit; font-size:14px; font-weight:700; color:var(--tx);
+    padding:0; outline:none; width:100%; cursor:pointer;
+  }
+  .fact .dl:focus{ color:var(--accent-ink); }
+
+  .filedrop{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    background:var(--fill); border:2px dashed #ccd1de; border-radius:14px;
+    padding:26px 18px; cursor:pointer; text-align:center; transition:all .14s;
+  }
+  .filedrop:hover{ background:#eef0f6; border-color:var(--accent); }
+  .filedrop input{ display:none; }
+  .filedrop .fdt{ font-size:14.5px; font-weight:700; color:var(--tx); }
+  .filedrop .fds{ font-size:12.5px; color:var(--tx4); }
+
+  .filegrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+  .filecard{
+    position:relative; background:#fff; border-radius:12px; padding:13px 15px;
+    display:flex; flex-direction:column; gap:5px; min-width:0;
+    box-shadow:inset 3px 0 0 #6d5aa8, 0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3);
+  }
+  .filecard .fk{
+    font-size:10px; font-weight:750; letter-spacing:.06em; color:#6d5aa8;
+    background:#efebf9; border-radius:6px; padding:2px 6px; align-self:flex-start;
+  }
+  .filecard .fn{ font-size:14px; font-weight:650; color:var(--tx); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:18px; }
+  .filecard .fmeta{ font-size:11.5px; color:var(--tx4); }
+  .facts2{ display:flex; gap:6px; margin-top:2px; }
+  .fbtn{
+    border:none; background:var(--fill); color:var(--tx2); font:inherit; font-size:11.5px; font-weight:650;
+    border-radius:8px; padding:6px 10px; cursor:pointer; transition:all .12s;
+  }
+  .fbtn:hover{ background:var(--fill2); color:var(--tx); }
+  .fbtn.go{ background:var(--accent-soft); color:var(--accent-ink); }
+  .fbtn.go:hover{ background:#d8e3ff; }
+
+  .afsel{
+    border:none; background:var(--fill); border-radius:11px; padding:11px 12px;
+    font:inherit; font-size:13.5px; color:var(--tx); outline:none; cursor:pointer; flex:0 0 auto;
+  }
+  .afsel.small{ padding:5px 8px; font-size:11.5px; border-radius:8px; }
+  .aftergrid{ display:flex; flex-direction:column; gap:10px; }
+  .aftercard{
+    position:relative; background:#fff; border-radius:12px; padding:13px 15px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    box-shadow:inset 3px 0 0 #b8455f, 0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3);
+  }
+  .aftercard.live{ box-shadow:inset 3px 0 0 var(--good), 0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3); }
+  .aftercard .atx{ font-size:14px; font-weight:650; color:var(--tx); outline:none; border-radius:4px; flex:1 1 200px; min-width:0; padding-right:18px; }
+  .aftercard .atx:hover{ background:var(--fill); box-shadow:0 0 0 3px var(--fill); }
+  .aftercard .arow{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .apill{ font-size:11.5px; font-weight:650; color:#15804c; background:var(--good-soft); border-radius:8px; padding:6px 10px; }
+
+  @media (max-width:900px){
+    .aftercard{ align-items:flex-start; }
+    .aftercard .arow{ width:100%; }
+    .filedrop{ padding:20px 14px; }
+  }
+
 </style>
 </head>
 <body>
@@ -2040,10 +2104,10 @@ let applyingRemote = false;
 function save(){
   if(!applyingRemote) state.updatedAt = Date.now();
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => Store.write(state), 120);
+  saveTimer = setTimeout(() => { Store.write(state); idbPutState(state); }, 120);
   if(!applyingRemote && typeof sbSchedulePush === "function") sbSchedulePush();
 }
-function flushSave(){ clearTimeout(saveTimer); Store.write(state); }
+function flushSave(){ clearTimeout(saveTimer); Store.write(state); idbPutState(state); }
 window.addEventListener("beforeunload", flushSave);
 window.addEventListener("pagehide", flushSave);
 document.addEventListener("visibilitychange", () => { if(document.hidden) flushSave(); });
@@ -3442,6 +3506,188 @@ function removeNote(id){
    ============================================================ */
 function hostFromUrl(url){ try { return new URL(url).hostname.replace(/^www\./, ""); } catch(e){ return "bez odkazu"; } }
 
+/* ---- soubory: popisky ve stavu, obsah v IndexedDB (zůstávají v tomhle prohlížeči) ---- */
+let _fdb = null;
+function filesDB(){
+  if(_fdb) return _fdb;
+  _fdb = new Promise((res, rej) => {
+    let rq;
+    try { rq = indexedDB.open("boxy-files", 2); } catch(e){ rej(e); return; }
+    rq.onupgradeneeded = () => {
+      const db = rq.result;
+      if(!db.objectStoreNames.contains("f")) db.createObjectStore("f");
+      if(!db.objectStoreNames.contains("s")) db.createObjectStore("s");
+    };
+    rq.onsuccess = () => res(rq.result);
+    rq.onerror = () => rej(rq.error);
+  });
+  return _fdb;
+}
+function filePut(id, blob){
+  return filesDB().then(db => new Promise((res, rej) => {
+    const t = db.transaction("f", "readwrite");
+    t.objectStore("f").put(blob, id);
+    t.oncomplete = () => res(true); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+  }));
+}
+function fileGet(id){
+  return filesDB().then(db => new Promise((res, rej) => {
+    const t = db.transaction("f", "readonly");
+    const r = t.objectStore("f").get(id);
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }));
+}
+function fileDel(id){
+  return filesDB().then(db => new Promise((res) => {
+    const t = db.transaction("f", "readwrite");
+    t.objectStore("f").delete(id);
+    t.oncomplete = () => res(true); t.onerror = () => res(false);
+  })).catch(() => false);
+}
+function fmtBytes(n){
+  if(!n && n !== 0) return "";
+  if(n < 1024) return n + " B";
+  if(n < 1048576) return Math.round(n/1024) + " kB";
+  return (n/1048576).toFixed(n < 10485760 ? 1 : 0) + " MB";
+}
+function fileKind(f){
+  const n = (f.name || "").toLowerCase();
+  const m = n.lastIndexOf(".");
+  return m > 0 ? n.slice(m+1).toUpperCase().slice(0,4) : "SOUBOR";
+}
+function projFiles(pr){ if(!Array.isArray(pr.files)) pr.files = []; return pr.files; }
+function fileMsg(t){ const el = document.getElementById("fileMsg"); if(el) el.textContent = t || ""; }
+function addProjFiles(pid, input){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const list = Array.from(input.files || []); if(!list.length) return;
+  fileMsg("Ukládám…");
+  const added = [];
+  let chain = Promise.resolve();
+  list.forEach(f => {
+    const id = uid();
+    chain = chain.then(() => filePut(id, f))
+      .then(() => { added.push({ id, name:f.name, size:f.size, type:f.type || "", at:Date.now() }); })
+      .catch(() => { fileMsg("Soubor „" + f.name + "“ se nepodařilo uložit — možná je moc velký."); });
+  });
+  chain.then(() => {
+    if(added.length){ projFiles(pr).push(...added); save(); render(); }
+  });
+  input.value = "";
+}
+function openProjFile(pid, fid){
+  const w = window.open("", "_blank");
+  fileGet(fid).then(blob => {
+    if(!blob){ if(w) w.close(); fileMsg("Soubor tu není — nahrál jsi ho nejspíš v jiném prohlížeči."); return; }
+    const url = URL.createObjectURL(blob);
+    if(w) w.location = url; else window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+  }).catch(() => { if(w) w.close(); fileMsg("Soubor se nepodařilo otevřít."); });
+}
+function downloadProjFile(pid, fid){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const meta = projFiles(pr).find(f => f.id === fid); if(!meta) return;
+  fileGet(fid).then(blob => {
+    if(!blob){ fileMsg("Soubor tu není."); return; }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = meta.name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 20000);
+  });
+}
+function removeProjFile(pid, fid){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  pr.files = projFiles(pr).filter(f => f.id !== fid);
+  save(); render(); fileDel(fid);
+}
+
+/* ---- záloha stavu: localStorage umí při rychlém zavření o poslední změnu přijít ---- */
+function idbPutState(v){
+  return filesDB().then(db => new Promise(res => {
+    if(!db.objectStoreNames.contains("s")){ res(false); return; }
+    let plain;
+    try { plain = JSON.parse(JSON.stringify(v)); } catch(e){ res(false); return; }
+    const t = db.transaction("s", "readwrite");
+    t.objectStore("s").put(plain, "state");
+    t.oncomplete = () => res(true); t.onerror = () => res(false); t.onabort = () => res(false);
+  })).catch(() => false);
+}
+function idbGetState(){
+  return filesDB().then(db => new Promise(res => {
+    if(!db.objectStoreNames.contains("s")){ res(null); return; }
+    const t = db.transaction("s", "readonly");
+    const r = t.objectStore("s").get("state");
+    r.onsuccess = () => res(r.result || null); r.onerror = () => res(null);
+  })).catch(() => null);
+}
+function restoreFromBackup(){
+  return idbGetState().then(bk => {
+    if(!bk || !Array.isArray(bk.projects)) return false;
+    if((bk.updatedAt || 0) <= (state.updatedAt || 0)) return false;
+    const ae = document.activeElement;
+    if(ae && (ae.isContentEditable || ae.tagName === "INPUT" || ae.tagName === "TEXTAREA")) return false;
+    state = Object.assign(blank(), bk);
+    Store.write(state);
+    render();
+    return true;
+  }).catch(() => false);
+}
+
+/* ---- po dojezdu: co se bude dělat a hlídat, i když je projekt hotový ---- */
+function projAfter(pr){ if(!Array.isArray(pr.after)) pr.after = []; return pr.after; }
+function addAfter(pid){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const inp = document.getElementById("afText"), sel = document.getElementById("afEvery");
+  const t = (inp.value || "").trim(); if(!t) return;
+  projAfter(pr).push({ id:uid(), text:t, everyDays:Number(sel && sel.value) || 30, rhythmId:null });
+  inp.value = ""; save(); render();
+  const i2 = document.getElementById("afText"); if(i2) i2.focus();
+}
+function saveAfterText(pid, aid, el){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const a = projAfter(pr).find(x => x.id === aid); if(!a) return;
+  const t = el.innerText.trim();
+  if(!t || t === a.text) return;
+  a.text = t;
+  if(a.rhythmId){ const r = state.rhythms.find(x => x.id === a.rhythmId); if(r) r.name = t; }
+  save();
+}
+function setAfterEvery(pid, aid, v){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const a = projAfter(pr).find(x => x.id === aid); if(!a) return;
+  a.everyDays = Number(v) || 30;
+  if(a.rhythmId){
+    const r = state.rhythms.find(x => x.id === a.rhythmId);
+    if(r){ r.everyDays = a.everyDays; r.cadenceLabel = (CADENCES.find(c => c[0] === a.everyDays) || [0,"vlastní"])[1]; }
+  }
+  save(); render();
+}
+function removeAfter(pid, aid){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  pr.after = projAfter(pr).filter(x => x.id !== aid);
+  save(); render();
+}
+function afterToProvoz(pid, aid){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const a = projAfter(pr).find(x => x.id === aid); if(!a || a.rhythmId) return;
+  const every = Number(a.everyDays) || 30;
+  const r = { id:uid(), clientId:pr.clientId, name:a.text, owner:"me",
+    cadenceLabel:(CADENCES.find(c => c[0] === every) || [0,"vlastní"])[1],
+    everyDays:every, lastRunAt:Date.now() };
+  state.rhythms.push(r);
+  a.rhythmId = r.id;
+  save(); render();
+}
+function setProjDeadline(pid, v){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  pr.deadline = v || null; save(); render();
+}
+function saveProjField(pid, key, el){
+  const pr = state.projects.find(x => x.id === pid); if(!pr) return;
+  const t = el.innerText.trim();
+  if(t === (pr[key] || "")) return;
+  pr[key] = t; save();
+}
+
 function projNotes(p){ return typeof p.notes === "string" ? p.notes : ""; }
 function saveProjNotes(pid, el){
   const p = state.projects.find(x => x.id === pid); if(!p) return;
@@ -3488,6 +3734,8 @@ function renderWorkspace(p){
   const left = n - cur - 1;
   const leftTxt = p.done ? "u cíle" : left === 0 ? "poslední zastávka" : left === 1 ? "zbývá jedna zastávka" : `zbývají ${left} ${left < 5 ? "zastávky" : "zastávek"}`;
   const nt = projNotes(p);
+  const files = projFiles(p);
+  const after = projAfter(p);
   const links = [];
   p.groups.forEach((g, gi) => (g.links || []).forEach((l, li) => links.push({ l, gi, li })));
 
@@ -3518,14 +3766,28 @@ function renderWorkspace(p){
           <div class="fact"><span>Oblast</span><b><i style="background:${clientDot(p.clientId)}"></i>${esc(clientName(p.clientId))}</b></div>
           <div class="fact"><span>Teď na zastávce</span><b>${esc(p.phases[cur].name)}</b></div>
           <div class="fact"><span>Do cíle</span><b>${p.done ? "dojeto" : leftTxt}</b></div>
-          <div class="fact"><span>Termín</span><b>${esc(fmtDeadline(p.deadline))}</b></div>
+          <div class="fact"><span>Kdy splnit</span><input class="dl" type="date" value="${p.deadline || ""}" onchange="setProjDeadline('${p.id}',this.value)"></div>
+        </div>
+        <div class="ws-state">
+          <div class="padlbl">Konečný cíl — co musí platit, až to bude hotové</div>
+          <div class="padtx one" contenteditable="true" spellcheck="false"
+            data-ph="Např. „eshop běží, objednávky chodí do skladu a klient to zvládne sám“…"
+            onkeydown="padKey(event,this)"
+            onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveProjField('${p.id}','goal',this)}">${esc(p.goal || "")}</div>
+        </div>
+        <div class="ws-state">
+          <div class="padlbl">S kým se to řeší</div>
+          <div class="padtx one" contenteditable="true" spellcheck="false"
+            data-ph="Jména, role, kontakt — kdo za to na druhé straně může…"
+            onkeydown="padKey(event,this)"
+            onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveProjField('${p.id}','people',this)}">${esc(p.people || "")}</div>
         </div>
         <div class="ws-state">
           <div class="padlbl">Stav vlastními slovy</div>
           <div class="padtx one" contenteditable="true" spellcheck="false"
             data-ph="Jak to teď stojí — jednou větou…"
             onkeydown="padKey(event,this)"
-            onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveProjStatus('${p.id}',this)}">${esc(p.status || "")}</div>
+            onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveProjField('${p.id}','status',this)}">${esc(p.status || "")}</div>
         </div>
       </div>
     </div>
@@ -3562,6 +3824,60 @@ function renderWorkspace(p){
             <button class="lkx" onclick="removeLink('${p.id}',${gi},${li})" title="Smazat">✕</button>
           </div>`).join("")}
         </div>` : `<div class="empty-tile">Zatím tu nic není — název a URL nahoře, Enter a je to.</div>`}
+      </div>
+    </div>
+
+    <div class="zone z-soubory">
+      <div class="seclabel">Soubory <span>smlouvy, PDF, podklady</span></div>
+      <div class="ws-card">
+        <label class="filedrop">
+          <input type="file" id="fileIn" multiple onchange="addProjFiles('${p.id}',this)">
+          <span class="fdt">Vlož soubor</span>
+          <span class="fds">PDF, obrázek, tabulka — cokoliv. Klepni sem nebo přetáhni.</span>
+        </label>
+        <div class="mind-note" id="fileMsg"></div>
+        ${files.length ? `<div class="filegrid">
+          ${files.map(f => `<div class="filecard">
+            <span class="fk">${esc(fileKind(f))}</span>
+            <span class="fn" title="${esc(f.name)}">${esc(f.name)}</span>
+            <span class="fmeta">${esc(fmtBytes(f.size))}</span>
+            <span class="facts2">
+              <button class="fbtn" onclick="openProjFile('${p.id}','${f.id}')">Otevřít</button>
+              <button class="fbtn" onclick="downloadProjFile('${p.id}','${f.id}')">Stáhnout</button>
+            </span>
+            <button class="lkx" onclick="removeProjFile('${p.id}','${f.id}')" title="Smazat">✕</button>
+          </div>`).join("")}
+        </div>` : `<div class="empty-tile">Zatím tu nic není.</div>`}
+        <div class="mind-note">Soubory zůstávají v tomhle prohlížeči — na jiném zařízení je neuvidíš.</div>
+      </div>
+    </div>
+
+    <div class="zone z-po">
+      <div class="seclabel">Po dojezdu <span>co se bude dělat a hlídat, aby to drželo</span></div>
+      <div class="ws-card">
+        <div class="linkbar">
+          <input id="afText" placeholder="Co se bude opakovat, až bude projekt hotový…" onkeydown="if(event.key==='Enter')addAfter('${p.id}')">
+          <select id="afEvery" class="afsel">${cadenceOptions(30)}</select>
+          <button class="btn-primary" onclick="addAfter('${p.id}')">Přidat</button>
+        </div>
+        ${after.length ? `<div class="aftergrid">
+          ${after.map(a => {
+            const live = a.rhythmId && state.rhythms.some(r => r.id === a.rhythmId);
+            return `<div class="aftercard ${live ? "live" : ""}">
+              <span class="atx" contenteditable="true" spellcheck="false"
+                onkeydown="editKey(event,this)"
+                onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveAfterText('${p.id}','${a.id}',this)}"
+                title="Klepni a uprav">${esc(a.text)}</span>
+              <span class="arow">
+                <select class="afsel small" onchange="setAfterEvery('${p.id}','${a.id}',this.value)">${cadenceOptions(a.everyDays || 30)}</select>
+                ${live ? `<span class="apill">běží v Provozu</span>`
+                       : `<button class="fbtn go" onclick="afterToProvoz('${p.id}','${a.id}')">Předat do Provozu →</button>`}
+              </span>
+              <button class="lkx" onclick="removeAfter('${p.id}','${a.id}')" title="Smazat">✕</button>
+            </div>`;
+          }).join("")}
+        </div>` : `<div class="empty-tile">Zatím nic — sem si piš, co se během projektu ukáže, že se bude muset dělat pořád dokola.</div>`}
+        <div class="mind-note">„Předat do Provozu" z toho udělá pravidelnou věc, která se ti bude sama hlásit na Dnes.</div>
       </div>
     </div>
   `;
@@ -4614,6 +4930,7 @@ function paintRoutes(){
 migrateBoxy();
 upgradeAreas();
 render();
+restoreFromBackup();
 if(sbConfigured()) sbInit();
 if(state.google.clientId) gRefresh();
 setInterval(() => {
