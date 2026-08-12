@@ -1962,6 +1962,24 @@
   .note-chip .fx:hover{ background:rgba(74,63,16,.14); color:#4a3f10; }
 
   .desk-wrap.droppable{ box-shadow:0 0 0 2.5px var(--accent), 0 6px 18px -14px rgba(20,22,28,.3); }
+  .z-listky.droppable{ box-shadow:inset 0 0 0 2.5px var(--accent); }
+
+  /* chip jednorázové věci — tmavý text na světlém podkladu */
+  .daystrip .focus-chip{
+    color:#1d2434; font-weight:650; display:flex; align-items:center; gap:7px;
+    padding:7px 22px 7px 10px; box-shadow:0 0 0 1px rgba(20,22,28,.07);
+  }
+  .daystrip .focus-chip .fcdot{ width:7px; height:7px; border-radius:50%; background:var(--fcd); flex:none; }
+  .daystrip .focus-chip .fx{ color:#1d2434; opacity:.42; }
+  .daystrip .focus-chip .fx:hover{ opacity:1; }
+
+  /* pohled na jeden den */
+  .week-grid.wk1{ grid-template-columns:1fr; }
+  .daystrip .week-grid.wk1 .wday{ min-height:170px; padding:14px 16px; }
+  .daystrip .week-grid.wk1 .wday .dh{ margin-bottom:10px; }
+  .daystrip .week-grid.wk1 .rchip,
+  .daystrip .week-grid.wk1 .focus-chip,
+  .daystrip .week-grid.wk1 .note-chip{ font-size:12.5px; }
 
   @media (max-width:900px){
     .sticky .sgrip, .sticky .sdue{ opacity:1; }
@@ -2326,6 +2344,8 @@ function upcomingByDay(list, days){
   }
   return out;
 }
+function stripViewMode(){ return state.settings.stripView === "den" ? "den" : "tyden"; }
+function setStripView(v){ state.settings.stripView = v === "den" ? "den" : "tyden"; save(); render(); }
 const BOARD_VIEWS = [["tyden","Týden"],["mesic","Měsíc"]];
 function boardView(){
   const k = state.settings.boardView;
@@ -2819,6 +2839,8 @@ function renderDnes(){
 
   if(pruneDesk()) save();
   const deskItems = deskList().filter(d => clientFilter === "all" || d.clientId === clientFilter);
+  const stripView = stripViewMode();
+  const stripDays = stripView === "den" ? [planDate] : boardDates();
 
   const noteCounts = { all: state.notes.length };
   ["práce","osobní","nákup","zdraví"].forEach(c => noteCounts[c] = state.notes.filter(n => n.category === c).length);
@@ -2923,15 +2945,21 @@ function renderDnes(){
       <div class="board-head">
         <div class="board-t">Co připadá na které dny</div>
         <div class="board-nav">
-          <button class="bnav" onclick="shiftBoard(-1)" title="Předchozí týden">‹</button>
-          <span class="board-range">${boardRange()}</span>
-          <button class="bnav" onclick="shiftBoard(1)" title="Další týden">›</button>
-          ${boardOffset !== 0 ? `<button class="sec-link" style="margin-left:6px;" onclick="shiftBoard(0)">dnes</button>` : ""}
+          <div class="seg" style="padding:2px;margin-right:4px;">
+            ${[["den","Den"],["tyden","Týden"]].map(([v, lab]) =>
+              `<button class="${stripView === v ? "active" : ""}" style="padding:5px 13px;font-size:11.5px;" onclick="setStripView('${v}')">${lab}</button>`).join("")}
+          </div>
+          ${stripView === "tyden" ? `
+            <button class="bnav" onclick="shiftBoard(-1)" title="Předchozí týden">‹</button>
+            <span class="board-range">${boardRange()}</span>
+            <button class="bnav" onclick="shiftBoard(1)" title="Další týden">›</button>
+            ${boardOffset !== 0 ? `<button class="sec-link" style="margin-left:6px;" onclick="shiftBoard(0)">dnes</button>` : ""}
+          ` : `<span class="board-range">${(() => { const dd = parseDate(planDate); return `${["Pondělí","Úterý","Středa","Čtvrtek","Pátek","Sobota","Neděle"][(dd.getDay()+6)%7]} ${dd.getDate()}. ${dd.getMonth()+1}.`; })()}</span>`}
           <button class="sec-link" style="margin-left:10px;" onclick="openAddRhythm()">+ Pravidelná</button>
         </div>
       </div>
-      <div class="week-grid wk5">
-        ${boardDates().map(k => {
+      <div class="week-grid ${stripView === "den" ? "wk1" : "wk5"}">
+        ${stripDays.map(k => {
           const d = parseDate(k);
           const isT = k === todayStr();
           const isPast = !isT && d < parseDate(todayStr());
@@ -2946,7 +2974,7 @@ function renderDnes(){
             ${evsAll.length > 2 ? `<div class="ev">+${evsAll.length - 2} další</div>` : ""}
             ${rhy.map(r => rhyChipHtml(r, isT)).join("")}
             ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
-              style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
+              style="background:${tint(f.color || "#2f6df6",.18)};--fcd:${f.color || "#2f6df6"};"><i class="fcdot"></i>${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
             ${notesOn(k).map(nn => `<div class="note-chip" draggable="true" ondragstart="noteDragStart(event,'${nn.id}')" title="Lísteček — přetáhni na jiný den">${esc(nn.text)}<button class="fx" onclick="clearNoteDue(event,'${nn.id}')" title="Zrušit datum">✕</button></div>`).join("")}
             <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat na tenhle den">+</button>
           </div>`;
@@ -3003,7 +3031,7 @@ function renderDnes(){
           <button class="dx" onclick="removeDesk(event,'${d.id}')" title="Smazat">✕</button>
         </div>`).join("")}
       </div>` : `<div class="empty-tile" style="background:rgba(255,255,255,.6);">Stůl je prázdný.</div>`}
-      <div class="mind-note">Hotové věci zůstanou na místě a přes noc samy zmizí. Nic se nepočítá.</div>
+      <div class="mind-note">Hotové věci zůstanou na místě a přes noc samy zmizí. Přetažením doprava z toho uděláš lísteček.</div>
       </div>
     </section>
 
@@ -3012,7 +3040,7 @@ function renderDnes(){
     </div>
 
     <aside class="colside">
-      <div class="zone z-listky">
+      <div class="zone z-listky" ondragover="notesDragOver(event)" ondragleave="notesDragLeave(event)" ondrop="dropNotes(event)">
       <section class="sblock amber sticky-panel">
         <div class="sec-head">
           <div class="sec-head-l"><span class="sec-ico">${ICONS.mind}</span>
@@ -3045,7 +3073,7 @@ function renderDnes(){
             <button class="sxx" onclick="removeNote('${n.id}')" title="Sundat lísteček">✕</button>
           </div>`).join("") || `<div class="mind-note" style="padding:4px 2px;">Nic tu není — čistá hlava.</div>`}
         </div>
-        <div class="mind-note">Datum je nepovinné — když ho přidáš, lísteček se objeví v tom dni nahoře. Za ⠿ ho přetáhneš na den nebo na Stůl.</div>
+        <div class="mind-note">Datum je nepovinné — když ho přidáš, lísteček se objeví v tom dni nahoře. Za ⠿ ho přetáhneš na den nebo na Stůl — a věc ze Stolu sem zase zpátky.</div>
       </section>
       </div>
     </aside>
@@ -3545,6 +3573,25 @@ function noteDragStart(e, id){
   e.stopPropagation();
   e.dataTransfer.setData("text/plain", JSON.stringify({ type:"note", id }));
   e.dataTransfer.effectAllowed = "copyMove";
+}
+function notesDragOver(e){
+  e.preventDefault();
+  // zdroj ze Stolu povoluje jen "copy" — jiný dropEffect by drop zahodil
+  const al = e.dataTransfer.effectAllowed;
+  e.dataTransfer.dropEffect = (al === "copy" || al === "uninitialized" || !al) ? "copy" : "move";
+  e.currentTarget.classList.add("droppable");
+}
+function notesDragLeave(e){ e.currentTarget.classList.remove("droppable"); }
+function dropNotes(e){
+  e.preventDefault();
+  e.currentTarget.classList.remove("droppable");
+  let d;
+  try { d = JSON.parse(e.dataTransfer.getData("text/plain")); } catch(_){ return; }
+  if(d.type !== "desk") return;
+  const k = deskList().find(x => x.id === d.id); if(!k) return;
+  state.desk = deskList().filter(x => x.id !== d.id);
+  state.notes.unshift({ id:uid(), text:k.text, category: noteFilter === "all" ? "práce" : noteFilter, createdAt:Date.now() });
+  save(); render();
 }
 function deskDragOver(e){
   e.preventDefault(); e.dataTransfer.dropEffect = "move";
