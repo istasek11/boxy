@@ -2002,43 +2002,47 @@
   .hchip.add:hover{ background:var(--fill); color:var(--tx); }
   .hgtools{ display:flex; gap:10px; margin-left:auto; }
 
-  .hubgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; }
+  .hubgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(186px,1fr)); gap:12px; }
   .ltile{
-    position:relative; background:#fff; border-radius:13px; padding:12px 13px;
-    display:flex; align-items:center; gap:11px; min-width:0; cursor:pointer;
-    box-shadow:0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3);
-    transition:box-shadow .14s, transform .14s;
+    position:relative; background:#fff; border:none; border-radius:16px; padding:18px 16px 16px;
+    display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-width:0;
+    min-height:132px; cursor:pointer; text-align:left; font:inherit;
+    box-shadow:0 0 0 1px rgba(20,22,28,.08), 0 4px 14px -9px rgba(20,22,28,.34);
+    transition:box-shadow .15s, transform .15s;
   }
-  .ltile:hover{ transform:translateY(-1px); box-shadow:0 0 0 1px rgba(20,22,28,.16), 0 8px 18px -9px rgba(20,22,28,.42); }
+  .ltile:hover{ transform:translateY(-2px); box-shadow:0 0 0 1px rgba(20,22,28,.16), 0 12px 24px -10px rgba(20,22,28,.46); }
+  .ltile:active{ transform:translateY(0); }
   .ltile .lico{
-    width:36px; height:36px; border-radius:10px; flex:none; color:#fff;
-    display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:750;
-    cursor:pointer; transition:filter .12s;
+    width:46px; height:46px; border-radius:13px; flex:none; color:#fff; margin-bottom:10px;
+    display:flex; align-items:center; justify-content:center; font-size:21px; font-weight:750;
+    box-shadow:0 4px 10px -5px rgba(20,22,28,.55);
   }
-  .ltile .lico:hover{ filter:brightness(1.12); }
-  .ltile .lmeta{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
   .ltile .ln{
-    font-size:13.5px; font-weight:650; color:var(--tx); outline:none; border-radius:4px;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:14px;
+    font-size:14.5px; font-weight:700; color:var(--tx); letter-spacing:-.012em; line-height:1.28;
+    width:100%; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   }
-  .ltile .ln:hover{ background:var(--fill); box-shadow:0 0 0 3px var(--fill); }
-  .ltile .lh{ font-size:11.5px; color:var(--tx4); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .ltile .lgrp{
-    position:absolute; right:8px; bottom:7px; border:none; background:transparent; cursor:pointer;
-    font:inherit; font-size:10.5px; color:var(--tx4); outline:none; opacity:0; transition:opacity .12s;
-    max-width:96px;
+  .ltile .lh{
+    font-size:12px; color:var(--tx4); margin-top:auto; padding-top:6px;
+    width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .ltile:hover .lgrp{ opacity:1; }
-  .ltile .lx{
-    position:absolute; top:6px; right:6px; width:20px; height:20px; border:none; background:transparent;
-    color:var(--tx4); border-radius:6px; font-size:9px; cursor:pointer; opacity:0; transition:all .12s;
+  .ltile .ltools{
+    position:absolute; top:8px; right:8px; display:flex; gap:2px; opacity:0; transition:opacity .12s;
   }
-  .ltile:hover .lx{ opacity:1; }
-  .ltile .lx:hover{ background:var(--fill2); color:var(--red); }
+  .ltile:hover .ltools{ opacity:1; }
+  .ltile .lb{
+    width:24px; height:24px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:var(--tx4); background:var(--fill); transition:all .12s;
+  }
+  .ltile .lb:hover{ background:var(--fill2); color:var(--tx); }
+  .ltile .lb:last-child:hover{ color:var(--red); }
 
   @media (max-width:900px){
-    .hubgrid{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+    .hubgrid{ grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; }
+    .ltile{ min-height:112px; padding:14px 12px 12px; }
+    .ltile .lico{ width:38px; height:38px; border-radius:11px; font-size:18px; margin-bottom:8px; }
+    .ltile .ln{ font-size:13.5px; }
     .hgtools{ margin-left:0; width:100%; }
+    .ltile .ltools{ opacity:1; }
   }
 
 </style>
@@ -3120,21 +3124,15 @@ function renderDnes(){
         </div>
 
         ${hubShown.length ? `<div class="hubgrid">
-          ${hubShown.map(l => `<div class="ltile" onclick="openHubLink('${l.id}')" title="${esc(l.url || "")}">
-            <span class="lico" style="background:${linkColor(l)};" onclick="setHubIcon(event,'${l.id}')" title="Změnit ikonku">${linkMark(l)}</span>
-            <span class="lmeta">
-              <span class="ln" contenteditable="true" spellcheck="false"
-                onclick="event.stopPropagation()" onkeydown="editKey(event,this)"
-                onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveHubName('${l.id}',this)}"
-                title="Klepni a uprav">${esc(l.name)}</span>
-              <span class="lh">${esc(isUrlish(l.url) ? hostFromUrl(l.url) : (l.url ? "cesta" : "bez odkazu"))}</span>
+          ${hubShown.map(l => `<button class="ltile" onclick="openHubLink('${l.id}')" title="${esc(l.url || l.name)}">
+            <span class="lico" style="background:${linkColor(l)};">${linkMark(l)}</span>
+            <span class="ln">${esc(l.name)}</span>
+            <span class="lh">${esc(isUrlish(l.url) ? hostFromUrl(l.url) : (l.url ? "cesta ke složce" : "bez odkazu"))}</span>
+            <span class="ltools">
+              <span class="lb" onclick="editHubLink(event,'${l.id}')" title="Upravit">✎</span>
+              <span class="lb" onclick="removeHubLink(event,'${l.id}')" title="Odebrat">✕</span>
             </span>
-            ${hubGroups().length ? `<select class="lgrp" onclick="event.stopPropagation()" onchange="moveLinkToGroup(event,'${l.id}',this.value)" title="Skupina">
-              <option value="" ${!l.groupId ? "selected" : ""}>bez skupiny</option>
-              ${hubGroups().map(g => `<option value="${g.id}" ${l.groupId === g.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}
-            </select>` : ""}
-            <button class="lx" onclick="removeHubLink(event,'${l.id}')" title="Odebrat">✕</button>
-          </div>`).join("")}
+          </button>`).join("")}
         </div>` : `<div class="empty-tile">${linkGroup === "all"
             ? "Zatím tu nic není — název a odkaz nahoře, Enter a je to."
             : "V téhle skupině zatím nic není."}</div>`}
@@ -3815,27 +3813,35 @@ function openHubLink(id){
     );
   } else toast("Tohle není odkaz, jen poznámka.");
 }
-function saveHubName(id, el){
+function editHubLink(e, id){
+  e.stopPropagation();
   const l = hubLinks().find(x => x.id === id); if(!l) return;
-  const t = el.innerText.trim();
-  if(!t || t === l.name) return;
-  l.name = t; save();
+  const gs = hubGroups();
+  dialog("Upravit dlaždici", `
+    <div class="field"><label>Název</label><input name="name" required value="${esc(l.name)}"></div>
+    <div class="field"><label>Odkaz nebo cesta</label><input name="url" value="${esc(l.url || "")}"></div>
+    <div class="field-row">
+      <div class="field"><label>Emoji (prázdné = písmeno)</label>
+        <input name="icon" maxlength="4" value="${esc(l.icon || "")}" placeholder="🛒"></div>
+      <div class="field"><label>Skupina</label>
+        <select name="grp"><option value="">bez skupiny</option>
+        ${gs.map(g => `<option value="${g.id}" ${l.groupId === g.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}
+        </select></div>
+    </div>
+    <div class="field"><label>Oblast</label><select name="client">${clientOptions(l.clientId)}</select></div>
+  `, "Uložit", fd => {
+    l.name = (fd.get("name") || "").trim() || l.name;
+    l.url = normUrl(fd.get("url") || "");
+    l.icon = (fd.get("icon") || "").trim();
+    l.groupId = fd.get("grp") || null;
+    l.clientId = fd.get("client") || l.clientId;
+    save(); closeDialog(); render();
+  });
 }
 function removeHubLink(e, id){
   e.stopPropagation();
   state.links = hubLinks().filter(x => x.id !== id);
   save(); render();
-}
-function setHubIcon(e, id){
-  e.stopPropagation();
-  const l = hubLinks().find(x => x.id === id); if(!l) return;
-  dialog("Ikonka odkazu", `
-    <div class="field"><label>Emoji (prázdné = písmeno z názvu)</label>
-      <input name="icon" maxlength="4" value="${esc(l.icon || "")}" placeholder="např. 🛒"></div>
-  `, "Uložit", fd => {
-    l.icon = (fd.get("icon") || "").trim();
-    save(); closeDialog(); render();
-  });
 }
 function addLinkGroup(){
   dialog("Nová skupina", `
