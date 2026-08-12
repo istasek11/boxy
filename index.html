@@ -1450,6 +1450,70 @@
     .prov-tools{ width:100%; }
   }
 
+
+  /* ---------- oddělení sekcí ---------- */
+  main{ gap:8px; }
+  .colmain{ gap:8px; }
+  .seclabel{
+    display:flex; align-items:center; gap:8px; padding:14px 6px 8px;
+    font-size:13px; font-weight:650; color:var(--tx2); letter-spacing:-.01em;
+  }
+  .seclabel i{ width:8px; height:8px; border-radius:2.5px; flex:none; }
+  .seclabel span{ font-weight:450; color:var(--tx4); font-size:12.5px; }
+  .colmain > .seclabel:first-child{ padding-top:2px; }
+  .sblock{ box-shadow:0 1px 2px rgba(20,22,28,.05), 0 10px 26px -14px rgba(20,22,28,.16); }
+  .topline{ box-shadow:0 1px 2px rgba(20,22,28,.05), 0 10px 26px -14px rgba(20,22,28,.16); }
+
+  /* ---------- kde jsem: oblast ---------- */
+  .areaseg button.active{ box-shadow:0 3px 10px -4px var(--tx4); }
+  .areaseg button{ font-size:12.5px; padding:7px 14px; }
+  .areabar{
+    display:flex; align-items:center; gap:11px; flex-wrap:wrap;
+    background:#fff; border-radius:14px; padding:11px 16px; margin-top:6px;
+    box-shadow:inset 4px 0 0 var(--ac), 0 1px 2px rgba(20,22,28,.05);
+  }
+  .areabar .adot{ width:9px; height:9px; border-radius:50%; background:var(--ac); flex:none; }
+  .areabar .aname{ font-size:14.5px; font-weight:700; color:var(--tx); letter-spacing:-.01em; }
+  .areabar .asub{ font-size:12.5px; color:var(--tx4); }
+  .areabar .sec-link{ margin-left:auto; }
+  body.area-on::before{
+    content:""; position:fixed; inset:0; background:var(--area);
+    opacity:.055; pointer-events:none; z-index:0;
+  }
+  @media (max-width:900px){
+    .seclabel{ padding:10px 4px 6px; }
+    .areabar .asub{ display:none; }
+  }
+
+
+  /* ---------- oblast v postranním menu ---------- */
+  .areagrp{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+    border:none; background:transparent; cursor:pointer;
+    padding:8px 10px 5px; margin-top:2px; border-radius:9px;
+    font-size:11.5px; font-weight:650; color:var(--tx3); transition:all .12s;
+  }
+  .areagrp:hover{ background:var(--fill); color:var(--tx2); }
+  .areagrp.on{ background:var(--ac); color:#fff; padding-bottom:8px; }
+  .areagrp.on .proj-dot{ background:rgba(255,255,255,.9) !important; }
+  .proj-item.dimmed{ opacity:.42; }
+  .proj-item.dimmed:hover{ opacity:1; }
+
+
+  /* ---------- úprava textu na místě ---------- */
+  .sticky .stx[contenteditable]{ outline:none; cursor:text; border-radius:3px; }
+  .sticky .stx[contenteditable]:hover{ background:rgba(255,255,255,.45); box-shadow:0 0 0 3px rgba(255,255,255,.45); }
+  .sticky .stx[contenteditable]:focus{ background:rgba(255,255,255,.75); box-shadow:0 0 0 4px rgba(255,255,255,.75); }
+  .sticky .scat{
+    position:absolute; left:12px; bottom:6px; border:none; background:transparent;
+    font-size:10.5px; opacity:.6; cursor:pointer; padding:2px 5px; border-radius:5px;
+    font-family:inherit; color:inherit; transition:all .12s;
+  }
+  .sticky .scat:hover{ opacity:1; background:rgba(255,255,255,.6); }
+  .desknote .dtx[contenteditable]{ outline:none; cursor:text; border-radius:6px; }
+  .desknote .dtx[contenteditable]:hover{ background:rgba(255,255,255,.75); box-shadow:0 0 0 4px rgba(255,255,255,.75); }
+  .desknote .dtx[contenteditable]:focus{ background:#fff; box-shadow:0 0 0 4px #fff, 0 0 0 5px var(--accent); }
+
 </style>
 </head>
 <body>
@@ -2133,12 +2197,15 @@ function renderSidebar(){
   document.getElementById("navProjects").innerHTML = state.clients.map(c => {
     const cp = act.filter(p => p.clientId === c.id);
     if(!cp.length) return "";
-    return `<div style="display:flex;align-items:center;gap:7px;padding:8px 10px 3px;">
+    const onArea = clientFilter === c.id;
+    return `<button class="areagrp ${onArea ? "on" : ""}" style="--ac:${clientDot(c.id)};"
+        onclick="setClientFilter('${onArea ? "all" : c.id}')"
+        title="${onArea ? "Zpět na všechny oblasti" : "Zobrazit jen " + esc(c.name)}">
         <span class="proj-dot" style="background:${clientDot(c.id)};width:7px;height:7px;"></span>
-        <span style="font-size:11px;font-weight:650;color:var(--tx3);">${esc(c.name)}</span>
-      </div>` +
+        <span class="agn">${esc(c.name)}</span>
+      </button>` +
       cp.map(p => `
-      <button class="nav-row proj-item ${view === p.id ? "active" : ""}" style="padding-left:26px;" onclick="go('${p.id}')">
+      <button class="nav-row proj-item ${view === p.id ? "active" : ""} ${clientFilter !== "all" && clientFilter !== c.id ? "dimmed" : ""}" style="padding-left:26px;" onclick="go('${p.id}')">
         <span class="nm"><span class="proj-dot" style="background:${projColor(p)}"></span><span class="proj-name">${esc(p.name)}</span></span>
         <span class="proj-phase" style="padding-left:0;">${esc((p.phases[p.currentPhaseIndex]||{}).name || "")}</span>
       </button>`).join("");
@@ -2288,6 +2355,10 @@ function renderDnes(){
 
   const projs = state.projects.filter(p => !p.archived && (clientFilter === "all" || p.clientId === clientFilter));
 
+  const areaCol = clientFilter === "all" ? null : clientDot(clientFilter);
+  document.documentElement.style.setProperty("--area", areaCol || "transparent");
+  document.body.classList.toggle("area-on", !!areaCol);
+
   if(pruneDesk()) save();
   const deskItems = deskList().filter(d => clientFilter === "all" || d.clientId === clientFilter);
 
@@ -2332,9 +2403,13 @@ function renderDnes(){
     </div>
 
     <div class="toprow" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-      <div class="seg scrollx">
-        ${[{id:"all", name:"Vše"}].concat(state.clients).map(c =>
-          `<button class="${clientFilter === c.id ? "active" : ""}" onclick="setClientFilter('${c.id}')">${c.id !== "all" ? `<span class="cdot" style="background:${clientDot(c.id)}"></span>` : ""}${esc(c.name)}</button>`).join("")}
+      <div class="seg areaseg scrollx">
+        ${[{id:"all", name:"Vše"}].concat(state.clients).map(c => {
+          const on = clientFilter === c.id;
+          const col = c.id === "all" ? "" : clientDot(c.id);
+          return `<button class="${on ? "active" : ""}" ${on && col ? `style="background:${col};color:#fff;"` : ""}
+            onclick="setClientFilter('${c.id}')">${c.id !== "all" ? `<span class="cdot" style="background:${on ? "rgba(255,255,255,.9)" : col}"></span>` : ""}${esc(c.name)}</button>`;
+        }).join("")}
       </div>
       <div class="scrollx" style="display:flex;"><div class="daypick" title="Který den plánuješ">
         ${weekDates().map(k => {
@@ -2357,9 +2432,17 @@ function renderDnes(){
       </div></div>
     </div>
 
+    ${clientFilter !== "all" ? `<div class="areabar" style="--ac:${clientDot(clientFilter)};">
+      <span class="adot"></span>
+      <span class="aname">${esc(clientName(clientFilter))}</span>
+      <span class="asub">vidíš jen tuhle oblast</span>
+      <button class="sec-link" onclick="setClientFilter('all')">zobrazit vše</button>
+    </div>` : ""}
+
+    <div class="seclabel"><i style="background:var(--tx3)"></i>Dnešní schůzky</div>
     <section class="topline">
       <div class="tlx-head">
-        <span class="tlx-t">${isPlanToday ? "Dnešní schůzky" : `Schůzky — ${pdLab}`}</span>
+        <span class="tlx-t">${isPlanToday ? "dnes" : pdLab}</span>
         ${state.google.clientId
           ? `<button class="sec-link" onclick="gManualRefresh()">${gConnected() ? "Obnovit kalendář" : "Připojit kalendář"}</button>`
           : `<button class="sec-link" onclick="openGModal()">Připojit kalendář</button>`}
@@ -2379,16 +2462,14 @@ function renderDnes(){
 
     <div class="cols">
     <div class="colmain">
+    <div class="seclabel"><i style="background:#2f6df6"></i>Cesty <span>kam projekty míří</span></div>
     <section class="sblock violet cesta">
       ${projs.map(p => renderProjectCard(p, true)).join("")}
       ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádná cesta — přidej projekt vlevo v menu a rozvrhni si zastávky" : "Pro tenhle výběr tu nic není"}</div>` : ""}
     </section>
 
+    <div class="seclabel"><i style="background:#12a8bd"></i>Na stole <span>jednorázové věci</span></div>
     <section class="sblock cyan">
-      <div class="sec-head">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.desk}</span>
-          <div><div class="eyebrow">jednorázové věci</div><h2>Na stole</h2></div></div>
-      </div>
       <div class="mind-input" style="max-width:640px;">
         <input id="deskInput" placeholder="Co je potřeba odbýt…" onkeydown="if(event.key==='Enter')addDesk()">
         <button class="btn-primary" onclick="addDesk()">Položit na stůl</button>
@@ -2401,7 +2482,10 @@ function renderDnes(){
           style="--dc:${clientDot(d.clientId)}"
           title="Podrž ~1 s = odbyto · přetažením na den v týdnu naplánuješ">
           <span class="dcl"><i></i>${esc(clientName(d.clientId))}</span>
-          <span class="dtx">${esc(d.text)}</span>
+          <span class="dtx" contenteditable="true" spellcheck="false"
+            onpointerdown="event.stopPropagation()"
+            onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveDeskText('${d.id}',this)}"
+            onkeydown="editKey(event,this)" title="Klepni a uprav">${esc(d.text)}</span>
           ${d.done ? `<span class="dok">✓ odbyto — přes noc samo zmizí</span>` : ""}
           <button class="dx" onclick="removeDesk(event,'${d.id}')" title="Smazat">✕</button>
         </div>`).join("")}
@@ -2409,12 +2493,9 @@ function renderDnes(){
       <div class="mind-note">Hotové věci zůstanou na místě a přes noc samy zmizí. Nic se nepočítá.</div>
     </section>
 
+    <div class="seclabel"><i style="background:#7b5cf0"></i>Provoz <span>co běží samo</span></div>
     <section class="sblock darkp">
       <div class="prov-head">
-        <div class="prov-id">
-          <div class="eyebrow" style="color:#8f9cff;">ať to běží samo</div>
-          <h2>Provoz</h2>
-        </div>
         <div class="prov-tools">
           <div class="seg" style="padding:2px;">
             ${[["all","Vše"],["me","Já"],["claude","Claude"],["both","Spolu"]].map(([k, lab]) =>
@@ -2517,8 +2598,10 @@ function renderDnes(){
         </div>
         <div class="stickies">
           ${notes.map((n, i) => `<div class="sticky c-${esc(n.category)}" id="note-${n.id}" style="--rot:${(i % 2 ? 1 : -1) * (0.5 + (i % 3) * 0.35)}deg;">
-            <span class="stx">${esc(n.text)}</span>
-            <span class="scat">${esc(n.category)}</span>
+            <span class="stx" contenteditable="true" spellcheck="false"
+              onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveNoteText('${n.id}',this)}"
+              onkeydown="editKey(event,this)" title="Klepni a uprav">${esc(n.text)}</span>
+            <button class="scat" onclick="cycleNoteCat(event,'${n.id}')" title="Přepnout kategorii">${esc(n.category)}</button>
             <button class="sxx" onclick="removeNote('${n.id}')" title="Sundat lísteček">✕</button>
           </div>`).join("") || `<div class="mind-note" style="padding:4px 2px;">Nic tu není — čistá hlava.</div>`}
         </div>
@@ -2993,6 +3076,32 @@ function addNote(){
   save(); render();
   const again = document.getElementById("mindInput");
   if(again) again.focus();
+}
+/* ---- úprava textu přímo v lístečku ---- */
+function saveNoteText(id, el){
+  const n = state.notes.find(x => x.id === id); if(!n) return;
+  const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+  if(!t){ el.textContent = n.text; return; }
+  if(t === n.text) return;
+  n.text = t; save(); render();
+}
+function cycleNoteCat(e, id){
+  e.stopPropagation();
+  const cats = ["práce","osobní","nákup","zdraví"];
+  const n = state.notes.find(x => x.id === id); if(!n) return;
+  n.category = cats[(cats.indexOf(n.category) + 1) % cats.length];
+  save(); render();
+}
+function saveDeskText(id, el){
+  const d = deskList().find(x => x.id === id); if(!d) return;
+  const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+  if(!t){ el.textContent = d.text; return; }
+  if(t === d.text) return;
+  d.text = t; save(); render();
+}
+function editKey(e, el){
+  if(e.key === "Enter"){ e.preventDefault(); el.blur(); }
+  else if(e.key === "Escape"){ e.preventDefault(); el.dataset.cancel = "1"; el.blur(); }
 }
 function removeNote(id){
   const el = document.getElementById("note-" + id);
@@ -4098,6 +4207,8 @@ if(sbConfigured()) sbInit();
 if(state.google.clientId) gRefresh();
 setInterval(() => {
   if(_drag) return;
+  const ae = document.activeElement;
+  if(ae && (ae.isContentEditable || ae.tagName === "INPUT" || ae.tagName === "TEXTAREA")) return;
   const t = todayStr();
   if(t !== selDate){ selDate = t; planDate = t; G.cache = {}; if(state.google.clientId) gRefresh(); }
   if(view === "dnes" && !document.querySelector(".overlay")) renderDnes();
