@@ -1985,6 +1985,62 @@
     .sticky .sgrip, .sticky .sdue{ opacity:1; }
   }
 
+  /* --- Rozcestník --- */
+  .z-hub{ --zbg:#e0eef1; --zac:#1a7f96; }
+  .hub-card{ gap:14px; }
+  .hubchips{ display:flex; flex-wrap:wrap; align-items:center; gap:7px; }
+  .hchip{
+    border:none; background:var(--fill); color:var(--tx2); font:inherit; font-size:12.5px; font-weight:650;
+    border-radius:10px; padding:8px 12px; cursor:pointer; display:flex; align-items:center; gap:7px;
+    transition:all .12s;
+  }
+  .hchip:hover{ background:var(--fill2); color:var(--tx); }
+  .hchip .n{ font-size:11px; font-weight:700; color:var(--tx4); background:#fff; border-radius:6px; padding:1px 6px; }
+  .hchip.on{ background:var(--ink); color:#fff; }
+  .hchip.on .n{ background:rgba(255,255,255,.18); color:#fff; }
+  .hchip.add{ background:transparent; color:var(--tx3); box-shadow:inset 0 0 0 1.5px var(--line); }
+  .hchip.add:hover{ background:var(--fill); color:var(--tx); }
+  .hgtools{ display:flex; gap:10px; margin-left:auto; }
+
+  .hubgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px; }
+  .ltile{
+    position:relative; background:#fff; border-radius:13px; padding:12px 13px;
+    display:flex; align-items:center; gap:11px; min-width:0; cursor:pointer;
+    box-shadow:0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3);
+    transition:box-shadow .14s, transform .14s;
+  }
+  .ltile:hover{ transform:translateY(-1px); box-shadow:0 0 0 1px rgba(20,22,28,.16), 0 8px 18px -9px rgba(20,22,28,.42); }
+  .ltile .lico{
+    width:36px; height:36px; border-radius:10px; flex:none; color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:750;
+    cursor:pointer; transition:filter .12s;
+  }
+  .ltile .lico:hover{ filter:brightness(1.12); }
+  .ltile .lmeta{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
+  .ltile .ln{
+    font-size:13.5px; font-weight:650; color:var(--tx); outline:none; border-radius:4px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:14px;
+  }
+  .ltile .ln:hover{ background:var(--fill); box-shadow:0 0 0 3px var(--fill); }
+  .ltile .lh{ font-size:11.5px; color:var(--tx4); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ltile .lgrp{
+    position:absolute; right:8px; bottom:7px; border:none; background:transparent; cursor:pointer;
+    font:inherit; font-size:10.5px; color:var(--tx4); outline:none; opacity:0; transition:opacity .12s;
+    max-width:96px;
+  }
+  .ltile:hover .lgrp{ opacity:1; }
+  .ltile .lx{
+    position:absolute; top:6px; right:6px; width:20px; height:20px; border:none; background:transparent;
+    color:var(--tx4); border-radius:6px; font-size:9px; cursor:pointer; opacity:0; transition:all .12s;
+  }
+  .ltile:hover .lx{ opacity:1; }
+  .ltile .lx:hover{ background:var(--fill2); color:var(--red); }
+
+  @media (max-width:900px){
+    .hubgrid{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+    .hgtools{ margin-left:0; width:100%; }
+  }
+
 </style>
 </head>
 <body>
@@ -2839,6 +2895,8 @@ function renderDnes(){
 
   if(pruneDesk()) save();
   const deskItems = deskList().filter(d => clientFilter === "all" || d.clientId === clientFilter);
+  const hubForArea = hubLinks().filter(l => clientFilter === "all" || l.clientId === clientFilter);
+  const hubShown = hubForArea.filter(l => linkGroup === "all" || l.groupId === linkGroup);
   const stripView = stripViewMode();
   const stripDays = stripView === "den" ? [planDate] : boardDates();
 
@@ -3035,6 +3093,53 @@ function renderDnes(){
       </div>
     </section>
 
+    </div>
+
+    <div class="zone z-hub">
+      <div class="seclabel">Rozcestník <span>kam chodíš pořád dokola</span></div>
+      <div class="ws-card hub-card">
+        <div class="hubchips">
+          <button class="hchip ${linkGroup === "all" ? "on" : ""}" onclick="setLinkGroup('all')">
+            Vše<span class="n">${hubForArea.length}</span></button>
+          ${hubGroups().map(g => {
+            const c = hubForArea.filter(l => l.groupId === g.id).length;
+            return `<button class="hchip ${linkGroup === g.id ? "on" : ""}" onclick="setLinkGroup('${g.id}')">
+              ${esc(g.name)}<span class="n">${c}</span></button>`;
+          }).join("")}
+          <button class="hchip add" onclick="addLinkGroup()">+ Skupina</button>
+          ${linkGroup !== "all" ? `<span class="hgtools">
+            <button class="sec-link" onclick="renameLinkGroup()">přejmenovat</button>
+            <button class="sec-link" onclick="removeLinkGroup()">smazat skupinu</button>
+          </span>` : ""}
+        </div>
+
+        <div class="linkbar">
+          <input id="hbName" placeholder="Název" onkeydown="if(event.key==='Enter')document.getElementById('hbUrl').focus()">
+          <input id="hbUrl" placeholder="odkaz, cesta ke složce, cokoliv…" onkeydown="if(event.key==='Enter')addHubLink()">
+          <button class="btn-primary" onclick="addHubLink()">Přidat</button>
+        </div>
+
+        ${hubShown.length ? `<div class="hubgrid">
+          ${hubShown.map(l => `<div class="ltile" onclick="openHubLink('${l.id}')" title="${esc(l.url || "")}">
+            <span class="lico" style="background:${linkColor(l)};" onclick="setHubIcon(event,'${l.id}')" title="Změnit ikonku">${linkMark(l)}</span>
+            <span class="lmeta">
+              <span class="ln" contenteditable="true" spellcheck="false"
+                onclick="event.stopPropagation()" onkeydown="editKey(event,this)"
+                onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveHubName('${l.id}',this)}"
+                title="Klepni a uprav">${esc(l.name)}</span>
+              <span class="lh">${esc(isUrlish(l.url) ? hostFromUrl(l.url) : (l.url ? "cesta" : "bez odkazu"))}</span>
+            </span>
+            ${hubGroups().length ? `<select class="lgrp" onclick="event.stopPropagation()" onchange="moveLinkToGroup(event,'${l.id}',this.value)" title="Skupina">
+              <option value="" ${!l.groupId ? "selected" : ""}>bez skupiny</option>
+              ${hubGroups().map(g => `<option value="${g.id}" ${l.groupId === g.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}
+            </select>` : ""}
+            <button class="lx" onclick="removeHubLink(event,'${l.id}')" title="Odebrat">✕</button>
+          </div>`).join("")}
+        </div>` : `<div class="empty-tile">${linkGroup === "all"
+            ? "Zatím tu nic není — název a odkaz nahoře, Enter a je to."
+            : "V téhle skupině zatím nic není."}</div>`}
+        <div class="mind-note">Odkaz se otevře v nové záložce. Cestu ke složce ti klepnutím zkopíruju do schránky.</div>
+      </div>
     </div>
 
     </div>
@@ -3653,6 +3758,116 @@ function removeNote(id){
    PLOCHA PROJEKTU
    ============================================================ */
 function hostFromUrl(url){ try { return new URL(url).hostname.replace(/^www\./, ""); } catch(e){ return "bez odkazu"; } }
+
+/* ============================================================
+   ROZCESTNÍK — odkazy, na které chodíš pořád dokola
+   ============================================================ */
+let linkGroup = "all";
+function hubLinks(){ if(!Array.isArray(state.links)) state.links = []; return state.links; }
+function hubGroups(){ if(!Array.isArray(state.linkGroups)) state.linkGroups = []; return state.linkGroups; }
+function setLinkGroup(g){ linkGroup = g; render(); }
+function linkColor(l){
+  const src = (l.url || l.name || "x");
+  let h = 0;
+  for(let i = 0; i < src.length; i++) h = (h * 31 + src.charCodeAt(i)) >>> 0;
+  return DOT_COLORS[h % DOT_COLORS.length];
+}
+function linkMark(l){
+  if(l.icon) return esc(l.icon);
+  const n = (l.name || hostFromUrl(l.url) || "?").trim();
+  return esc(n.slice(0, 1).toUpperCase());
+}
+function isUrlish(v){ return /^(https?:|mailto:|tel:)/i.test(v) || /^[\w-]+(\.[\w-]+)+([\/?#].*)?$/.test(v); }
+function normUrl(v){
+  const t = (v || "").trim();
+  if(!t) return "";
+  if(/^(https?:|mailto:|tel:)/i.test(t)) return t;
+  if(/^[\w-]+(\.[\w-]+)+([\/?#].*)?$/.test(t)) return "https://" + t;
+  return t;                                   // cesta ke složce, název programu apod.
+}
+function addHubLink(){
+  const nm = document.getElementById("hbName"), ur = document.getElementById("hbUrl");
+  if(!nm || !ur) return;
+  const name = (nm.value || "").trim(), raw = (ur.value || "").trim();
+  if(!name && !raw) return;
+  const url = normUrl(raw);
+  const cid = clientFilter !== "all" ? clientFilter : (state.clients[0] ? state.clients[0].id : "interni");
+  hubLinks().unshift({
+    id: uid(),
+    name: name || hostFromUrl(url),
+    url,
+    groupId: linkGroup !== "all" ? linkGroup : null,
+    clientId: cid,
+    icon: ""
+  });
+  nm.value = ""; ur.value = "";
+  save(); render();
+  const again = document.getElementById("hbName"); if(again) again.focus();
+}
+function openHubLink(id){
+  const l = hubLinks().find(x => x.id === id); if(!l) return;
+  if(isUrlish(l.url)){ window.open(l.url, "_blank", "noopener"); return; }
+  const t = l.url || "";
+  if(navigator.clipboard && t){
+    navigator.clipboard.writeText(t).then(
+      () => toast("Cesta zkopírovaná — prohlížeč ji sám otevřít nedokáže."),
+      () => toast("Zkopírovat se to nepovedlo.")
+    );
+  } else toast("Tohle není odkaz, jen poznámka.");
+}
+function saveHubName(id, el){
+  const l = hubLinks().find(x => x.id === id); if(!l) return;
+  const t = el.innerText.trim();
+  if(!t || t === l.name) return;
+  l.name = t; save();
+}
+function removeHubLink(e, id){
+  e.stopPropagation();
+  state.links = hubLinks().filter(x => x.id !== id);
+  save(); render();
+}
+function setHubIcon(e, id){
+  e.stopPropagation();
+  const l = hubLinks().find(x => x.id === id); if(!l) return;
+  dialog("Ikonka odkazu", `
+    <div class="field"><label>Emoji (prázdné = písmeno z názvu)</label>
+      <input name="icon" maxlength="4" value="${esc(l.icon || "")}" placeholder="např. 🛒"></div>
+  `, "Uložit", fd => {
+    l.icon = (fd.get("icon") || "").trim();
+    save(); closeDialog(); render();
+  });
+}
+function addLinkGroup(){
+  dialog("Nová skupina", `
+    <div class="field"><label>Název skupiny</label><input name="name" required placeholder="např. Blendea"></div>
+  `, "Přidat", fd => {
+    const g = { id: uid(), name: fd.get("name").trim() };
+    hubGroups().push(g);
+    linkGroup = g.id;
+    save(); closeDialog(); render();
+  });
+}
+function renameLinkGroup(){
+  const g = hubGroups().find(x => x.id === linkGroup); if(!g) return;
+  dialog("Upravit skupinu", `
+    <div class="field"><label>Název</label><input name="name" required value="${esc(g.name)}"></div>
+  `, "Uložit", fd => {
+    g.name = fd.get("name").trim();
+    save(); closeDialog(); render();
+  });
+}
+function removeLinkGroup(){
+  const g = hubGroups().find(x => x.id === linkGroup); if(!g) return;
+  state.linkGroups = hubGroups().filter(x => x.id !== g.id);
+  hubLinks().forEach(l => { if(l.groupId === g.id) l.groupId = null; });
+  linkGroup = "all";
+  save(); render();
+}
+function moveLinkToGroup(e, id, gid){
+  e.stopPropagation();
+  const l = hubLinks().find(x => x.id === id); if(!l) return;
+  l.groupId = gid || null; save(); render();
+}
 
 /* ---- soubory: popisky ve stavu, obsah v IndexedDB (zůstávají v tomhle prohlížeči) ---- */
 let _fdb = null;
