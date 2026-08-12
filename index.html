@@ -1916,6 +1916,57 @@
     .daystrip{ padding:14px 12px 16px; border-radius:14px; }
   }
 
+  /* --- lísteček: datum a úchyt --- */
+  .sticky{ padding-bottom:30px; }
+  .sticky{ cursor:grab; }
+  .sticky:active{ cursor:grabbing; }
+  .sticky .stx{ cursor:text; }
+  .sticky .sgrip{
+    position:absolute; top:7px; left:8px; font-size:12px; line-height:1;
+    color:rgba(59,53,36,.34); user-select:none; padding:3px 5px; border-radius:5px;
+    opacity:0; transition:opacity .12s, background .12s; cursor:grab;
+  }
+  .sticky:hover .sgrip{ opacity:1; }
+  .sticky .sgrip:hover{ background:rgba(59,53,36,.12); color:inherit; }
+  .sticky .sgrip:active{ cursor:grabbing; }
+  .sticky .stx{ padding-left:12px; }
+  .sticky .sdue{
+    position:absolute; right:8px; bottom:7px; border:none; background:rgba(59,53,36,.09);
+    color:rgba(59,53,36,.62); font:inherit; font-size:10.5px; font-weight:650;
+    border-radius:6px; padding:3px 7px; cursor:pointer; display:flex; align-items:center; gap:5px;
+    opacity:0; transition:all .12s;
+  }
+  .sticky:hover .sdue, .sticky .sdue.on{ opacity:1; }
+  .sticky .sdue:hover{ background:rgba(59,53,36,.18); color:inherit; }
+  .sticky .sdue.on{ background:rgba(59,53,36,.16); color:inherit; }
+  .sticky .sdue .dx2{ font-size:8px; opacity:.55; }
+  .sticky .sdue .dx2:hover{ opacity:1; }
+  .sticky .sdinp{
+    position:absolute; right:8px; bottom:6px; border:none; background:#fff;
+    font:inherit; font-size:11px; border-radius:6px; padding:3px 5px; outline:none;
+    box-shadow:0 0 0 2px var(--accent); color:var(--tx);
+  }
+
+  /* lísteček s datem v pruhu dnů */
+  .note-chip{
+    position:relative; background:#fdf0a8; color:#4a3f10; border-radius:8px;
+    padding:6px 20px 6px 9px; font-size:11.5px; font-weight:600; line-height:1.3;
+    box-shadow:0 0 0 1px rgba(150,120,20,.28); cursor:grab;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .note-chip:active{ cursor:grabbing; }
+  .note-chip .fx{
+    position:absolute; top:4px; right:4px; border:none; background:transparent;
+    color:rgba(74,63,16,.45); font-size:9px; cursor:pointer; padding:2px 3px; border-radius:5px;
+  }
+  .note-chip .fx:hover{ background:rgba(74,63,16,.14); color:#4a3f10; }
+
+  .desk-wrap.droppable{ box-shadow:0 0 0 2.5px var(--accent), 0 6px 18px -14px rgba(20,22,28,.3); }
+
+  @media (max-width:900px){
+    .sticky .sgrip, .sticky .sdue{ opacity:1; }
+  }
+
 </style>
 </head>
 <body>
@@ -2136,7 +2187,8 @@ let applyingRemote = false;
 function save(){
   if(!applyingRemote) state.updatedAt = Date.now();
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { Store.write(state); idbPutState(state); }, 120);
+  idbPutState(state);                       // záloha hned, ať se nic neztratí při rychlém zavření
+  saveTimer = setTimeout(() => Store.write(state), 120);
   if(!applyingRemote && typeof sbSchedulePush === "function") sbSchedulePush();
 }
 function flushSave(){ clearTimeout(saveTimer); Store.write(state); idbPutState(state); }
@@ -2696,6 +2748,10 @@ function dropDay(e, key){
   const el = document.getElementById("wd-" + key); if(el) el.classList.remove("droppable");
   let d;
   try { d = JSON.parse(e.dataTransfer.getData("text/plain")); } catch(_){ return; }
+  if(d.type === "note"){
+    const n = state.notes.find(x => x.id === d.id); if(!n) return;
+    n.due = key; save(); render(); return;
+  }
   if(d.type === "move"){
     const it = takeMoved(d); if(!it) return;
     if(!state.weekPlan[key]) state.weekPlan[key] = [];
@@ -2891,6 +2947,7 @@ function renderDnes(){
             ${rhy.map(r => rhyChipHtml(r, isT)).join("")}
             ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
               style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
+            ${notesOn(k).map(nn => `<div class="note-chip" draggable="true" ondragstart="noteDragStart(event,'${nn.id}')" title="Lísteček — přetáhni na jiný den">${esc(nn.text)}<button class="fx" onclick="clearNoteDue(event,'${nn.id}')" title="Zrušit datum">✕</button></div>`).join("")}
             <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat na tenhle den">+</button>
           </div>`;
         }).join("")}
@@ -2925,7 +2982,7 @@ function renderDnes(){
     <div class="zone z-stul">
     <div class="seclabel">Na stole <span>jednorázové věci</span></div>
     <section class="sblock cyan">
-      <div class="desk-wrap">
+      <div class="desk-wrap" ondragover="deskDragOver(event)" ondragleave="deskDragLeave(event)" ondrop="dropDesk(event)">
       <div class="mind-input" style="max-width:640px;">
         <input id="deskInput" placeholder="Co je potřeba odbýt…" onkeydown="if(event.key==='Enter')addDesk()">
         <button class="btn-primary" onclick="addDesk()">Položit na stůl</button>
@@ -2970,15 +3027,25 @@ function renderDnes(){
             `<button class="${noteFilter === k ? "active" : ""}" style="padding:5px 10px;font-size:11.5px;" onclick="setNoteFilter('${k}')">${lab}</button>`).join("")}
         </div>
         <div class="stickies">
-          ${notes.map((n, i) => `<div class="sticky c-${esc(n.category)}" id="note-${n.id}" style="--rot:${(i % 2 ? 1 : -1) * (0.5 + (i % 3) * 0.35)}deg;">
+          ${notes.map((n, i) => `<div class="sticky c-${esc(n.category)}" id="note-${n.id}" style="--rot:${(i % 2 ? 1 : -1) * (0.5 + (i % 3) * 0.35)}deg;"
+            draggable="true" ondragstart="noteDragStart(event,'${n.id}')"
+            title="Přetáhni na den v kalendáři nebo na Stůl">
+            <span class="sgrip">⠿</span>
             <span class="stx" contenteditable="true" spellcheck="false"
               onblur="if(this.dataset.cancel){this.dataset.cancel='';render();}else{saveNoteText('${n.id}',this)}"
               onkeydown="editKey(event,this)" title="Klepni a uprav">${esc(n.text)}</span>
             <button class="scat" onclick="cycleNoteCat(event,'${n.id}')" title="Přepnout kategorii">${esc(n.category)}</button>
+            ${_dueOpen === n.id
+              ? `<input type="date" class="sdinp" value="${n.due || ""}"
+                   onchange="setNoteDue('${n.id}',this.value)" onblur="closeNoteDue()"
+                   onkeydown="if(event.key==='Escape'){event.preventDefault();closeNoteDue();}">`
+              : n.due
+                ? `<button class="sdue on" onclick="openNoteDue(event,'${n.id}')" title="Změnit datum">${esc(fmtDeadline(n.due))}<span class="dx2" onclick="clearNoteDue(event,'${n.id}')" title="Zrušit datum">✕</span></button>`
+                : `<button class="sdue" onclick="openNoteDue(event,'${n.id}')" title="Přidat datum — objeví se v kalendáři">+ datum</button>`}
             <button class="sxx" onclick="removeNote('${n.id}')" title="Sundat lísteček">✕</button>
           </div>`).join("") || `<div class="mind-note" style="padding:4px 2px;">Nic tu není — čistá hlava.</div>`}
         </div>
-        <div class="mind-note">Křížkem lísteček sundáš. Nic se nepočítá.</div>
+        <div class="mind-note">Datum je nepovinné — když ho přidáš, lísteček se objeví v tom dni nahoře. Za ⠿ ho přetáhneš na den nebo na Stůl.</div>
       </section>
       </div>
     </aside>
@@ -3451,6 +3518,52 @@ function addNote(){
   const again = document.getElementById("mindInput");
   if(again) again.focus();
 }
+/* ---- lísteček: nepovinné datum + přetažení ---- */
+let _dueOpen = null;
+function openNoteDue(e, id){ e.stopPropagation(); _dueOpen = id; render(); }
+function closeNoteDue(){ if(_dueOpen){ _dueOpen = null; render(); } }
+function setNoteDue(id, v){
+  const n = state.notes.find(x => x.id === id); if(!n) return;
+  if(v) n.due = v; else delete n.due;
+  _dueOpen = null; save(); render();
+}
+function clearNoteDue(e, id){
+  if(e) e.stopPropagation();
+  const n = state.notes.find(x => x.id === id); if(!n) return;
+  delete n.due; save(); render();
+}
+function notesOn(key){ return state.notes.filter(n => n.due === key); }
+function focusDue(){
+  if(!_dueOpen) return;
+  const inp = document.querySelector(".sdinp");
+  if(inp && document.activeElement !== inp){
+    inp.focus();
+    try { inp.showPicker(); } catch(_){}
+  }
+}
+function noteDragStart(e, id){
+  e.stopPropagation();
+  e.dataTransfer.setData("text/plain", JSON.stringify({ type:"note", id }));
+  e.dataTransfer.effectAllowed = "copyMove";
+}
+function deskDragOver(e){
+  e.preventDefault(); e.dataTransfer.dropEffect = "move";
+  e.currentTarget.classList.add("droppable");
+}
+function deskDragLeave(e){ e.currentTarget.classList.remove("droppable"); }
+function dropDesk(e){
+  e.preventDefault();
+  e.currentTarget.classList.remove("droppable");
+  let d;
+  try { d = JSON.parse(e.dataTransfer.getData("text/plain")); } catch(_){ return; }
+  if(d.type !== "note") return;
+  const n = state.notes.find(x => x.id === d.id); if(!n) return;
+  state.notes = state.notes.filter(x => x.id !== d.id);
+  const cid = clientFilter !== "all" ? clientFilter : (state.clients[0] ? state.clients[0].id : "interni");
+  deskList().unshift({ id:uid(), clientId:cid, text:n.text, done:false, doneAt:0, at:Date.now() });
+  save(); render();
+}
+
 /* ---- úprava textu přímo v lístečku ---- */
 function saveNoteText(id, el){
   const n = state.notes.find(x => x.id === id); if(!n) return;
@@ -4912,6 +5025,7 @@ function focusDraft(){
 }
 function paintRoutes(){
   focusDraft();
+  focusDue();
   document.querySelectorAll(".ln.done").forEach(el => {
     let len = 0;
     try { len = el.getTotalLength(); } catch(e){ return; }
