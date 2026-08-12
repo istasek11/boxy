@@ -1520,6 +1520,135 @@
   .desknote .dtx[contenteditable]:hover{ background:rgba(255,255,255,.75); box-shadow:0 0 0 4px rgba(255,255,255,.75); }
   .desknote .dtx[contenteditable]:focus{ background:#fff; box-shadow:0 0 0 4px #fff, 0 0 0 5px var(--accent); }
 
+
+  /* =====================================================================
+     SYSTÉMOVÝ ÚKLID — hierarchie, kontrast, rytmus
+     Pravidla: dvě vrstvy podkladu (plátno + prvek), barva = význam,
+     odstupy na osmičkové mřížce, jeden akcent.
+     ===================================================================== */
+
+  /* --- 1. plátno a odstupy --- */
+  body{ background:#f4f5f8; }
+  :root{ --canvas:#f4f5f8; }
+  main{ max-width:1360px; padding:8px 8px 80px; gap:0; }
+  .colmain{ gap:0; }
+  .cols{ gap:32px; grid-template-columns:minmax(0,1fr) 316px; }
+
+  /* --- 2. sekce sedí na plátně, ne v kartě --- */
+  .sblock{
+    background:transparent !important; box-shadow:none !important; border:none !important;
+    padding:0 !important; border-radius:0 !important; gap:12px;
+  }
+  .seclabel{
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+    padding:56px 2px 20px; font-size:26px; font-weight:750;
+    letter-spacing:-.035em; color:var(--tx); line-height:1.1;
+  }
+  .seclabel span{ font-size:14px; font-weight:450; color:var(--tx4); letter-spacing:-.005em; }
+  .colmain > .seclabel:first-child{ padding-top:12px; }
+  main > .seclabel{ padding-top:44px; }
+
+  /* --- 3. horní pruh s osou --- */
+  .topline{
+    background:#fff; border-radius:16px; padding:18px 22px 20px;
+    box-shadow:0 1px 2px rgba(20,22,28,.05), 0 8px 22px -16px rgba(20,22,28,.2);
+  }
+
+  /* --- 4. karta projektu: barva jako značka, ne výplň --- */
+  .cesta{ gap:12px; }
+  .cesta .pcard, .cesta .pcard:hover{
+    background:#fff !important; border-radius:14px; padding:20px 24px 16px 26px;
+    box-shadow:inset 3px 0 0 var(--pc), 0 1px 2px rgba(20,22,28,.05),
+               0 8px 22px -16px rgba(20,22,28,.22) !important;
+  }
+  .cesta .pcard + .pcard{ margin-top:12px; }
+  .cesta .pcard .nm{ font-size:18px; font-weight:700; letter-spacing:-.022em; margin-top:2px; }
+  .cesta .pcard .eyebrow{ font-size:12px; }
+  .cesta .pin .lab{ font-size:13px; font-weight:550; color:var(--tx3); }
+  .cesta .pin.current .lab{ font-size:15.5px; font-weight:700; color:var(--tx); }
+  .cesta .pin.done .lab{ color:var(--tx4); }
+  .route .ln.rest{ stroke:#c2c6d2; stroke-width:4; }
+  .cesta .pmeaning{ background:var(--fill); }
+  .shut-line{ font-size:13px; }
+
+  /* --- 5. Na stole --- */
+  .desk-wrap{
+    background:#fff; border-radius:16px; padding:20px 22px;
+    box-shadow:0 1px 2px rgba(20,22,28,.05), 0 8px 22px -16px rgba(20,22,28,.2);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .desknote{ background:var(--fill); }
+  .desknote .dtx{ font-size:13.5px; }
+
+  /* --- 6. Provoz: světlý, stejný jazyk jako zbytek --- */
+  .sblock.provoz{ display:flex; flex-direction:column; gap:0; }
+  .prov-wrap{
+    background:#fff; border-radius:16px; padding:20px 22px 22px;
+    box-shadow:0 1px 2px rgba(20,22,28,.05), 0 8px 22px -16px rgba(20,22,28,.2);
+  }
+  .prov-head{ align-items:center; margin-bottom:18px; }
+  .board-head{
+    border-top:none; padding-top:0; margin:0 0 12px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .board-t{ font-size:13.5px; font-weight:600; color:var(--tx3); }
+  .board-range{ font-size:13px; font-weight:650; color:var(--tx); }
+  .bnav{ background:var(--fill); color:var(--tx2); }
+  .bnav:hover{ background:var(--fill2); color:var(--tx); }
+  .provoz .wday{ background:var(--fill); min-height:132px; }
+  .provoz .wday.today{ background:var(--accent-soft); box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .provoz .wday .dh .dn{ color:var(--tx2); font-size:12px; }
+  .provoz .wday.today .dh .dn{ color:var(--accent-ink); }
+  .provoz .wday .dh .dd{ color:var(--tx4); font-size:11px; }
+  .provoz .wday .ev{ color:var(--tx3); }
+  .provoz .wday .ev b{ color:var(--tx2); }
+  .provoz .wday .addf{ color:var(--tx4); }
+  .provoz .wday .addf:hover{ background:#fff; color:var(--tx2); }
+
+  .rchip{
+    background:var(--fill2); color:var(--tx2);
+    padding:6px 10px; font-size:11.5px; border-radius:8px;
+  }
+  .rchip:hover{ background:#e2e4ec; }
+  .rchip.late{ background:var(--red-soft); color:#b8324a; }
+  .rchip.late:hover{ background:#fbd5dd; }
+  .rchip.due{ background:var(--accent-soft); color:var(--accent-ink); }
+  .rchip.done{ background:var(--good-soft); color:#15804c; }
+  .rchip.next{ background:#eceef4; color:var(--tx3); }
+  .rchip .rok{ color:#15804c; }
+  .rchip.holding::after{ background:rgba(26,155,92,.18); border-right-color:var(--good); }
+
+  .monthlist .mrow{ border-top:1px solid var(--line); padding:10px 2px; }
+  .mday{ color:var(--tx4); }
+  .mday b{ color:var(--tx); }
+  .mday i{ color:var(--accent-ink); }
+
+  /* --- 7. lístečky --- */
+  .sticky-panel{
+    background:#fff; border-radius:16px; padding:20px 20px 18px;
+    box-shadow:0 1px 2px rgba(20,22,28,.05), 0 8px 22px -16px rgba(20,22,28,.2);
+  }
+  .sticky{ box-shadow:0 1px 2px rgba(20,22,28,.07), 0 6px 14px -10px rgba(20,22,28,.28); }
+  .sticky:hover{ box-shadow:0 2px 4px rgba(20,22,28,.09), 0 10px 20px -12px rgba(20,22,28,.34); }
+
+  /* --- 8. text: tři úrovně, dost kontrastu --- */
+  :root{ --tx:#12141a; --tx2:#484e5c; --tx3:#6b7280; --tx4:#9aa0ad; }
+  .hdr{ padding:6px 2px 2px; }
+  h1{ font-size:32px; font-weight:750; letter-spacing:-.032em; }
+  .hdr-sub{ font-size:14.5px; color:var(--tx3); }
+  .toprow{ margin-top:18px; }
+
+  /* --- 9. pruh oblasti --- */
+  .areabar{ margin-top:14px; box-shadow:inset 4px 0 0 var(--ac), 0 1px 2px rgba(20,22,28,.05); }
+
+  @media (max-width:900px){
+    main{ padding:4px 2px 60px; }
+    .seclabel{ padding:34px 2px 14px; font-size:21px; }
+    main > .seclabel{ padding-top:28px; }
+    .topline, .desk-wrap, .prov-wrap, .sticky-panel{ padding:16px 14px; border-radius:14px; }
+    .cesta .pcard, .cesta .pcard:hover{ padding:16px 16px 12px 18px; }
+  }
+
 </style>
 </head>
 <body>
@@ -2445,7 +2574,7 @@ function renderDnes(){
       <button class="sec-link" onclick="setClientFilter('all')">zobrazit vše</button>
     </div>` : ""}
 
-    <div class="seclabel"><i style="background:var(--tx3)"></i>Dnešní schůzky</div>
+    <div class="seclabel">Dnešní schůzky</div>
     <section class="topline">
       <div class="tlx-head">
         <span class="tlx-t">${isPlanToday ? "dnes" : pdLab}</span>
@@ -2468,14 +2597,15 @@ function renderDnes(){
 
     <div class="cols">
     <div class="colmain">
-    <div class="seclabel"><i style="background:#2f6df6"></i>Cesty <span>kam projekty míří</span></div>
+    <div class="seclabel">Cesty <span>kam projekty míří</span></div>
     <section class="sblock violet cesta">
       ${projs.map(p => renderProjectCard(p, true)).join("")}
       ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádná cesta — přidej projekt vlevo v menu a rozvrhni si zastávky" : "Pro tenhle výběr tu nic není"}</div>` : ""}
     </section>
 
-    <div class="seclabel"><i style="background:#12a8bd"></i>Na stole <span>jednorázové věci</span></div>
+    <div class="seclabel">Na stole <span>jednorázové věci</span></div>
     <section class="sblock cyan">
+      <div class="desk-wrap">
       <div class="mind-input" style="max-width:640px;">
         <input id="deskInput" placeholder="Co je potřeba odbýt…" onkeydown="if(event.key==='Enter')addDesk()">
         <button class="btn-primary" onclick="addDesk()">Položit na stůl</button>
@@ -2497,10 +2627,12 @@ function renderDnes(){
         </div>`).join("")}
       </div>` : `<div class="empty-tile" style="background:rgba(255,255,255,.6);">Stůl je prázdný.</div>`}
       <div class="mind-note">Hotové věci zůstanou na místě a přes noc samy zmizí. Nic se nepočítá.</div>
+      </div>
     </section>
 
-    <div class="seclabel"><i style="background:#7b5cf0"></i>Provoz <span>co běží samo</span></div>
-    <section class="sblock darkp">
+    <div class="seclabel">Provoz <span>co běží samo</span></div>
+    <section class="sblock provoz">
+      <div class="prov-wrap">
       <div class="prov-head">
         <div class="prov-tools">
           <div class="seg" style="padding:2px;">
@@ -2554,7 +2686,7 @@ function renderDnes(){
       <div class="monthlist">
         ${(() => {
           const rows = upcomingByDay(pending, 30);
-          if(!rows.length) return `<div class="empty-tile" style="background:rgba(255,255,255,.05);color:#8b8f9c;">Příští měsíc tě z pravidelných věcí nic nečeká.</div>`;
+          if(!rows.length) return `<div class="empty-tile" >Příští měsíc tě z pravidelných věcí nic nečeká.</div>`;
           return rows.map(row => `<div class="mrow">
             <div class="mday">
               <b>${["Po","Út","St","Čt","Pá","So","Ne"][(row.d.getDay()+6)%7]}</b>
@@ -2570,20 +2702,21 @@ function renderDnes(){
       </div>
       `}
 
-      ${!rhyForClient.length ? `<div class="empty-tile" style="background:rgba(255,255,255,.05);color:#8b8f9c;margin-top:10px;">Zatím žádné pravidelné věci</div>` : ""}
+      ${!rhyForClient.length ? `<div class="empty-tile" style="margin-top:10px;">Zatím žádné pravidelné věci</div>` : ""}
 
-      ${vyList.length ? `<div class="sub-label" style="color:#8b8f9c;margin-top:14px;">Výstupy od Clauda <span class="n" style="color:#6d7280;">— posledních 7 dní</span></div>
+      ${vyList.length ? `<div class="sub-label" style="margin-top:20px;">Výstupy od Clauda <span class="n">— posledních 7 dní</span></div>
       <div style="display:flex;flex-direction:column;gap:6px;">
         ${vyList.slice(0, 6).map(row => {
           const dd = new Date(row.created_at);
-          return `<div class="vy-row" style="background:rgba(255,255,255,.06);">
-            <span style="color:#a78bfa;font-weight:800;">✳</span>
-            <span class="t" style="color:#eceef4;">${esc(row.title || row.rhythm_name || "Výstup")}</span>
-            <span class="meta" style="color:#8b8f9c;font-family:inherit;">${esc(row.area || "")} · ${CZ_DAYS[dd.getDay()]} ${dd.getDate()}. ${dd.getMonth()+1}.</span>
-            ${row.url ? `<a href="${esc(row.url)}" target="_blank" rel="noopener" style="color:#a78bfa;">Stáhnout ↓</a>` : ""}
+          return `<div class="vy-row">
+            <span style="color:#7b5cf0;font-weight:800;">✳</span>
+            <span class="t">${esc(row.title || row.rhythm_name || "Výstup")}</span>
+            <span class="meta">${esc(row.area || "")} · ${CZ_DAYS[dd.getDay()]} ${dd.getDate()}. ${dd.getMonth()+1}.</span>
+            ${row.url ? `<a href="${esc(row.url)}" target="_blank" rel="noopener">Stáhnout ↓</a>` : ""}
           </div>`;
         }).join("")}
       </div>` : ""}
+      </div>
     </section>
 
     </div>
