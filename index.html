@@ -2192,6 +2192,35 @@
     .mnode .nb{ opacity:1; }
   }
 
+  /* --- postranní panel: Domů + oblasti --- */
+  .navsec{ display:flex; flex-direction:column; gap:2px; margin-top:14px; }
+  .navbottom{ margin-top:auto; display:flex; flex-direction:column; gap:2px; }
+  .nav-row.area-row{ font-weight:600; }
+  .nav-row.area-row .adot{
+    width:9px; height:9px; border-radius:50%; background:var(--ac); flex:none; margin-left:6px; margin-right:2px;
+  }
+  .nav-row.area-row.active{ background:var(--ac); color:#fff; box-shadow:0 6px 16px -8px var(--ac); }
+  .nav-row.area-row.active .adot{ background:rgba(255,255,255,.92); }
+  .nav-row.area-row.active .nav-meta{ color:rgba(255,255,255,.72); }
+  .nav-row.area-row:not(.active):hover{ background:var(--fill); }
+  .nav-row.proj-item{ padding-left:26px; }
+
+  .hdr.areahdr{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+  .hdr.areahdr .hdr-date{ display:flex; align-items:center; gap:7px; color:var(--ac); font-weight:650; }
+  .hdr.areahdr .hdot{ width:9px; height:9px; border-radius:50%; background:var(--ac); }
+  .hdr.areahdr h1{ letter-spacing:-.032em; }
+
+  @media (max-width:900px){
+    .navsec{ flex-direction:row; flex-wrap:wrap; gap:6px; margin-top:0; }
+    .navsec .nav-row{ width:auto; flex:0 0 auto; padding:8px 12px; }
+    .navsec .nav-row.proj-item{ padding-left:12px; }
+    .navbottom{ margin-top:0; flex-direction:row; gap:6px; }
+    .navbottom .nav-row{ width:auto; flex:0 0 auto; padding:8px 12px; }
+    #navMain{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+    #navMain .navcard{ flex:0 0 auto; }
+    .hdr.areahdr{ flex-wrap:wrap; }
+  }
+
 </style>
 </head>
 <body>
@@ -2201,27 +2230,8 @@
       <div class="brand-mark">B</div>
       <div class="brand-name">Boxy</div>
     </div>
-    <div class="navcard">
-      <button class="nav-row" id="navDnes" onclick="go('dnes')">
-        <span class="ni"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2.5"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3"/></svg></span>
-        <span class="lbl">Dnes</span>
-        <span class="nav-meta" id="navDate"></span>
-      </button>
-      <button class="nav-row" onclick="go('archiv')">
-        <span class="ni"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2.5" width="12" height="3.4" rx="1.2"/><path d="M3.2 5.9v6.4a1.6 1.6 0 0 0 1.6 1.6h6.4a1.6 1.6 0 0 0 1.6-1.6V5.9M6.4 9h3.2"/></svg></span>
-        <span class="lbl">Archiv</span>
-        <span class="nav-meta" id="archCount"></span>
-      </button>
-      <button class="nav-row" onclick="openSettings()">
-        <span class="ni"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.4"/><path d="M12.9 9.9a1.3 1.3 0 0 0 .26 1.44l.05.05a1.6 1.6 0 1 1-2.26 2.26l-.05-.05a1.3 1.3 0 0 0-1.44-.26 1.3 1.3 0 0 0-.79 1.19v.13a1.6 1.6 0 0 1-3.2 0v-.07a1.3 1.3 0 0 0-.85-1.19 1.3 1.3 0 0 0-1.44.26l-.05.05A1.6 1.6 0 1 1 .87 11.4l.05-.05a1.3 1.3 0 0 0 .26-1.44 1.3 1.3 0 0 0-1.19-.79H-.1a1.6 1.6 0 0 1 0-3.2h.07a1.3 1.3 0 0 0 1.19-.85 1.3 1.3 0 0 0-.26-1.44l-.05-.05A1.6 1.6 0 1 1 3.11.87l.05.05a1.3 1.3 0 0 0 1.44.26h.06a1.3 1.3 0 0 0 .79-1.19V-.1a1.6 1.6 0 0 1 3.2 0v.07a1.3 1.3 0 0 0 .79 1.19 1.3 1.3 0 0 0 1.44-.26l.05-.05a1.6 1.6 0 1 1 2.26 2.26l-.5.05a1.3 1.3 0 0 0-.26 1.44v.06a1.3 1.3 0 0 0 1.19.79h.13a1.6 1.6 0 0 1 0 3.2h-.07a1.3 1.3 0 0 0-1.19.79z" transform="translate(1 1) scale(0.86)"/></svg></span>
-        <span class="lbl">Nastavení</span>
-      </button>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:2px;">
-      <div class="nav-label">Projekty</div>
-      <div id="navProjects"></div>
-      <button class="btn-ghost-add" onclick="openNewProject()">+ Nový projekt</button>
-    </div>
+    <div id="navMain"></div>
+    <div class="navcard navbottom" id="navBottom"></div>
     <div class="side-footer">
       <div class="syncpill" id="syncPill" hidden><span class="led"></span><span></span></div>
     </div>
@@ -2875,28 +2885,58 @@ let justConfirmed = {};
 
 function go(v){ view = v; render(); }
 
+function goHome(){ clientFilter = "all"; view = "dnes"; render(); }
+function goArea(cid){ clientFilter = cid; view = "dnes"; render(); }
+
+const NAVI = {
+  home: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.2 8 2.6l5.5 4.6"/><path d="M4 7.6V13h8V7.6"/></svg>`,
+  arch: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2.5" width="12" height="3.4" rx="1.2"/><path d="M3.2 5.9v6.4a1.6 1.6 0 0 0 1.6 1.6h6.4a1.6 1.6 0 0 0 1.6-1.6V5.9M6.4 9h3.2"/></svg>`,
+  gear: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.6v1.6M8 12.8v1.6M14.4 8h-1.6M3.2 8H1.6M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1M12.5 12.5l-1.1-1.1M4.6 4.6 3.5 3.5"/></svg>`
+};
+
 function renderSidebar(){
   const now = new Date();
-  document.getElementById("navDate").textContent = `${now.getDate()}. ${now.getMonth()+1}.`;
-  document.getElementById("navDnes").classList.toggle("active", view === "dnes");
   const act = state.projects.filter(p => !p.archived);
-  document.getElementById("navProjects").innerHTML = state.clients.map(c => {
-    const cp = act.filter(p => p.clientId === c.id);
-    if(!cp.length) return "";
-    const onArea = clientFilter === c.id;
-    return `<button class="areagrp ${onArea ? "on" : ""}" style="--ac:${clientDot(c.id)};"
-        onclick="setClientFilter('${onArea ? "all" : c.id}')"
-        title="${onArea ? "Zpět na všechny oblasti" : "Zobrazit jen " + esc(c.name)}">
-        <span class="proj-dot" style="background:${clientDot(c.id)};width:7px;height:7px;"></span>
-        <span class="agn">${esc(c.name)}</span>
-      </button>` +
-      cp.map(p => `
-      <button class="nav-row proj-item ${view === p.id ? "active" : ""} ${clientFilter !== "all" && clientFilter !== c.id ? "dimmed" : ""}" style="padding-left:26px;" onclick="go('${p.id}')">
-        <span class="nm"><span class="proj-dot" style="background:${projColor(p)}"></span><span class="proj-name">${esc(p.name)}</span></span>
-        <span class="proj-phase" style="padding-left:0;">${esc((p.phases[p.currentPhaseIndex]||{}).name || "")}</span>
-      </button>`).join("");
-  }).join("");
-  document.getElementById("archCount").textContent = state.projects.filter(p => p.archived).length || "";
+  const onHome = view === "dnes" && clientFilter === "all";
+
+  document.getElementById("navMain").innerHTML = `
+    <div class="navcard">
+      <button class="nav-row ${onHome ? "active" : ""}" onclick="goHome()">
+        <span class="ni">${NAVI.home}</span>
+        <span class="lbl">Domů</span>
+        <span class="nav-meta">${now.getDate()}. ${now.getMonth()+1}.</span>
+      </button>
+    </div>
+    <div class="navsec">
+      <div class="nav-label">Oblasti</div>
+      ${state.clients.map(c => {
+        const cp = act.filter(p => p.clientId === c.id);
+        const onArea = clientFilter === c.id;
+        const opened = onArea && (view === "dnes" || cp.some(p => p.id === view));
+        return `<button class="nav-row area-row ${onArea && view === "dnes" ? "active" : ""}"
+            style="--ac:${clientDot(c.id)};" onclick="goArea('${c.id}')" title="Zobrazit jen ${esc(c.name)}">
+            <span class="adot"></span>
+            <span class="lbl">${esc(c.name)}</span>
+            <span class="nav-meta">${cp.length || ""}</span>
+          </button>` +
+          (opened ? cp.map(p => `
+          <button class="nav-row proj-item ${view === p.id ? "active" : ""}" onclick="go('${p.id}')">
+            <span class="nm"><span class="proj-dot" style="background:${projColor(p)}"></span><span class="proj-name">${esc(p.name)}</span></span>
+            <span class="proj-phase" style="padding-left:0;">${esc((p.phases[Math.min(p.currentPhaseIndex, p.phases.length-1)]||{}).name || "")}</span>
+          </button>`).join("") : "");
+      }).join("")}
+      <button class="btn-ghost-add" onclick="openNewProject()">+ Nový projekt</button>
+    </div>`;
+
+  const arch = state.projects.filter(p => p.archived).length;
+  document.getElementById("navBottom").innerHTML = `
+    <button class="nav-row ${view === "archiv" ? "active" : ""}" onclick="go('archiv')">
+      <span class="ni">${NAVI.arch}</span><span class="lbl">Archiv</span>
+      <span class="nav-meta">${arch || ""}</span>
+    </button>
+    <button class="nav-row" onclick="openSettings()">
+      <span class="ni">${NAVI.gear}</span><span class="lbl">Nastavení</span>
+    </button>`;
 }
 
 /* ============================================================
@@ -3080,7 +3120,8 @@ function renderDnes(){
   const linkedProj = linkedBlock ? state.projects.find(p => p.id === linkedBlock.refId) : null;
   const focusProj = todayFocus.map(f => f.refType === "project" ? state.projects.find(p => p.id === f.refId) : null).find(Boolean);
   const leadProj = focusProj || projs[0] || null;
-  const h1txt = greet;
+  const areaC = clientFilter === "all" ? null : state.clients.find(c => c.id === clientFilter);
+  const h1txt = areaC ? esc(areaC.name) : greet;
   let subLine;
   if(leadProj){
     const lp = leadProj.phases[Math.min(leadProj.currentPhaseIndex, leadProj.phases.length - 1)];
@@ -3091,23 +3132,17 @@ function renderDnes(){
     subLine = "Zatím tu není žádná cesta. Přidej projekt a uvidíš, kam míří.";
   }
   document.getElementById("main").innerHTML = `
-    <div class="hdr">
+    <div class="hdr ${areaC ? "areahdr" : ""}" ${areaC ? `style="--ac:${clientDot(areaC.id)};"` : ""}>
       <div>
-        <div class="hdr-date">${dateStr}</div>
+        <div class="hdr-date">${areaC ? `<span class="hdot"></span>oblast · ${dateStr}` : dateStr}</div>
         <h1>${h1txt}</h1>
         <div class="hdr-sub">${subLine}</div>
       </div>
+      ${areaC ? `<button class="btn-light" onclick="goHome()">← Domů</button>` : ""}
     </div>
 
     <div class="toprow" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-      <div class="seg areaseg scrollx">
-        ${[{id:"all", name:"Vše"}].concat(state.clients).map(c => {
-          const on = clientFilter === c.id;
-          const col = c.id === "all" ? "" : clientDot(c.id);
-          return `<button class="${on ? "active" : ""}" ${on && col ? `style="background:${col};color:#fff;"` : ""}
-            onclick="setClientFilter('${c.id}')">${c.id !== "all" ? `<span class="cdot" style="background:${on ? "rgba(255,255,255,.9)" : col}"></span>` : ""}${esc(c.name)}</button>`;
-        }).join("")}
-      </div>
+      <div></div>
       <div class="scrollx" style="display:flex;"><div class="daypick" title="Který den plánuješ">
         ${weekDates().map(k => {
           const d = parseDate(k);
@@ -3129,12 +3164,7 @@ function renderDnes(){
       </div></div>
     </div>
 
-    ${clientFilter !== "all" ? `<div class="areabar" style="--ac:${clientDot(clientFilter)};">
-      <span class="adot"></span>
-      <span class="aname">${esc(clientName(clientFilter))}</span>
-      <span class="asub">vidíš jen tuhle oblast</span>
-      <button class="sec-link" onclick="setClientFilter('all')">zobrazit vše</button>
-    </div>` : ""}
+
 
     <div class="zone z-den">
     <div class="seclabel">Kalendář <span>schůzky a co na který den padá</span></div>
