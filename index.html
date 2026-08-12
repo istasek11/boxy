@@ -1404,6 +1404,52 @@
     .topline .tl-hours, .topline .tl-lanes{ min-width:640px; }
   }
 
+
+  /* ---------- sloučený Provoz ---------- */
+  .prov-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .prov-id .eyebrow{ font-size:12px; }
+  .prov-id h2{ color:#fff; font-size:19px; }
+  .prov-tools{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .darkp .board-head{ margin-top:18px; }
+
+  .rchip{
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:7px;
+    border-radius:9px; padding:6px 9px; font-size:11.5px; font-weight:600; line-height:1.25;
+    background:rgba(255,255,255,.07); color:#dfe1e8;
+    cursor:grab; user-select:none; -webkit-user-select:none; touch-action:none;
+    transition:background .13s;
+  }
+  .rchip:hover{ background:rgba(255,255,255,.13); }
+  .rchip:active{ cursor:grabbing; }
+  .rchip .rdot{ width:6px; height:6px; border-radius:50%; flex:none; }
+  .rchip .rtx{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rchip .rok{ color:#4ade80; font-weight:800; flex:none; }
+  .rchip.late{ background:rgba(224,66,96,.22); color:#ffc7d2; }
+  .rchip.late:hover{ background:rgba(224,66,96,.32); }
+  .rchip.due{ background:rgba(47,109,246,.22); color:#cfe0ff; }
+  .rchip.done{ background:rgba(26,155,92,.20); color:#a7e8c4; cursor:pointer; }
+  .rchip.next{ background:rgba(255,255,255,.05); color:#9ba0ad; }
+  .rchip.holding::after{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:0;
+    background:rgba(74,222,128,.22); border-right:2px solid #4ade80;
+    animation:holdfill .7s linear forwards; pointer-events:none;
+  }
+
+  /* měsíční přehled */
+  .monthlist{ display:flex; flex-direction:column; gap:2px; }
+  .mrow{ display:grid; grid-template-columns:112px minmax(0,1fr); gap:14px; align-items:start;
+    padding:9px 2px; border-top:1px solid rgba(255,255,255,.07); }
+  .mrow:first-child{ border-top:none; }
+  .mday{ display:flex; align-items:baseline; gap:6px; font-size:12.5px; color:#8b8f9c; padding-top:3px; }
+  .mday b{ color:#eceef4; font-weight:650; }
+  .mday i{ font-style:normal; font-size:10.5px; color:#89aeff; font-weight:650; }
+  .mitems{ display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
+  .mitems .rchip{ flex:0 1 auto; max-width:100%; }
+  @media (max-width:900px){
+    .mrow{ grid-template-columns:minmax(0,1fr); gap:6px; }
+    .prov-tools{ width:100%; }
+  }
+
 </style>
 </head>
 <body>
@@ -1735,6 +1781,39 @@ function deskHoldStart(e, id){
     toggleDesk(id);
   }, 700) };
 }
+
+/* ---- na který den pravidelná věc připadá ---- */
+function dayOffsetOf(key){
+  const d = parseDate(key); d.setHours(12,0,0,0);
+  const t = new Date(); t.setHours(12,0,0,0);
+  return Math.round((d - t) / DAY);
+}
+function rhythmOccursOn(r, key){
+  const off = dayOffsetOf(key);
+  if(off < 0) return false;                       // minulost nedohání
+  const until = daysUntilDue(r);                  // <= 0 znamená po termínu
+  if(off === 0) return until <= 0 || isToday(r.lastRunAt);
+  if(until > off) return false;
+  const every = Math.max(1, r.everyDays);
+  return (off - until) % every === 0;
+}
+function upcomingByDay(list, days){
+  const out = [];
+  for(let i = 0; i < days; i++){
+    const d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate() + i);
+    const key = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const items = list.filter(r => rhythmOccursOn(r, key));
+    const plan = (state.weekPlan[key] || []);
+    if(items.length || plan.length) out.push({ key, d, items, plan });
+  }
+  return out;
+}
+const BOARD_VIEWS = [["tyden","Týden"],["mesic","Měsíc"]];
+function boardView(){
+  const k = state.settings.boardView;
+  return BOARD_VIEWS.some(v => v[0] === k) ? k : "tyden";
+}
+function setBoardView(k){ state.settings.boardView = k; save(); render(); }
 
 /* ---- pravidelné věci: horizont Dnes / Týden / Měsíc ---- */
 const HORIZONS = [["den","Dnes"],["tyden","Týden"],["mesic","Měsíc"]];
@@ -2305,46 +2384,6 @@ function renderDnes(){
       ${!projs.length ? `<div class="empty-tile">${clientFilter === "all" ? "Zatím žádná cesta — přidej projekt vlevo v menu a rozvrhni si zastávky" : "Pro tenhle výběr tu nic není"}</div>` : ""}
     </section>
 
-    <section class="sblock darkp">
-      <div class="tl-card">
-        <div class="board-head" style="margin-top:0;padding-top:0;border-top:none;">
-          <div class="board-t">Pravidelné věci a co má datum</div>
-          <div class="board-nav">
-            <button class="bnav" onclick="shiftBoard(-1)" title="Předchozí týden">‹</button>
-            <span class="board-range">${boardRange()}</span>
-            <button class="bnav" onclick="shiftBoard(1)" title="Další týden">›</button>
-            ${boardOffset !== 0 ? `<button class="sec-link" style="margin-left:6px;" onclick="shiftBoard(0)">dnes</button>` : ""}
-          </div>
-        </div>
-        <div class="week-grid wk5">
-          ${boardDates().map(k => {
-            const d = parseDate(k);
-            const isT = k === todayStr();
-            const isPast = !isT && d < parseDate(todayStr());
-            const evsAll = weekEventsFor(k);
-            const evs = evsAll.slice(0, 3);
-            const foc = state.weekPlan[k] || [];
-            return `<div class="wday ${isT ? "today" : ""} ${isPast ? "pastday" : ""}" id="wd-${k}"
-              ondragover="dayDragOver(event,'${k}')" ondragleave="dayDragLeave(event,'${k}')" ondrop="dropDay(event,'${k}')">
-              <div class="dh"><span class="dn">${["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7]}${isT ? " · dnes" : ""}</span><span class="dd">${d.getDate()}. ${d.getMonth()+1}.</span></div>
-              ${evs.map(e => `<div class="ev"><b>${e.t}</b> ${esc(e.title)}</div>`).join("")}
-              ${evsAll.length > 3 ? `<div class="ev">+${evsAll.length - 3} další</div>` : ""}
-              ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
-                style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
-              <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat na tenhle den">+</button>
-            </div>`;
-          }).join("")}
-        </div>
-        <div class="mind-note" style="margin-top:10px;">Pravidelnou věc přetáhni sem z Provozu · „+" přidá jednorázovou věc na konkrétní den.</div>
-      </div>
-    </section>
-
-    ${linkedProj ? `<div class="linkline">
-      <span class="ll-dot"></span><span class="ll-seg"></span>
-      <span class="ll-txt">blok ${fmtHM(linkedBlock.sh)} = fáze „${esc(linkedProj.phases[Math.min(linkedProj.currentPhaseIndex, linkedProj.phases.length-1)].name)}" z ${esc(linkedProj.name)}</span>
-      <span class="ll-rest"></span>
-    </div>` : ""}
-
     <section class="sblock cyan">
       <div class="sec-head">
         <div class="sec-head-l"><span class="sec-ico">${ICONS.desk}</span>
@@ -2370,61 +2409,95 @@ function renderDnes(){
       <div class="mind-note">Hotové věci zůstanou na místě a přes noc samy zmizí. Nic se nepočítá.</div>
     </section>
 
-    <section class="sblock green">
-      <div class="sec-head stack">
-        <div class="sec-head-l"><span class="sec-ico">${ICONS.cycle}</span>
-          <div><div class="eyebrow">ať to běží samo</div><h2>Provoz</h2></div>
+    <section class="sblock darkp">
+      <div class="prov-head">
+        <div class="prov-id">
+          <div class="eyebrow" style="color:#8f9cff;">ať to běží samo</div>
+          <h2>Provoz</h2>
         </div>
-        <div class="row2">
+        <div class="prov-tools">
           <div class="seg" style="padding:2px;">
             ${[["all","Vše"],["me","Já"],["claude","Claude"],["both","Spolu"]].map(([k, lab]) =>
-              `<button class="${ownerFilter === k ? "active" : ""}" style="padding:5px 10px;font-size:11.5px;" onclick="setOwnerFilter('${k}')">${lab}</button>`).join("")}
+              `<button class="${ownerFilter === k ? "active" : ""}" style="padding:5px 11px;font-size:11.5px;" onclick="setOwnerFilter('${k}')">${lab}</button>`).join("")}
           </div>
           <div class="seg" style="padding:2px;">
-            ${HORIZONS.map(([k, lab]) =>
-              `<button class="${rhyHorizon() === k ? "active" : ""}" style="padding:5px 12px;font-size:11.5px;" onclick="setRhyHorizon('${k}')">${lab}</button>`).join("")}
+            ${BOARD_VIEWS.map(([k, lab]) =>
+              `<button class="${boardView() === k ? "active" : ""}" style="padding:5px 13px;font-size:11.5px;" onclick="setBoardView('${k}')">${lab}</button>`).join("")}
           </div>
           <button class="sec-link" onclick="openAddRhythm()">+ Pravidelná</button>
         </div>
       </div>
 
-      ${rhyForClient.length ? `<div class="mind-note" style="margin:-4px 0 -2px;">Podržením (~1 s) potvrdíš, že věc proběhla · přetažením na den v týdnu ji naplánuješ</div>` : `<div class="empty-tile" style="background:rgba(255,255,255,.6);">Zatím žádné pravidelné věci</div>`}
+      ${boardView() === "tyden" ? `
+      <div class="board-head">
+        <div class="board-t">Co připadá na které dny</div>
+        <div class="board-nav">
+          <button class="bnav" onclick="shiftBoard(-1)" title="Předchozí týden">‹</button>
+          <span class="board-range">${boardRange()}</span>
+          <button class="bnav" onclick="shiftBoard(1)" title="Další týden">›</button>
+          ${boardOffset !== 0 ? `<button class="sec-link" style="margin-left:6px;" onclick="shiftBoard(0)">dnes</button>` : ""}
+        </div>
+      </div>
+      <div class="week-grid wk5">
+        ${boardDates().map(k => {
+          const d = parseDate(k);
+          const isT = k === todayStr();
+          const isPast = !isT && d < parseDate(todayStr());
+          const evsAll = weekEventsFor(k);
+          const evs = evsAll.slice(0, 2);
+          const rhy = pending.filter(r => rhythmOccursOn(r, k));
+          const foc = state.weekPlan[k] || [];
+          return `<div class="wday ${isT ? "today" : ""} ${isPast ? "pastday" : ""}" id="wd-${k}"
+            ondragover="dayDragOver(event,'${k}')" ondragleave="dayDragLeave(event,'${k}')" ondrop="dropDay(event,'${k}')">
+            <div class="dh"><span class="dn">${["Po","Út","St","Čt","Pá","So","Ne"][(d.getDay()+6)%7]}${isT ? " · dnes" : ""}</span><span class="dd">${d.getDate()}. ${d.getMonth()+1}.</span></div>
+            ${evs.map(e => `<div class="ev"><b>${e.t}</b> ${esc(e.title)}</div>`).join("")}
+            ${evsAll.length > 2 ? `<div class="ev">+${evsAll.length - 2} další</div>` : ""}
+            ${rhy.map(r => rhyChipHtml(r, isT)).join("")}
+            ${foc.map(f => `<div class="focus-chip" draggable="true" ondragstart="moveStart(event,'week','${k}','${f.id}')"
+              style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}<button class="fx" onclick="removeFocus('${k}','${f.id}')">✕</button></div>`).join("")}
+            <button class="addf" onclick="addFocusDialog('${k}')" title="Přidat na tenhle den">+</button>
+          </div>`;
+        }).join("")}
+      </div>
+      <div class="mind-note" style="margin-top:10px;">Podržením chipu potvrdíš, že věc proběhla · „+" přidá jednorázovou věc na konkrétní den.</div>
+      ` : `
+      <div class="board-head">
+        <div class="board-t">Co tě čeká v příštích 30 dnech</div>
+      </div>
+      <div class="monthlist">
+        ${(() => {
+          const rows = upcomingByDay(pending, 30);
+          if(!rows.length) return `<div class="empty-tile" style="background:rgba(255,255,255,.05);color:#8b8f9c;">Příští měsíc tě z pravidelných věcí nic nečeká.</div>`;
+          return rows.map(row => `<div class="mrow">
+            <div class="mday">
+              <b>${["Po","Út","St","Čt","Pá","So","Ne"][(row.d.getDay()+6)%7]}</b>
+              <span>${row.d.getDate()}. ${row.d.getMonth()+1}.</span>
+              ${dayOffsetOf(row.key) === 0 ? `<i>dnes</i>` : ""}
+            </div>
+            <div class="mitems">
+              ${row.items.map(r => rhyChipHtml(r, dayOffsetOf(row.key) === 0)).join("")}
+              ${row.plan.map(f => `<span class="focus-chip" style="background:${tint(f.color || "#2f6df6",.24)};color:${lighten(f.color || "#2f6df6")};">${esc(f.title)}</span>`).join("")}
+            </div>
+          </div>`).join("");
+        })()}
+      </div>
+      `}
 
-      ${(() => {
-        const list = pending.filter(inHorizon);
-        const due = list.filter(r => rhythmStatus(r) !== "ok" && ownerOf(r) !== "claude").sort(dueSort);
-        const claude = list.filter(r => rhythmStatus(r) !== "ok" && ownerOf(r) === "claude").sort(dueSort);
-        const quiet = list.filter(r => rhythmStatus(r) === "ok")
-          .sort((a,b) => daysUntilDue(a) - daysUntilDue(b));
-        if(!rhyForClient.length) return "";
-        if(!list.length) return `<div class="empty-tile" style="background:rgba(255,255,255,.6);">${
-          rhyHorizon() === "den" ? "Dneska tě z pravidelných věcí nic nečeká." :
-          rhyHorizon() === "tyden" ? "Tenhle týden tě z pravidelných věcí nic nečeká." :
-          "Tenhle měsíc tě z pravidelných věcí nic nečeká."}</div>`;
-        return `
-          ${due.length ? `<div class="rhythm-grid">${due.map(rTileHtml).join("")}</div>` : ""}
-          ${claude.length ? `<div class="sub-label" style="margin-top:2px;">Čeká na Clauda <span class="n">— potvrdí se samo, až dorazí výstup</span></div>
-            <div class="rrow-grid">${claude.map(rClaudeRowHtml).join("")}</div>` : ""}
-          ${quiet.length ? `<div class="sub-label" style="margin-top:6px;">${
-              rhyHorizon() === "den" ? "Dnes už proběhlo" : "Dál v tomhle horizontu"
-            }</div>
-            <div class="rrow-grid">${quiet.map(rQuietRowHtml).join("")}</div>` : ""}`;
-      })()}
+      ${!rhyForClient.length ? `<div class="empty-tile" style="background:rgba(255,255,255,.05);color:#8b8f9c;margin-top:10px;">Zatím žádné pravidelné věci</div>` : ""}
 
-      ${vyList.length ? `<div class="sub-label">Výstupy od Clauda <span class="n">— posledních 7 dní</span></div>
+      ${vyList.length ? `<div class="sub-label" style="color:#8b8f9c;margin-top:14px;">Výstupy od Clauda <span class="n" style="color:#6d7280;">— posledních 7 dní</span></div>
       <div style="display:flex;flex-direction:column;gap:6px;">
-        ${vyList.slice(0, 8).map(row => {
-          const d = new Date(row.created_at);
-          return `<div class="vy-row">
-            <span style="color:#6d28d9;font-weight:800;">✳</span>
-            <span class="t">${esc(row.title || row.rhythm_name || "Výstup")}</span>
-            <span class="meta">${esc(row.area || "")} · ${CZ_DAYS[d.getDay()]} ${d.getDate()}. ${d.getMonth()+1}. ${pad(d.getHours())}:${pad(d.getMinutes())}</span>
-            ${row.url ? `<a href="${esc(row.url)}" target="_blank" rel="noopener">Stáhnout ↓</a>` : ""}
+        ${vyList.slice(0, 6).map(row => {
+          const dd = new Date(row.created_at);
+          return `<div class="vy-row" style="background:rgba(255,255,255,.06);">
+            <span style="color:#a78bfa;font-weight:800;">✳</span>
+            <span class="t" style="color:#eceef4;">${esc(row.title || row.rhythm_name || "Výstup")}</span>
+            <span class="meta" style="color:#8b8f9c;font-family:inherit;">${esc(row.area || "")} · ${CZ_DAYS[dd.getDay()]} ${dd.getDate()}. ${dd.getMonth()+1}.</span>
+            ${row.url ? `<a href="${esc(row.url)}" target="_blank" rel="noopener" style="color:#a78bfa;">Stáhnout ↓</a>` : ""}
           </div>`;
         }).join("")}
       </div>` : ""}
     </section>
-
 
     </div>
 
@@ -2853,6 +2926,23 @@ function setClientFilter(id){ clientFilter = id; render(); }
 function setRhythmFilter(k){ rhythmFilter = k; render(); }
 function setNoteFilter(k){ noteFilter = k; render(); }
 
+function rhyChipHtml(r, today){
+  const st = rhythmStatus(r);
+  const doneNow = today && isToday(r.lastRunAt);   // „hotovo" platí jen pro dnešek
+  const cls = doneNow ? "done" : today ? (st === "late" ? "late" : "due") : "next";
+  const claude = ownerOf(r) === "claude";
+  const hold = today && !doneNow && !claude;
+  return `<div class="rchip ${cls}" draggable="true"
+    ondragstart="holdCancel(); dragStart(event,'rhythm','${r.id}')"
+    ${hold ? `onpointerdown="holdStart(event,'${r.id}')" title="Podrž ~1 s = proběhlo"` : ""}
+    ${doneNow ? `onclick="unconfirmRhythm('${r.id}')" title="Dnes hotovo — klepnutím vrátíš"` : ""}
+    oncontextmenu="event.preventDefault()"
+    ondblclick="event.preventDefault(); openEditRhythm('${r.id}')">
+    <i class="rdot" style="background:${clientDot(r.clientId)}"></i>
+    <span class="rtx">${claude ? "✳ " : ""}${esc(r.name)}</span>
+    ${doneNow ? `<span class="rok">✓</span>` : ""}
+  </div>`;
+}
 function confirmRhythm(id){
   const r = state.rhythms.find(x => x.id === id); if(!r) return;
   r.prevLastRunAt = r.lastRunAt;
