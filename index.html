@@ -185,7 +185,7 @@
   .darkp .seg{ background:rgba(255,255,255,.07) !important; }
   .darkp .seg button{ color:#9c9ca8; }
   .darkp .seg button:hover{ color:#fff; }
-  .darkp .seg button.active{ background:#fff; color:var(--ink); }
+  .darkp .seg button.active{ background:var(--card); color:var(--ink); }
   .darkp .week-grid{ gap:8px; }
   .darkp .wday{ background:rgba(255,255,255,.045); min-height:160px; padding:11px 10px; border-radius:12px; }
   .darkp .wday.today{ background:rgba(255,255,255,.09); box-shadow:inset 0 0 0 1.5px var(--accent); }
@@ -286,12 +286,12 @@
   .route .pins{ position:absolute; inset:26px 0 36px; pointer-events:none; }
   .pin{ position:absolute; transform:translate(-50%,-50%); pointer-events:auto; }
   .pin .bead{
-    width:16px; height:16px; border-radius:50%; background:#fff; border:3px solid var(--good);
+    width:16px; height:16px; border-radius:50%; background:var(--card); border:3px solid var(--good);
     transition:all .3s;
   }
   .pin.future .bead{ border-color:#d3d3dd; border-width:2.5px; width:13px; height:13px; }
   .pin.current .bead{
-    width:26px; height:26px; border:5px solid var(--accent); background:#fff;
+    width:26px; height:26px; border:5px solid var(--accent); background:var(--card);
     box-shadow:0 0 0 7px var(--accent-soft);
   }
   .pin.current::after{
@@ -402,7 +402,7 @@
     background:var(--fill); border-radius:12px; padding:9px 9px 10px; min-height:128px;
     display:flex; flex-direction:column; gap:7px; transition:background .15s, box-shadow .15s;
   }
-  .wday.today{ background:#fff; box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .wday.today{ background:var(--card); box-shadow:inset 0 0 0 1.5px var(--accent); }
   .wday.pastday{ opacity:.5; }
   .wday.droppable{ background:var(--accent-soft); box-shadow:inset 0 0 0 2px var(--accent); }
   .wday .dh{ display:flex; align-items:baseline; justify-content:space-between; }
@@ -510,9 +510,9 @@
   .vpath .stop{ width:14px; }
   .vpath .stop .dot{
     width:15px; height:15px; display:flex; align-items:center; justify-content:center;
-    color:#fff; font-size:9px; font-weight:800; background:#fff; border:2.5px solid var(--fill2);
+    color:#fff; font-size:9px; font-weight:800; background:var(--card); border:2.5px solid var(--fill2);
   }
-  .vpath .stop.current .dot{ width:18px; height:18px; background:#fff; border-width:4px; margin-top:-1px; }
+  .vpath .stop.current .dot{ width:18px; height:18px; background:var(--card); border-width:4px; margin-top:-1px; }
   .vpath .stop .pl{ top:26px; font-size:11.5px; }
   .vpath .stop.current .pl{ font-weight:700; color:var(--tx); }
   .vpath .seg-line{ top:7px; }
@@ -520,7 +520,7 @@
   .v-projs{ background:var(--fill); border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
   .vproj{
     display:grid; grid-template-columns:minmax(140px,1fr) auto auto 90px; align-items:center; gap:12px;
-    border:none; background:#fff; border-radius:12px; padding:9px 12px; cursor:pointer; text-align:left;
+    border:none; background:var(--card); border-radius:12px; padding:9px 12px; cursor:pointer; text-align:left;
     font-size:13px; transition:box-shadow .13s;
   }
   .vproj:hover{ background:var(--fill2); }
@@ -536,7 +536,7 @@
     display:flex; flex-direction:column; gap:9px; cursor:pointer; text-align:left; width:100%;
     box-shadow:none; transition:border-color .15s, background .15s;
   }
-  .rtile:hover{ border-color:var(--tx3); background:#fff; }
+  .rtile:hover{ border-color:var(--tx3); background:var(--card); }
   .rtile .top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
   .rtile .cl{ font-size:12px; color:var(--tx3); display:flex; align-items:center; gap:6px; font-weight:500; }
   .rtile .cl i{ width:7px; height:7px; border-radius:2px; display:inline-block; }
@@ -548,7 +548,7 @@
   .status i{ width:5px; height:5px; border-radius:50%; }
   .status.ok{ color:#0a7c40; background:var(--good-soft); } .status.ok i{ background:var(--good); }
   .status.soon{ color:#8a5a00; background:var(--amber-soft); } .status.soon i{ background:var(--amber); }
-  .status.late{ color:#fff; background:var(--red); } .status.late i{ background:#fff; }
+  .status.late{ color:#fff; background:var(--red); } .status.late i{ background:var(--card); }
   .rbar{ height:3px; background:var(--fill2); overflow:hidden; }
   .rbar > div{ height:100%; transition:width .45s ease; }
   .rtile .foot{ display:flex; justify-content:space-between; gap:6px; font-size:12px; color:var(--tx3); }
@@ -593,13 +593,13 @@
   .path .seg-line.todo{ background:var(--fill2); }
   .stop{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:8px; width:10px; }
   .stop .dot{ width:14px; height:14px; border-radius:50%; background:var(--good); border:3px solid var(--good); transition:all .4s; }
-  .stop.future .dot{ width:12px; height:12px; background:#fff; border:3px solid var(--fill2); }
-  .stop.current .dot{ width:20px; height:20px; background:var(--accent); border:4px solid #fff; box-shadow:0 0 0 4px var(--accent-soft); margin-top:-2px; }
+  .stop.future .dot{ width:12px; height:12px; background:var(--card); border:3px solid var(--fill2); }
+  .stop.current .dot{ width:20px; height:20px; background:var(--accent); border:4px solid var(--card); box-shadow:0 0 0 4px var(--accent-soft); margin-top:-2px; }
   .stop .pl{ position:absolute; top:24px; font-size:11px; color:var(--tx4); white-space:nowrap; font-weight:600; }
   .stop.current .pl{ color:var(--tx); font-weight:800; font-size:12px; }
   .stop.done .pl{ color:var(--tx3); }
   .pcard.watch .stop .dot{ background:var(--red); border-color:var(--red); }
-  .pcard.watch .stop.future .dot{ background:#fff; border-color:var(--fill2); }
+  .pcard.watch .stop.future .dot{ background:var(--card); border-color:var(--fill2); }
   .pcard.watch .stop.current .dot{ background:var(--red); border-color:#fff; box-shadow:0 0 0 4px var(--red-soft); }
   .pcard.watch .path .seg-line.done{ background:var(--red); }
   .pfoot{ display:flex; align-items:center; justify-content:space-between; gap:14px; border-top:1px solid var(--line); padding-top:14px; }
@@ -622,7 +622,7 @@
     padding:10px 14px; font-family:inherit; font-size:14px; color:var(--tx); transition:box-shadow .15s;
   }
   .mind-input input:focus{ outline:none; }
-  .mind-input:focus-within{ box-shadow:inset 0 0 0 2px var(--ink); background:#fff; }
+  .mind-input:focus-within{ box-shadow:inset 0 0 0 2px var(--ink); background:var(--card); }
   .mind-row{
     display:flex; align-items:center; gap:10px;
     padding:9px 10px; border-radius:12px; cursor:pointer; font-size:13.5px;
@@ -765,7 +765,7 @@
 
   /* ---------- boční lišta = bílá karta ---------- */
   aside{
-    background:#fff; color:var(--tx); border-radius:18px; box-shadow:var(--card-sh);
+    background:var(--card); color:var(--tx); border-radius:18px; box-shadow:var(--card-sh);
     position:sticky; top:14px; height:calc(100vh - 28px);
     padding:18px 12px 14px; gap:18px;
   }
@@ -804,7 +804,7 @@
 
   /* ---------- sekce = bílé karty ---------- */
   .sblock{
-    background:#fff; border:none !important; border-left:none !important;
+    background:var(--card); border:none !important; border-left:none !important;
     border-radius:18px; padding:22px 24px 24px; box-shadow:var(--card-sh);
   }
   .sec-ico{ border-radius:10px; width:30px; height:30px; background:var(--fill); color:var(--tx2); }
@@ -824,14 +824,14 @@
   .seg{ background:var(--fill); border-radius:12px; padding:4px; }
   .seg button{ border-radius:9px; font-size:12.5px; font-weight:600; padding:7px 14px; color:var(--tx3); }
   .seg button:hover{ color:var(--tx); }
-  .seg button.active{ background:#fff; color:var(--tx); box-shadow:0 1px 3px rgba(20,22,28,.12); }
+  .seg button.active{ background:var(--card); color:var(--tx); box-shadow:0 1px 3px rgba(20,22,28,.12); }
   .seg .cdot{ border-radius:50%; }
   .seg .cnt{ font-family:inherit; font-weight:600; }
 
   /* ---------- přepínač dní ---------- */
   .daypick{ background:var(--fill); border-radius:14px; padding:5px; }
   .daypick button{ border-radius:10px; }
-  .daypick button:hover{ background:#fff; }
+  .daypick button:hover{ background:var(--card); }
   .daypick .dw{ color:var(--tx4); font-size:11px; font-weight:500; }
   .daypick .dn{ color:var(--tx2); font-size:14.5px; font-weight:600; }
   .daypick button.active{ background:var(--accent); }
@@ -844,7 +844,7 @@
     background:var(--fill); border:1px solid transparent !important; border-radius:14px; box-shadow:none;
   }
   .rtile:hover,.mtile:hover,.stile:hover,.tile:hover,.pcard:hover{
-    background:#fff; border-color:var(--line) !important; box-shadow:var(--card-sh);
+    background:var(--card); border-color:var(--line) !important; box-shadow:var(--card-sh);
   }
   .cesta .pcard,.cesta .pcard:hover{ background:transparent; border-color:transparent !important; box-shadow:none; }
   .rtile .nm{ font-size:14px; font-weight:650; letter-spacing:-.01em; }
@@ -881,7 +881,7 @@
   .btn-primary:disabled{ background:var(--fill2); color:var(--tx4); box-shadow:none; }
   .btn-light{ border-radius:999px; background:var(--fill); font-weight:600; }
   .btn-light:hover{ background:var(--fill2); }
-  .tool-btn{ border-radius:8px; background:#fff; color:var(--tx3); }
+  .tool-btn{ border-radius:8px; background:var(--card); color:var(--tx3); }
   .tool-btn:hover{ background:var(--ink); color:#fff; }
 
   /* ---------- řádky provozu ---------- */
@@ -897,7 +897,7 @@
   /* ---------- na mysli ---------- */
   .mind-input{ background:var(--fill); border-radius:999px; }
   .mind-input input{ border-radius:999px; font-size:14px; }
-  .mind-input:focus-within{ background:#fff; box-shadow:inset 0 0 0 2px var(--accent); }
+  .mind-input:focus-within{ background:var(--card); box-shadow:inset 0 0 0 2px var(--accent); }
   .mind-row{ border-radius:11px; }
   .mind-row:hover{ background:var(--fill); }
   .mind-row .cat{ border-radius:50%; }
@@ -930,7 +930,7 @@
   .darkp .sec-link:hover{ background:rgba(255,255,255,.18); color:#fff; box-shadow:none; }
   .darkp .seg{ background:rgba(255,255,255,.08) !important; }
   .darkp .seg button{ color:#9ba0ad; }
-  .darkp .seg button.active{ background:#fff; color:var(--ink); box-shadow:none; }
+  .darkp .seg button.active{ background:var(--card); color:var(--ink); box-shadow:none; }
   .darkp .tl-hours span{ font-family:inherit; color:#6d7280; font-size:11px; font-weight:500; }
   .darkp .lane{ border-radius:12px; background:rgba(255,255,255,.045); }
   .darkp .lane.plan{ background:rgba(47,109,246,.16); }
@@ -963,7 +963,7 @@
   .dialog h3{ font-size:18px; font-weight:700; letter-spacing:-.02em; }
   .field label{ color:var(--tx2); font-weight:600; }
   .field input,.field select,.field textarea{ border-radius:11px; background:var(--fill); border-color:transparent; font-size:14px; }
-  .field input:focus,.field select:focus,.field textarea:focus{ background:#fff; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  .field input:focus,.field select:focus,.field textarea:focus{ background:var(--card); border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
   .toast{ border-radius:999px; }
   .trash{ border-radius:999px; }
   .overlay{ background:rgba(20,22,28,.42); }
@@ -1024,7 +1024,7 @@
 
   /* co znamená dokončit — jeden čitelný blok, název se už neopakuje */
   .cesta .pmeaning{
-    background:#fff; border-radius:12px; padding:12px 15px;
+    background:var(--card); border-radius:12px; padding:12px 15px;
     font-size:13.5px; color:var(--tx2); line-height:1.5;
   }
   .cesta .pmeaning .lbl{
@@ -1128,7 +1128,7 @@
   .pin:not(.markable){ cursor:pointer; }
 
   .steps{
-    background:#fff; border-radius:14px; padding:14px 16px 12px; margin:2px 0 14px;
+    background:var(--card); border-radius:14px; padding:14px 16px 12px; margin:2px 0 14px;
     display:flex; flex-direction:column; gap:2px;
   }
   .steps-head{
@@ -1147,7 +1147,7 @@
   .stepr + .stepr{ box-shadow:inset 0 1px 0 var(--line); }
   .stepr .sdot{
     width:17px; height:17px; border-radius:50%; flex:none;
-    border:2px solid var(--fill2); background:#fff;
+    border:2px solid var(--fill2); background:var(--card);
     display:flex; align-items:center; justify-content:center;
     font-size:9px; font-weight:800; color:#fff; transition:all .2s;
   }
@@ -1180,10 +1180,10 @@
   .sw input{ position:absolute; opacity:0; width:0; height:0; }
   .sw span{
     display:block; width:26px; height:26px; border-radius:50%;
-    box-shadow:0 0 0 2px #fff, 0 0 0 3px transparent; transition:box-shadow .13s, transform .13s;
+    box-shadow:0 0 0 2px var(--card), 0 0 0 3px transparent; transition:box-shadow .13s, transform .13s;
   }
   .sw:hover span{ transform:scale(1.1); }
-  .sw input:checked + span{ box-shadow:0 0 0 2px #fff, 0 0 0 3.5px var(--tx); transform:scale(1.1); }
+  .sw input:checked + span{ box-shadow:0 0 0 2px var(--card), 0 0 0 3.5px var(--tx); transform:scale(1.1); }
 
 
   /* ---------- výraznější trasa + čitelnější popisky ---------- */
@@ -1199,7 +1199,7 @@
   /* ---------- zastávky na odbočce (svisle) ---------- */
   .route .ln.branch.tail{ stroke-dasharray:1 8; stroke-linecap:round; opacity:.65; }
   .bpin .bead{
-    width:13px; height:13px; border-radius:50%; background:#fff;
+    width:13px; height:13px; border-radius:50%; background:var(--card);
     border:3px solid #b6bac9; box-shadow:none;
     display:flex; align-items:center; justify-content:center;
     color:#fff; font-size:8px; font-weight:800; line-height:1;
@@ -1241,7 +1241,7 @@
   /* lišta pod odbočkou */
   .brbar{
     display:flex; align-items:center; justify-content:space-between; gap:14px;
-    flex-wrap:wrap; background:#fff; border-radius:12px; padding:10px 14px; margin-bottom:14px;
+    flex-wrap:wrap; background:var(--card); border-radius:12px; padding:10px 14px; margin-bottom:14px;
   }
   .brbar-t{ font-size:12.5px; color:var(--tx3); }
   .brbar-t b{ color:var(--tx); font-weight:650; }
@@ -1275,10 +1275,10 @@
 
 
   /* ---------- psaní kroku přímo v trase ---------- */
-  .bpin.bdraft .bead{ background:#fff; border:3px dashed var(--accent); }
+  .bpin.bdraft .bead{ background:var(--card); border:3px dashed var(--accent); }
   .cesta .bpin.bdraft .lab{ padding:0; margin-left:-2px; background:transparent !important; }
   .stepinput{
-    border:none; background:#fff; border-radius:9px; padding:7px 12px;
+    border:none; background:var(--card); border-radius:9px; padding:7px 12px;
     font-family:inherit; font-size:13.5px; font-weight:550; color:var(--tx);
     width:270px; box-shadow:0 0 0 2px var(--accent), 0 4px 14px -6px rgba(20,22,28,.3);
   }
@@ -1314,7 +1314,7 @@
     cursor:grab; user-select:none; -webkit-user-select:none; touch-action:none;
     transition:background .14s, box-shadow .14s;
   }
-  .desknote:hover{ background:#fff; }
+  .desknote:hover{ background:var(--card); }
   .desknote:active{ cursor:grabbing; }
   .desknote .dcl{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--tx4); }
   .desknote .dcl i{ width:7px; height:7px; border-radius:50%; background:var(--dc); flex:none; }
@@ -1340,7 +1340,7 @@
   /* ---------- časová osa jako pruh nahoře ---------- */
   main{ max-width:1400px; }
   .topline{
-    background:#fff; border-radius:18px; box-shadow:var(--card-sh);
+    background:var(--card); border-radius:18px; box-shadow:var(--card-sh);
     padding:16px 20px 18px; display:flex; flex-direction:column; gap:12px;
   }
   .tlx-head{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
@@ -1474,7 +1474,7 @@
   .areaseg button{ font-size:12.5px; padding:7px 14px; }
   .areabar{
     display:flex; align-items:center; gap:11px; flex-wrap:wrap;
-    background:#fff; border-radius:14px; padding:11px 16px; margin-top:6px;
+    background:var(--card); border-radius:14px; padding:11px 16px; margin-top:6px;
     box-shadow:inset 4px 0 0 var(--ac), 0 1px 2px rgba(20,22,28,.05);
   }
   .areabar .adot{ width:9px; height:9px; border-radius:50%; background:var(--ac); flex:none; }
@@ -1518,7 +1518,7 @@
   .sticky .scat:hover{ opacity:1; background:rgba(255,255,255,.6); }
   .desknote .dtx[contenteditable]{ outline:none; cursor:text; border-radius:6px; }
   .desknote .dtx[contenteditable]:hover{ background:rgba(255,255,255,.75); box-shadow:0 0 0 4px rgba(255,255,255,.75); }
-  .desknote .dtx[contenteditable]:focus{ background:#fff; box-shadow:0 0 0 4px #fff, 0 0 0 5px var(--accent); }
+  .desknote .dtx[contenteditable]:focus{ background:var(--card); box-shadow:0 0 0 4px var(--card), 0 0 0 5px var(--accent); }
 
 
   /* =====================================================================
@@ -1528,7 +1528,7 @@
      ===================================================================== */
 
   /* --- 1. plátno a odstupy --- */
-  body{ background:#f4f5f8; }
+  body{ background:var(--canvas); }
   :root{ --canvas:#f4f5f8; }
   main{ max-width:1360px; padding:8px 8px 80px; gap:0; }
   .colmain{ gap:0; }
@@ -1550,14 +1550,14 @@
 
   /* --- 3. horní pruh s osou --- */
   .topline{
-    background:#fff; border-radius:16px; padding:18px 22px 20px;
+    background:var(--card); border-radius:16px; padding:18px 22px 20px;
     box-shadow:0 1px 2px rgba(20,22,28,.05), 0 8px 22px -16px rgba(20,22,28,.2);
   }
 
   /* --- 4. karta projektu: barva jako značka, ne výplň --- */
   .cesta{ gap:12px; }
   .cesta .pcard, .cesta .pcard:hover{
-    background:#fff !important; border-radius:14px; padding:20px 24px 16px 26px;
+    background:var(--card) !important; border-radius:14px; padding:20px 24px 16px 26px;
     box-shadow:inset 3px 0 0 var(--pc), 0 1px 2px rgba(20,22,28,.05),
                0 8px 22px -16px rgba(20,22,28,.22) !important;
   }
@@ -1573,7 +1573,7 @@
 
   /* --- 5. Na stole --- */
   .desk-wrap{
-    background:#fff; border-radius:16px; padding:20px 22px;
+    background:var(--card); border-radius:16px; padding:20px 22px;
     box-shadow:0 1px 2px rgba(20,22,28,.05), 0 8px 22px -16px rgba(20,22,28,.2);
     display:flex; flex-direction:column; gap:14px;
   }
@@ -1583,7 +1583,7 @@
   /* --- 6. Provoz: světlý, stejný jazyk jako zbytek --- */
   .sblock.provoz{ display:flex; flex-direction:column; gap:0; }
   .prov-wrap{
-    background:#fff; border-radius:16px; padding:20px 22px 22px;
+    background:var(--card); border-radius:16px; padding:20px 22px 22px;
     box-shadow:0 1px 2px rgba(20,22,28,.05), 0 8px 22px -16px rgba(20,22,28,.2);
   }
   .prov-head{ align-items:center; margin-bottom:18px; }
@@ -1603,7 +1603,7 @@
   .provoz .wday .ev{ color:var(--tx3); }
   .provoz .wday .ev b{ color:var(--tx2); }
   .provoz .wday .addf{ color:var(--tx4); }
-  .provoz .wday .addf:hover{ background:#fff; color:var(--tx2); }
+  .provoz .wday .addf:hover{ background:var(--card); color:var(--tx2); }
 
   .rchip{
     background:var(--fill2); color:var(--tx2);
@@ -1625,7 +1625,7 @@
 
   /* --- 7. lístečky --- */
   .sticky-panel{
-    background:#fff; border-radius:16px; padding:20px 20px 18px;
+    background:var(--card); border-radius:16px; padding:20px 20px 18px;
     box-shadow:0 1px 2px rgba(20,22,28,.05), 0 8px 22px -16px rgba(20,22,28,.2);
   }
   .sticky{ box-shadow:0 1px 2px rgba(20,22,28,.07), 0 6px 14px -10px rgba(20,22,28,.28); }
@@ -1709,7 +1709,7 @@
 
   /* lístečky sedí rovnou na ploše zóny — žádná další karta */
   .z-listky .sticky-panel{ background:transparent !important; box-shadow:none !important; padding:0 !important; }
-  .z-listky .mind-input{ background:#fff; }
+  .z-listky .mind-input{ background:var(--card); }
   .z-listky .seg{ background:rgba(255,255,255,.72); }
   .z-listky .sec-ico{ background:rgba(255,255,255,.7); }
   .z-listky .mind-note{ color:#8a83a5; }
@@ -1767,7 +1767,7 @@
   .ws-cesta .pcard .head{ justify-content:flex-end; }
 
   .ws-card{
-    background:#fff; border-radius:16px; padding:20px 22px;
+    background:var(--card); border-radius:16px; padding:20px 22px;
     box-shadow:0 1px 2px rgba(20,22,28,.05), 0 6px 18px -14px rgba(20,22,28,.3);
     display:flex; flex-direction:column; gap:16px;
   }
@@ -1789,7 +1789,7 @@
   }
   .padtx.one{ min-height:0; font-size:14px; }
   .padtx:hover{ background:#eef0f6; }
-  .padtx:focus{ background:#fff; box-shadow:inset 0 0 0 2px var(--accent); color:var(--tx); }
+  .padtx:focus{ background:var(--card); box-shadow:inset 0 0 0 2px var(--accent); color:var(--tx); }
   .padtx:empty::before{ content:attr(data-ph); color:var(--tx4); }
 
   .linkbar{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -1797,11 +1797,11 @@
     flex:1 1 160px; min-width:0; border:none; background:var(--fill); border-radius:11px;
     padding:11px 13px; font:inherit; font-size:14px; color:var(--tx); outline:none;
   }
-  .linkbar input:focus{ background:#fff; box-shadow:inset 0 0 0 2px var(--accent); }
+  .linkbar input:focus{ background:var(--card); box-shadow:inset 0 0 0 2px var(--accent); }
   .linkbar .btn-primary{ flex:none; }
   .linkgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; }
   .linkcard{
-    position:relative; background:#fff; border-radius:12px; padding:13px 15px;
+    position:relative; background:var(--card); border-radius:12px; padding:13px 15px;
     display:flex; flex-direction:column; gap:5px; min-width:0;
     box-shadow:inset 3px 0 0 var(--accent), 0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3);
     transition:box-shadow .14s;
@@ -1848,7 +1848,7 @@
 
   .filegrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
   .filecard{
-    position:relative; background:#fff; border-radius:12px; padding:13px 15px;
+    position:relative; background:var(--card); border-radius:12px; padding:13px 15px;
     display:flex; flex-direction:column; gap:5px; min-width:0;
     box-shadow:inset 3px 0 0 #6d5aa8, 0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3);
   }
@@ -1874,7 +1874,7 @@
   .afsel.small{ padding:5px 8px; font-size:11.5px; border-radius:8px; }
   .aftergrid{ display:flex; flex-direction:column; gap:10px; }
   .aftercard{
-    position:relative; background:#fff; border-radius:12px; padding:13px 15px;
+    position:relative; background:var(--card); border-radius:12px; padding:13px 15px;
     display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
     box-shadow:inset 3px 0 0 #b8455f, 0 0 0 1px rgba(20,22,28,.085), 0 3px 10px -7px rgba(20,22,28,.3);
   }
@@ -1892,13 +1892,13 @@
 
   /* --- pruh dnů pod časovou osou --- */
   .daystrip{
-    background:#fff; border-radius:16px; padding:18px 20px 20px; margin-top:14px;
+    background:var(--card); border-radius:16px; padding:18px 20px 20px; margin-top:14px;
     box-shadow:0 1px 2px rgba(20,22,28,.05), 0 6px 18px -14px rgba(20,22,28,.3);
   }
   .daystrip .board-head{ margin:0 0 14px; }
   .daystrip .week-grid{ gap:10px; }
   .daystrip .wday{
-    background:#f4f5f9; border-radius:12px; min-height:120px;
+    background:var(--fill); border-radius:12px; min-height:120px;
     box-shadow:inset 0 0 0 1px rgba(20,22,28,.06);
   }
   .daystrip .wday.today{ background:var(--accent-soft); box-shadow:inset 0 0 0 1.5px var(--accent); }
@@ -1909,7 +1909,7 @@
   .daystrip .wday .ev{ color:var(--tx3); }
   .daystrip .wday .ev b{ color:var(--tx2); }
   .daystrip .wday .addf{ color:var(--tx4); }
-  .daystrip .wday .addf:hover{ background:#fff; color:var(--tx2); }
+  .daystrip .wday .addf:hover{ background:var(--card); color:var(--tx2); }
   .daystrip .wday.drop-on{ background:#dfe8fb; box-shadow:inset 0 0 0 2px var(--accent); }
 
   @media (max-width:900px){
@@ -1942,7 +1942,7 @@
   .sticky .sdue .dx2{ font-size:8px; opacity:.55; }
   .sticky .sdue .dx2:hover{ opacity:1; }
   .sticky .sdinp{
-    position:absolute; right:8px; bottom:6px; border:none; background:#fff;
+    position:absolute; right:8px; bottom:6px; border:none; background:var(--card);
     font:inherit; font-size:11px; border-radius:6px; padding:3px 5px; outline:none;
     box-shadow:0 0 0 2px var(--accent); color:var(--tx);
   }
@@ -2010,7 +2010,7 @@
 
   .hubgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(184px,1fr)); gap:13px; }
   .ltile{
-    position:relative; background:#fff; border:none; border-radius:17px; padding:0; overflow:hidden;
+    position:relative; background:var(--card); border:none; border-radius:17px; padding:0; overflow:hidden;
     display:flex; flex-direction:column; align-items:stretch; min-width:0;
     cursor:pointer; text-align:left; font:inherit;
     box-shadow:0 0 0 1px rgba(20,22,28,.07), 0 5px 16px -10px rgba(20,22,28,.4);
@@ -2078,7 +2078,7 @@
 
   .tgrid{ display:flex; flex-direction:column; gap:8px; }
   .trow{
-    position:relative; background:#fff; border-radius:11px; padding:11px 34px 11px 13px;
+    position:relative; background:var(--card); border-radius:11px; padding:11px 34px 11px 13px;
     display:flex; align-items:center; gap:12px; min-width:0;
     box-shadow:0 0 0 1px rgba(20,22,28,.08), 0 3px 10px -8px rgba(20,22,28,.35);
   }
@@ -2130,7 +2130,7 @@
   .mmedges{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
   .mnode{
     position:absolute; max-width:210px; min-width:96px;
-    background:#fff; border-radius:12px; padding:11px 15px 11px 14px;
+    background:var(--card); border-radius:12px; padding:11px 15px 11px 14px;
     box-shadow:inset 3px 0 0 var(--mc), 0 0 0 1px rgba(20,22,28,.09), 0 4px 12px -8px rgba(20,22,28,.45);
     cursor:grab; user-select:none; touch-action:none; transition:box-shadow .14s;
   }
@@ -2150,7 +2150,7 @@
   /* plovoucí lišta nad bublinou */
   .mnode .ntools{
     position:absolute; top:-13px; right:6px; display:flex; gap:2px; padding:2px;
-    background:#fff; border-radius:9px; opacity:0; transition:opacity .13s;
+    background:var(--card); border-radius:9px; opacity:0; transition:opacity .13s;
     box-shadow:0 0 0 1px rgba(20,22,28,.09), 0 4px 10px -6px rgba(20,22,28,.5);
   }
   .mnode:hover .ntools, .mnode.editing .ntools{ opacity:1; }
@@ -2165,7 +2165,7 @@
   .mnode .nadd{
     position:absolute; right:-13px; top:50%; transform:translateY(-50%);
     width:24px; height:24px; border-radius:50%; border:none; cursor:pointer;
-    background:#fff; color:var(--mc); font-size:15px; font-weight:700; line-height:1;
+    background:var(--card); color:var(--mc); font-size:15px; font-weight:700; line-height:1;
     display:flex; align-items:center; justify-content:center;
     box-shadow:0 0 0 1.5px var(--mc), 0 3px 8px -4px rgba(20,22,28,.5);
     opacity:0; transition:opacity .13s, transform .13s;
@@ -2179,7 +2179,7 @@
     min-width:20px; height:20px; padding:0 5px; border-radius:10px; border:none; cursor:pointer;
     background:var(--mc); color:#fff; font-size:11px; font-weight:750; line-height:1;
     display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 0 2px #fff, 0 3px 8px -4px rgba(20,22,28,.55);
+    box-shadow:0 0 0 2px var(--card), 0 3px 8px -4px rgba(20,22,28,.55);
     transition:transform .13s, opacity .13s;
   }
   .mnode .ncol:hover{ transform:translateY(-50%) scale(1.12); }
@@ -2223,24 +2223,29 @@
 
   /* --- horní navigace sekcí --- */
   .sectabs{
-    display:inline-flex; align-items:center; gap:3px; padding:4px; --ac:var(--accent);
-    background:#e7eaf2; border-radius:15px;
-    box-shadow:inset 0 1px 2px rgba(20,22,28,.05);
+    display:inline-flex; align-items:stretch; gap:7px; --ac:var(--accent); padding:1px 0 3px;
   }
   .sectabs button{
-    display:flex; align-items:center; gap:7px; border:none; background:transparent; cursor:pointer;
-    font:inherit; font-size:13px; font-weight:650; color:var(--tx3); letter-spacing:-.005em;
-    padding:8px 14px; border-radius:11px; white-space:nowrap;
-    transition:background .14s, color .14s, box-shadow .14s;
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    font:inherit; font-size:12.5px; font-weight:600; letter-spacing:-.006em;
+    color:var(--tx2); background:var(--card);
+    border:1px solid var(--line); border-radius:13px;
+    padding:9px 14px 9px 11px; white-space:nowrap;
+    box-shadow:0 1px 1.5px rgba(20,22,28,.035);
+    transition:color .15s, background .15s, border-color .15s, box-shadow .15s, transform .15s;
   }
-  .sectabs button:hover{ color:var(--tx); background:rgba(255,255,255,.55); }
+  .sectabs button svg{ width:15px; height:15px; flex:none; color:var(--tx4); transition:color .15s; }
+  .sectabs button:hover{
+    color:var(--tx); border-color:var(--tx4); transform:translateY(-1px);
+    box-shadow:0 2px 3px rgba(20,22,28,.05), 0 10px 18px -14px rgba(20,22,28,.6);
+  }
+  .sectabs button:hover svg{ color:var(--ac); }
   .sectabs button.on{
-    background:#fff; color:var(--tx);
-    box-shadow:0 1px 2px rgba(20,22,28,.08), 0 5px 12px -7px rgba(20,22,28,.5);
+    background:var(--ac); border-color:var(--ac); color:#fff; font-weight:650;
+    box-shadow:0 2px 3px -1px rgba(20,22,28,.16), 0 12px 20px -12px var(--ac);
   }
-  .sectabs button.on::before{
-    content:""; width:6px; height:6px; border-radius:50%; background:var(--ac); flex:none;
-  }
+  .sectabs button.on svg{ color:#fff; opacity:.92; }
+  .sectabs button.on:hover{ transform:translateY(-1px); filter:brightness(1.05); }
 
   /* --- co je vidět podle záložky --- */
   main.tabbed .zone{ display:none; }
@@ -2267,9 +2272,213 @@
 
   @media (max-width:900px){
     .toprow{ gap:8px !important; }
-    .sectabs{ padding:3px; border-radius:13px; }
-    .sectabs button{ font-size:12.5px; padding:7px 11px; gap:6px; border-radius:10px; }
+    .sectabs{ gap:6px; }
+    .sectabs button{ font-size:12px; padding:8px 11px 8px 9px; gap:6px; border-radius:11px; }
+    .sectabs button svg{ width:14px; height:14px; }
   }
+
+
+  /* ============================================================
+     OSOBNÍ — deník dne
+     ============================================================ */
+  .z-osobni{ --zbg:#dcedf1; --zac:#12879b; }
+  .z-zamer{  --zbg:#e9e6f2; --zac:#6d5aa8; }
+
+  .intent{
+    background:var(--card); border-radius:16px; padding:15px 18px 16px;
+    box-shadow:var(--card-sh); font-size:15.5px; line-height:1.6; color:var(--tx);
+    outline:none; min-height:26px;
+  }
+  .intent:empty::before{ content:attr(data-ph); color:var(--tx4); }
+  .intent:focus{ box-shadow:var(--card-sh), 0 0 0 2px var(--zac); }
+
+  .pweek{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; margin-bottom:16px; }
+  .pwday{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:11px 4px 10px; border-radius:15px; border:1px solid var(--line);
+    background:var(--card); cursor:pointer; font:inherit; color:var(--tx3);
+    transition:border-color .15s, background .15s, transform .15s, box-shadow .15s;
+  }
+  .pwday:hover{ transform:translateY(-1px); border-color:var(--tx4); }
+  .pwday .pw-d{ font-size:11px; font-weight:650; letter-spacing:.02em; }
+  .pwday .pw-n{ font-size:17px; font-weight:700; color:var(--tx); letter-spacing:-.02em; line-height:1.1; }
+  .pwday .pw-m{ height:5px; width:5px; border-radius:50%; background:var(--fill2); }
+  .pwday.has .pw-m{ background:var(--zac); }
+  .pwday.today{ border-color:var(--zac); }
+  .pwday.sel{
+    background:var(--zac); border-color:var(--zac); color:rgba(255,255,255,.92);
+    box-shadow:0 12px 22px -14px var(--zac);
+  }
+  .pwday.sel .pw-n{ color:#fff; }
+  .pwday.sel .pw-m{ background:rgba(255,255,255,.9); }
+  .pweek-head{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .pweek-head .pw-t{ font-size:13.5px; font-weight:650; color:var(--tx2); }
+  .pweek-head .pw-nav{ margin-left:auto; display:flex; align-items:center; gap:6px; }
+
+  .pdayhead{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    margin:2px 2px 12px; font-size:17px; font-weight:700; letter-spacing:-.02em; color:var(--tx);
+  }
+  .pdayhead span{ font-size:12.5px; font-weight:500; color:var(--tx4); letter-spacing:0; }
+
+  .pgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(212px,1fr)); gap:12px; }
+  .ptile{
+    background:var(--card); border-radius:16px; padding:14px 16px 15px;
+    box-shadow:var(--card-sh); display:flex; flex-direction:column; gap:10px; min-width:0;
+  }
+  .ptile.wide{ grid-column:1/-1; }
+  .ptile.w2{ grid-column:span 2; }
+  .pt-h{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:650; color:var(--tx3); }
+  .pt-h i{ width:7px; height:7px; border-radius:2.5px; background:var(--zac); flex:none; }
+  .pt-h em{ margin-left:auto; font-style:normal; font-weight:500; color:var(--tx4); font-size:11px; }
+
+  .punit{ display:flex; align-items:center; gap:9px; }
+  .pnum{
+    border:1px solid var(--line); background:var(--fill); border-radius:11px;
+    padding:9px 12px; font:inherit; font-size:15px; font-weight:650; color:var(--tx);
+    width:100%; min-width:0; font-variant-numeric:tabular-nums;
+  }
+  .pnum:focus{ outline:none; background:var(--card); border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  .punit .u{ font-size:12px; color:var(--tx4); font-weight:600; flex:none; }
+
+  .ppills{ display:flex; gap:6px; flex-wrap:wrap; }
+  .ppills button{
+    border:1px solid var(--line); background:var(--fill); border-radius:10px;
+    padding:7px 12px; font:inherit; font-size:12px; font-weight:600; color:var(--tx2);
+    cursor:pointer; transition:background .14s, color .14s, border-color .14s, box-shadow .14s;
+  }
+  .ppills button:hover{ border-color:var(--tx4); color:var(--tx); }
+  .ppills button.on{ background:var(--zac); border-color:var(--zac); color:#fff; box-shadow:0 10px 16px -12px var(--zac); }
+
+  .pdrops{ display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+  .pdrops button{
+    width:19px; height:24px; border:none; background:none; cursor:pointer; padding:0;
+    color:var(--fill2); transition:color .13s, transform .13s;
+  }
+  .pdrops button svg{ width:100%; height:100%; display:block; }
+  .pdrops button.on{ color:var(--zac); }
+  .pdrops button:hover{ transform:translateY(-2px); }
+  .pdrops .pdn{ font-size:12px; color:var(--tx4); font-weight:600; margin-left:6px; font-variant-numeric:tabular-nums; }
+
+  .ptext{
+    border:1px solid var(--line); background:var(--fill); border-radius:12px;
+    padding:10px 12px; font:inherit; font-size:13.5px; line-height:1.6; color:var(--tx);
+    width:100%; resize:vertical; min-height:76px;
+  }
+  .ptext:focus{ outline:none; background:var(--card); border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+
+  .psport{ display:flex; flex-direction:column; gap:8px; }
+  .psrow{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--fill); border-radius:12px; padding:9px 8px 9px 12px; }
+  .psrow .psn{ font-weight:650; font-size:13.5px; color:var(--tx); }
+  .psrow .psm{ font-size:12px; color:var(--tx3); font-family:var(--mono); }
+  .psrow .ppills{ margin-left:auto; }
+  .psrow .psx{ border:none; background:none; cursor:pointer; color:var(--tx4); font-size:15px; line-height:1; padding:4px 6px; border-radius:8px; }
+  .psrow .psx:hover{ color:var(--red); background:var(--red-soft); }
+  .psadd{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .psadd input{
+    border:1px solid var(--line); background:var(--fill); border-radius:11px;
+    padding:9px 12px; font:inherit; font-size:13.5px; color:var(--tx); min-width:0;
+  }
+  .psadd input:focus{ outline:none; background:var(--card); border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  .psadd .w1{ flex:1 1 190px; }
+  .psadd .w2{ width:92px; flex:none; }
+  .pempty{ color:var(--tx4); font-size:13px; }
+
+  @media (max-width:640px){
+    .pweek{ grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; }
+    .pwday{ padding:9px 2px 8px; border-radius:12px; }
+    .pwday .pw-n{ font-size:15px; }
+    .pgrid{ grid-template-columns:minmax(0,1fr); }
+    .ptile.w2{ grid-column:auto; }
+  }
+
+  /* ============================================================
+     TMAVÝ REŽIM
+     ============================================================ */
+  body.dark{
+    --canvas:#0d0e13;
+    --bg:#0d0e13; --card:#1c1e26; --fill:#23262f; --fill2:#2c303b; --line:#2b2f3a;
+    --tx:#e9ebf1; --tx2:#b6bcca; --tx3:#8b93a4; --tx4:#6d7586;
+    --ink:#08090d; --ink2:#12131a;
+    --accent:#5c8dfb; --accent-ink:#8ab0ff; --accent-soft:#1a2740;
+    --blue:#5c8dfb; --blue-soft:#1a2740;
+    --good:#3fbd83; --good-soft:#122c20;
+    --amber:#e0a53c; --amber-soft:#2e2311;
+    --red:#f4708c; --red-soft:#331823;
+    --violet:#9b85f5; --magenta:#ef73b0; --cyan:#37bfd4; --lime:#a4d456;
+    --card-sh:0 1px 2px rgba(0,0,0,.45), 0 10px 26px -14px rgba(0,0,0,.9);
+    --sh-lg:0 30px 70px -22px rgba(0,0,0,.85);
+    color-scheme:dark;
+  }
+  body.dark .zone{ --zring:rgba(255,255,255,.055); }
+  body.dark .z-den{    --zbg:#171922; --zac:#98a2b8; }
+  body.dark .z-cesty{  --zbg:#141b2b; --zac:#6f9dff; }
+  body.dark .z-stul{   --zbg:#241d12; --zac:#dda54e; }
+  body.dark .z-provoz{ --zbg:#12211b; --zac:#3fbd83; }
+  body.dark .z-listky{ --zbg:#1d1a2b; --zac:#a48ff0; }
+  body.dark .z-hub{    --zbg:#11212a; --zac:#3fbcd4; }
+  body.dark .z-tags{   --zbg:#221e1a; --zac:#c9a17c; }
+  body.dark .z-mind{   --zbg:#171a24; --zac:#8fa2e0; }
+  body.dark .z-soubory{--zbg:#1d1a2b; --zac:#a48ff0; }
+  body.dark .z-po{     --zbg:#261821; --zac:#ef7d95; }
+  body.dark .z-osobni{ --zbg:#12212a; --zac:#3fbcd4; }
+  body.dark .z-zamer{  --zbg:#1d1a2b; --zac:#a48ff0; }
+  body.dark .pwday.sel{ color:rgba(6,22,28,.75); }
+  body.dark .pwday.sel .pw-n{ color:#06171d; }
+  body.dark .pwday.sel .pw-m{ background:rgba(6,23,29,.75); }
+  body.dark .z-osobni .ppills button.on{ color:#06171d; }
+
+  /* papírové plochy, které mají vlastní teplou barvu */
+  body.dark .z-stul .desk-wrap{ background:#1f1a12; }
+  body.dark .zone .desknote{
+    background:#26200f; color:var(--tx);
+    box-shadow:inset 4px 0 0 var(--dc,#c0862a),
+               0 0 0 1px rgba(200,150,60,.22),
+               0 4px 12px -8px rgba(0,0,0,.7);
+  }
+  body.dark .zone .desknote:hover{ background:#2d2614; }
+  body.dark .desknote .dtx[contenteditable]:focus{ box-shadow:0 0 0 4px #2d2614, 0 0 0 5px var(--accent); }
+  /* lístečky zůstávají barevné papírky, jen se na tmavém plátně tolik nepálí */
+  body.dark .sticky{ filter:saturate(.9) brightness(.9); }
+  body.dark .sticky.c-práce{ background:#f0e19a; }
+
+  body.dark .brand-name{ color:#f2f3f7; }
+  body.dark .nav-row.active{ background:#22242e; }
+  body.dark .seg{ background:var(--fill); }
+  body.dark .seg button.active{ background:var(--card); color:var(--tx); box-shadow:0 1px 3px rgba(0,0,0,.5); }
+  body.dark .sectabs button{ box-shadow:0 1px 2px rgba(0,0,0,.35); }
+  body.dark .sectabs button:hover{ box-shadow:0 2px 4px rgba(0,0,0,.4); }
+  body.dark .wday.today{ box-shadow:inset 0 0 0 1.5px var(--accent); }
+  body.dark .modal-back{ background:rgba(4,5,8,.66); }
+  body.dark img{ opacity:.94; }
+
+  /* světlé plochy, které v tmavém režimu nesmí zůstat bílé */
+  body.dark .empty-tile,
+  body.dark .zone .empty-tile{ background:rgba(255,255,255,.05) !important; }
+  body.dark .z-listky .seg{ background:rgba(255,255,255,.06); }
+  body.dark .z-listky .sec-ico{ background:rgba(255,255,255,.08); color:var(--tx2); }
+  body.dark .wday .addf:hover{ background:rgba(255,255,255,.08); }
+  body.dark .daypick button:hover{ background:rgba(255,255,255,.08); }
+  body.dark .pchev:hover{ background:rgba(255,255,255,.08); }
+  body.dark .cesta .bpin:hover .lab{ background:rgba(255,255,255,.12); }
+  body.dark .daystrip .wday{ box-shadow:inset 0 0 0 1px rgba(255,255,255,.05); }
+  body.dark .daystrip .wday.drop-on{ background:#1c2740; box-shadow:inset 0 0 0 2px var(--accent); }
+  body.dark .desknote .dtx[contenteditable]:hover{ background:rgba(255,255,255,.07); box-shadow:0 0 0 4px rgba(255,255,255,.07); }
+  body.dark .tool-btn{ background:var(--fill); }
+  .tool-btn.danger:hover{ background:var(--red); color:#fff; }
+  .archrow{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .archrow .tool-btn{ flex:none; width:34px; height:34px; }
+  body.dark .zone .desknote .dtx{ color:var(--tx); }
+  body.dark .zone .desknote .dcl{ color:#d0a459; }
+  body.dark .zone .desknote.done{ background:#13251b; box-shadow:inset 4px 0 0 var(--good), 0 0 0 1px rgba(63,189,131,.28), 0 4px 12px -8px rgba(0,0,0,.7); }
+  body.dark .zone .desknote.done .dcl{ color:#6fc79b; }
+  body.dark .rchip:hover{ background:#363b49; }
+  body.dark .rchip.late{ color:#ff8fa5; }
+  body.dark .rchip.late:hover{ background:#3f1d29; }
+  body.dark .rchip.done{ color:#5fd3a0; }
+  body.dark .rchip.next{ background:var(--fill); color:var(--tx3); }
+  body.dark .rchip .rok{ color:#5fd3a0; }
+  body.dark .rtile{ background:var(--fill); }
 
 </style>
 </head>
@@ -2332,6 +2541,7 @@ function blank(){
     google:{clientId:"", hidden:[]},
     sync:{url:"", key:""},
     clients:[], rhythms:[], projects:[], notes:[], desk:[], history:[], dayPlan:{}, weekPlan:{}, dayModes:{}, quickBlocks:[], systems:[], metrics:[],
+    personal:{ intent:"", days:{} },
     boxyMigrated:0,
     updatedAt:0
   };
@@ -2342,6 +2552,7 @@ function payload(){
     settings:state.settings, google:state.google,
     clients:state.clients, rhythms:state.rhythms, projects:state.projects,
     notes:state.notes, desk:state.desk, history:state.history, dayPlan:state.dayPlan, weekPlan:state.weekPlan, dayModes:state.dayModes, quickBlocks:state.quickBlocks, systems:state.systems, metrics:state.metrics,
+    personal:state.personal,
     boxyMigrated:state.boxyMigrated, updatedAt:state.updatedAt
   };
 }
@@ -2940,6 +3151,17 @@ const SEC_TABS = [
   ["vse","Vše"], ["cesty","Cesty"], ["kalendar","Kalendář"], ["stul","Na stole"],
   ["listky","Lístečky"], ["rozcestnik","Rozcestník"], ["stitky","Štítky"], ["mapa","Mind mapa"]
 ];
+const SVGO = `viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"`;
+const SEC_ICO = {
+  vse:        `<svg ${SVGO}><rect x="2.5" y="2.5" width="5.6" height="5.6" rx="1.8"/><rect x="9.9" y="2.5" width="5.6" height="5.6" rx="1.8"/><rect x="2.5" y="9.9" width="5.6" height="5.6" rx="1.8"/><rect x="9.9" y="9.9" width="5.6" height="5.6" rx="1.8"/></svg>`,
+  cesty:      `<svg ${SVGO}><path d="M3.4 13.6c3.4 0 2.4-4.6 5.6-4.6s2.2-4.6 5.6-4.6"/><circle cx="3.4" cy="13.6" r="1.9"/><circle cx="14.6" cy="4.4" r="1.9"/></svg>`,
+  kalendar:   `<svg ${SVGO}><rect x="2.6" y="3.6" width="12.8" height="11.8" rx="2.6"/><path d="M2.6 7.4h12.8M6.2 1.9v3M11.8 1.9v3"/></svg>`,
+  stul:       `<svg ${SVGO}><rect x="2.4" y="4.2" width="13.2" height="9.6" rx="2.4"/><path d="M2.4 7.6h13.2M6.6 7.6v6.2"/></svg>`,
+  listky:     `<svg ${SVGO}><path d="M3.2 4.2a2 2 0 0 1 2-2h7.6a2 2 0 0 1 2 2v5.4l-4.6 4.6H5.2a2 2 0 0 1-2-2Z"/><path d="M14.8 9.6h-3.2a1.4 1.4 0 0 0-1.4 1.4v3.2"/></svg>`,
+  rozcestnik: `<svg ${SVGO}><circle cx="9" cy="9" r="6.6"/><path d="M11.6 6.4 7.9 7.9 6.4 11.6l3.7-1.5Z"/></svg>`,
+  stitky:     `<svg ${SVGO}><path d="M8.1 2.6H4.2a1.6 1.6 0 0 0-1.6 1.6v3.9c0 .42.17.83.47 1.13l5.6 5.6a1.6 1.6 0 0 0 2.26 0l3.9-3.9a1.6 1.6 0 0 0 0-2.26l-5.6-5.6a1.6 1.6 0 0 0-1.13-.47Z"/><circle cx="6" cy="6" r="1.05" fill="currentColor" stroke="none"/></svg>`,
+  mapa:       `<svg ${SVGO}><circle cx="4.2" cy="9" r="2.1"/><circle cx="13.6" cy="4.4" r="2.1"/><circle cx="13.6" cy="13.6" r="2.1"/><path d="M6.2 8.1 11.7 5.2M6.2 9.9l5.5 2.9"/></svg>`
+};
 function setSecTab(t){ secTab = t; render(); window.scrollTo({ top:0, behavior:"smooth" }); }
 function goHome(){ clientFilter = "all"; view = "dnes"; secTab = "vse"; render(); }
 function goArea(cid){ clientFilter = cid; view = "dnes"; secTab = "vse"; render(); }
@@ -2947,8 +3169,25 @@ function goArea(cid){ clientFilter = cid; view = "dnes"; secTab = "vse"; render(
 const NAVI = {
   home: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.2 8 2.6l5.5 4.6"/><path d="M4 7.6V13h8V7.6"/></svg>`,
   arch: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2.5" width="12" height="3.4" rx="1.2"/><path d="M3.2 5.9v6.4a1.6 1.6 0 0 0 1.6 1.6h6.4a1.6 1.6 0 0 0 1.6-1.6V5.9M6.4 9h3.2"/></svg>`,
-  gear: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.6v1.6M8 12.8v1.6M14.4 8h-1.6M3.2 8H1.6M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1M12.5 12.5l-1.1-1.1M4.6 4.6 3.5 3.5"/></svg>`
+  gear: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.6v1.6M8 12.8v1.6M14.4 8h-1.6M3.2 8H1.6M12.5 3.5l-1.1 1.1M4.6 11.4l-1.1 1.1M12.5 12.5l-1.1-1.1M4.6 4.6 3.5 3.5"/></svg>`,
+  moon: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 9.6A5.8 5.8 0 0 1 6.4 2.6a5.9 5.9 0 1 0 7 7Z"/></svg>`,
+  sun:  `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.4v1.5M8 13.1v1.5M14.6 8h-1.5M2.9 8H1.4M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1M12.7 12.7l-1.1-1.1M4.4 4.4 3.3 3.3"/></svg>`,
+  heart:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13.4S2.4 10.1 2.4 6.3A3 3 0 0 1 8 4.7a3 3 0 0 1 5.6 1.6c0 3.8-5.6 7.1-5.6 7.1Z"/></svg>`
 };
+
+/* ---- světlý / tmavý režim ---- */
+function themeNow(){ return (state.settings && state.settings.theme === "dark") ? "dark" : "light"; }
+function applyTheme(){
+  const d = themeNow() === "dark";
+  document.body.classList.toggle("dark", d);
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute("content", d ? "#0d0e13" : "#ffffff");
+}
+function toggleTheme(){
+  if(!state.settings) state.settings = {};
+  state.settings.theme = themeNow() === "dark" ? "light" : "dark";
+  applyTheme(); save(); renderSidebar();
+}
 
 function renderSidebar(){
   const now = new Date();
@@ -2982,6 +3221,13 @@ function renderSidebar(){
           </button>`).join("") : "");
       }).join("")}
       <button class="btn-ghost-add" onclick="openNewProject()">+ Nový projekt</button>
+    </div>
+    <div class="navsec">
+      <div class="nav-label">Osobní</div>
+      <button class="nav-row area-row pers-row ${view === "osobni" ? "active" : ""}" style="--ac:#22b8cf;" onclick="goOsobni()" title="Osobní deník">
+        <span class="adot"></span>
+        <span class="lbl">Deník</span>
+      </button>
     </div>`;
 
   const arch = state.projects.filter(p => p.archived).length;
@@ -2989,6 +3235,10 @@ function renderSidebar(){
     <button class="nav-row ${view === "archiv" ? "active" : ""}" onclick="go('archiv')">
       <span class="ni">${NAVI.arch}</span><span class="lbl">Archiv</span>
       <span class="nav-meta">${arch || ""}</span>
+    </button>
+    <button class="nav-row" onclick="toggleTheme()" title="Přepnout světlý / tmavý režim">
+      <span class="ni">${themeNow() === "dark" ? NAVI.sun : NAVI.moon}</span>
+      <span class="lbl">${themeNow() === "dark" ? "Světlý režim" : "Tmavý režim"}</span>
     </button>
     <button class="nav-row" onclick="openSettings()">
       <span class="ni">${NAVI.gear}</span><span class="lbl">Nastavení</span>
@@ -3199,7 +3449,7 @@ function renderDnes(){
 
     <div class="toprow" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
       <div class="scrollx"><nav class="sectabs" ${areaC ? `style="--ac:${clientDot(areaC.id)};"` : ""}>
-        ${SEC_TABS.map(([k, lab]) => `<button class="${secTab === k ? "on" : ""}" onclick="setSecTab('${k}')">${lab}</button>`).join("")}
+        ${SEC_TABS.map(([k, lab]) => `<button class="${secTab === k ? "on" : ""}" onclick="setSecTab('${k}')">${SEC_ICO[k] || ""}<span>${lab}</span></button>`).join("")}
       </nav></div>
       <div class="scrollx daypickwrap" style="display:flex;"><div class="daypick" title="Který den plánuješ">
         ${weekDates().map(k => {
@@ -3693,6 +3943,7 @@ function renderProjectCard(p, draggable){
       <span class="tool-btn" title="Štítky" onclick="openTagPicker(event,'project','${p.id}')">🏷</span>
       <span class="tool-btn" title="Otevřít plochu" onclick="go('${p.id}')">↗</span>
       <span class="tool-btn" title="Upravit" onclick="openEditProject('${p.id}')">✎</span>
+      <span class="tool-btn danger" title="Smazat projekt" onclick="deleteProject('${p.id}')">🗑</span>
     </span>
   </div>`;
 }
@@ -4724,6 +4975,7 @@ function renderWorkspace(p){
       <div class="ws-acts">
         <button class="btn-light" onclick="openEditProject('${p.id}')">Upravit</button>
         <button class="btn-light" onclick="archiveProject('${p.id}')">${p.archived ? "Obnovit z archivu" : "Do archivu"}</button>
+        <button class="btn-light" style="color:var(--red);" onclick="deleteProject('${p.id}')">Smazat</button>
       </div>
     </div>
 
@@ -4877,6 +5129,19 @@ function archiveProject(pid){
   p.archived = !p.archived;
   save(); view = "dnes"; render();
 }
+function deleteProject(pid){
+  const p = state.projects.find(x => x.id === pid);
+  if(!p) return;
+  if(!window.confirm(`Smazat projekt „${p.name}"? Zmizí i s cestou, kroky a poznámkami. Tohle už nevrátíš — pokud ho jen chceš mít z očí, dej ho do archivu.`)) return;
+  state.projects = state.projects.filter(x => x.id !== pid);
+  const clean = obj => Object.keys(obj || {}).forEach(k => {
+    obj[k] = (obj[k] || []).filter(b => !(b && b.refType === "project" && b.refId === pid));
+  });
+  clean(state.dayPlan); clean(state.weekPlan);
+  if(Array.isArray(state.quickBlocks)) state.quickBlocks = state.quickBlocks.filter(q => !(q && q.refType === "project" && q.refId === pid));
+  if(view === pid) view = "dnes";
+  save(); closeDialog(); render();
+}
 
 /* ============================================================
    VIZE — oblasti, milníky, na čem se pracuje
@@ -4994,9 +5259,12 @@ function renderArchiv(){
   document.getElementById("main").innerHTML = `
     <div class="hdr"><div><div class="hdr-date">Hotové a odložené projekty</div><h1>Archiv</h1></div></div>
     ${arch.length ? arch.map(p => `
-      <button class="nav-row" style="background:var(--card);box-shadow:var(--sh);padding:14px 16px;border-radius:12px;" onclick="go('${p.id}')">
-        <span>${esc(p.name)}</span><span class="nav-meta">${esc(clientName(p.clientId))}</span>
-      </button>`).join("") : `<div class="empty-tile">Archiv je prázdný</div>`}
+      <div class="archrow">
+        <button class="nav-row" style="flex:1;background:var(--card);box-shadow:var(--sh);padding:14px 16px;border-radius:12px;" onclick="go('${p.id}')">
+          <span>${esc(p.name)}</span><span class="nav-meta">${esc(clientName(p.clientId))}</span>
+        </button>
+        <button class="tool-btn danger" title="Smazat projekt" onclick="deleteProject('${p.id}')">🗑</button>
+      </div>`).join("") : `<div class="empty-tile">Archiv je prázdný</div>`}
   `;
 }
 
@@ -5131,6 +5399,10 @@ function openEditProject(pid){
     ${colorField(projColor(p))}
     <div class="field"><label>Fáze — jedna na řádek („Název = co znamená dokončit")</label>
       <textarea name="phases">${esc(phasesTxt)}</textarea>
+    </div>
+    <div class="field-row" style="margin-top:2px;">
+      <div class="field"><button type="button" class="btn-light" onclick="closeDialog(); archiveProject('${p.id}')">${p.archived ? "Obnovit z archivu" : "Uložit do archivu"}</button></div>
+      <div class="field"><button type="button" class="btn-light" style="color:var(--red);" onclick="deleteProject('${p.id}')">Smazat projekt</button></div>
     </div>
   `, "Uložit", fd => {
     p.name = fd.get("name").trim();
@@ -5876,11 +6148,223 @@ function gToggleCal(id, visible){
 /* ============================================================
    ROOT
    ============================================================ */
+
+/* ============================================================
+   OSOBNÍ — deník dne (sport, tělo, den). Nic se neodškrtává.
+   ============================================================ */
+let pDate = todayStr(), pOff = 0;
+const P_FEEL  = ["lehké", "akorát", "na doraz"];
+const P_SLEEP = ["mizerný", "ujde", "super"];
+const P_AMT   = ["ne", "trochu", "dost"];
+
+function pers(){
+  if(!state.personal || typeof state.personal !== "object") state.personal = { intent:"", days:{} };
+  if(!state.personal.days || typeof state.personal.days !== "object") state.personal.days = {};
+  if(typeof state.personal.intent !== "string") state.personal.intent = "";
+  return state.personal;
+}
+function pday(k){
+  const P = pers();
+  if(!P.days[k]) P.days[k] = { sport:[], water:0, food:"", alcohol:"", sweet:"", sleep:"", sleepQ:"", km:"", weight:"", note:"" };
+  const d = P.days[k];
+  if(!Array.isArray(d.sport)) d.sport = [];
+  return d;
+}
+function pHas(k){
+  const d = (pers().days || {})[k];
+  if(!d) return false;
+  return !!((Array.isArray(d.sport) && d.sport.length) || d.water || d.food || d.alcohol || d.sweet || d.sleep || d.sleepQ || d.km || d.weight || d.note);
+}
+function pWeekDates(){
+  const n = new Date();
+  const dow = (n.getDay() + 6) % 7;
+  const mon = new Date(n);
+  mon.setDate(n.getDate() - dow + pOff * 7);
+  return Array.from({length:7}, (_, i) => {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  });
+}
+function pRange(){
+  const ks = pWeekDates();
+  const a = parseDate(ks[0]), b = parseDate(ks[6]);
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()}.–${b.getDate()}. ${MONTHS_G[a.getMonth()]}`
+    : `${a.getDate()}. ${MONTHS_G[a.getMonth()]} – ${b.getDate()}. ${MONTHS_G[b.getMonth()]}`;
+}
+function pShift(n){ pOff = n === 0 ? 0 : pOff + n; render(); }
+function goOsobni(){ view = "osobni"; render(); window.scrollTo({ top:0, behavior:"smooth" }); }
+function pPick(k){ pDate = k; render(); }
+
+/* pozor: u polí NEpřekreslujeme — jinak se stihne rozpadnout DOM dřív, než doklikne tlačítko */
+function pSet(k, field, v){ const d = pday(k); d[field] = v; save(); pMark(k); }
+function pMark(k){
+  const el = document.querySelector(`.pwday[data-k="${k}"]`);
+  if(el) el.classList.toggle("has", pHas(k));
+}
+function pPill(k, field, v){ const d = pday(k); d[field] = (d[field] === v ? "" : v); save(); renderOsobni(); }
+function pWater(k, n){ const d = pday(k); d.water = (d.water === n ? n - 1 : n); save(); renderOsobni(); }
+function pIntent(el){
+  const t = el.innerText.trim();
+  if(t === pers().intent) return;
+  pers().intent = t; save();
+}
+function pAddSport(k){
+  const w = document.getElementById("pspWhat"), m = document.getElementById("pspMin");
+  if(!w) return;
+  const t = (w.value || "").trim();
+  if(!t) return;
+  pday(k).sport.push({ id:uid(), what:t, min:(m && m.value || "").trim(), feel:"" });
+  w.value = ""; if(m) m.value = "";
+  save(); renderOsobni();
+  const nw = document.getElementById("pspWhat"); if(nw) nw.focus();
+}
+function pDelSport(k, id){ const d = pday(k); d.sport = d.sport.filter(x => x.id !== id); save(); renderOsobni(); }
+function pFeel(k, id, f){
+  const sp = pday(k).sport.find(x => x.id === id); if(!sp) return;
+  sp.feel = (sp.feel === f ? "" : f); save(); renderOsobni();
+}
+function pLastWeight(before){
+  const days = pers().days || {};
+  const ks = Object.keys(days).filter(k => k < before && days[k] && String(days[k].weight || "").trim()).sort();
+  if(!ks.length) return null;
+  const k = ks[ks.length - 1], d = parseDate(k);
+  return { v:String(days[k].weight).trim(), lab:`${d.getDate()}. ${d.getMonth()+1}.` };
+}
+const P_DROP = `<svg viewBox="0 0 16 20" fill="currentColor"><path d="M8 1.4c3 3.6 5.4 6.6 5.4 9.6a5.4 5.4 0 0 1-10.8 0c0-3 2.4-6 5.4-9.6Z"/></svg>`;
+
+function renderOsobni(){
+  const k = pDate;
+  const d = pday(k);
+  const dt = parseDate(k);
+  const isToday = k === todayStr();
+  const dayLab = `${CZ_DAYS_FULL[dt.getDay()]} ${dt.getDate()}. ${dt.getMonth()+1}.`;
+  const lw = pLastWeight(k);
+  const pills = (field, opts) => `<div class="ppills">${opts.map(o =>
+    `<button class="${d[field] === o ? "on" : ""}" onclick="pPill('${k}','${field}','${o}')">${o}</button>`).join("")}</div>`;
+
+  document.getElementById("main").innerHTML = `
+    <div class="hdr areahdr" style="--ac:#12879b;">
+      <div>
+        <div class="hdr-date"><span class="hdot"></span>osobní · ${esc(dayLab)}</div>
+        <h1>Deník</h1>
+        <div class="hdr-sub">Zapiš, jak den vypadal. Nic se neodškrtává — jen se to pamatuje.</div>
+      </div>
+      <button class="btn-light" onclick="goHome()">← Domů</button>
+    </div>
+
+    <div class="zone z-zamer">
+      <div class="seclabel">Záměr <span>k čemu to celé směřuje</span></div>
+      <div class="intent" contenteditable="true" data-ph="Napiš, o co ti jde — jednou větou." onblur="pIntent(this)">${esc(pers().intent)}</div>
+    </div>
+
+    <div class="zone z-osobni">
+      <div class="seclabel">Dny <span>klikni na den a zapiš ho</span></div>
+      <div class="pweek-head">
+        <span class="pw-t">${esc(pRange())}</span>
+        <div class="pw-nav">
+          <button class="bnav" onclick="pShift(-1)" title="Předchozí týden">‹</button>
+          ${pOff !== 0 ? `<button class="sec-link" onclick="pShift(0)">dnes</button>` : ""}
+          <button class="bnav" onclick="pShift(1)" title="Další týden">›</button>
+        </div>
+      </div>
+      <div class="pweek">
+        ${pWeekDates().map(key => {
+          const dd = parseDate(key);
+          return `<button class="pwday ${key === pDate ? "sel" : ""} ${key === todayStr() ? "today" : ""} ${pHas(key) ? "has" : ""}" data-k="${key}" onclick="pPick('${key}')">
+            <span class="pw-d">${CZ_DAYS[dd.getDay()]}</span>
+            <span class="pw-n">${dd.getDate()}</span>
+            <span class="pw-m"></span>
+          </button>`;
+        }).join("")}
+      </div>
+
+      <div class="pdayhead">${isToday ? "Dnes" : esc(dayLab)} <span>${isToday ? esc(dayLab) : ""}</span></div>
+
+      <div class="pgrid">
+        <div class="ptile wide">
+          <div class="pt-h"><i></i>Pohyb <em>co jsi dělal a jak to šlo</em></div>
+          <div class="psport">
+            ${d.sport.length ? d.sport.map(sp => `
+              <div class="psrow">
+                <span class="psn">${esc(sp.what)}</span>
+                ${sp.min ? `<span class="psm">${esc(sp.min)} min</span>` : ""}
+                <div class="ppills">${P_FEEL.map(f =>
+                  `<button class="${sp.feel === f ? "on" : ""}" onclick="pFeel('${k}','${sp.id}','${f}')">${f}</button>`).join("")}</div>
+                <button class="psx" onclick="pDelSport('${k}','${sp.id}')" title="Smazat">×</button>
+              </div>`).join("") : `<div class="pempty">Zatím nic — a to je taky informace.</div>`}
+            <div class="psadd">
+              <input class="w1" id="pspWhat" placeholder="běh, posilovna, kolo…" onkeydown="if(event.key==='Enter'){event.preventDefault();pAddSport('${k}');}">
+              <input class="w2" id="pspMin" placeholder="minut" inputmode="numeric" onkeydown="if(event.key==='Enter'){event.preventDefault();pAddSport('${k}');}">
+              <button class="btn-primary" style="padding:9px 16px;font-size:13px;" onclick="pAddSport('${k}')">Přidat</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ptile w2">
+          <div class="pt-h"><i></i>Voda <em>sklenic</em></div>
+          <div class="pdrops">
+            ${Array.from({length:10}, (_, i) => i + 1).map(n =>
+              `<button class="${(d.water || 0) >= n ? "on" : ""}" onclick="pWater('${k}',${n})" title="${n}">${P_DROP}</button>`).join("")}
+            <span class="pdn">${d.water || 0}</span>
+          </div>
+        </div>
+
+        <div class="ptile">
+          <div class="pt-h"><i></i>Spánek</div>
+          <div class="punit">
+            <input class="pnum" inputmode="decimal" placeholder="—" value="${esc(d.sleep)}" onchange="pSet('${k}','sleep',this.value)">
+            <span class="u">hod</span>
+          </div>
+          ${pills("sleepQ", P_SLEEP)}
+        </div>
+
+        <div class="ptile">
+          <div class="pt-h"><i></i>Nachozeno</div>
+          <div class="punit">
+            <input class="pnum" inputmode="decimal" placeholder="—" value="${esc(d.km)}" onchange="pSet('${k}','km',this.value)">
+            <span class="u">km</span>
+          </div>
+        </div>
+
+        <div class="ptile">
+          <div class="pt-h"><i></i>Váha <em>nemusí být každý den</em></div>
+          <div class="punit">
+            <input class="pnum" inputmode="decimal" placeholder="—" value="${esc(d.weight)}" onchange="pSet('${k}','weight',this.value)">
+            <span class="u">kg</span>
+          </div>
+          ${lw ? `<div class="pempty">naposledy ${esc(lw.v)} kg · ${esc(lw.lab)}</div>` : ""}
+        </div>
+
+        <div class="ptile">
+          <div class="pt-h"><i></i>Alkohol</div>
+          ${pills("alcohol", P_AMT)}
+        </div>
+
+        <div class="ptile">
+          <div class="pt-h"><i></i>Sladké</div>
+          ${pills("sweet", P_AMT)}
+        </div>
+
+        <div class="ptile wide">
+          <div class="pt-h"><i></i>Jídlo <em>co ti prošlo dnem</em></div>
+          <textarea class="ptext" placeholder="snídaně, oběd, večeře, co mezi tím…" onchange="pSet('${k}','food',this.value)">${esc(d.food)}</textarea>
+        </div>
+
+        <div class="ptile wide">
+          <div class="pt-h"><i></i>Jak to bylo <em>tělo, hlava, nálada</em></div>
+          <textarea class="ptext" placeholder="pár vět pro sebe…" onchange="pSet('${k}','note',this.value)">${esc(d.note)}</textarea>
+        </div>
+      </div>
+    </div>`;
+}
+
 function render(){
   const mainEl = document.getElementById("main");
   if(mainEl) mainEl.className = (view === "dnes" && secTab !== "vse") ? ("tabbed tab-" + secTab) : "";
   renderSidebar();
   if(view === "dnes" || view === "vize") renderDnes();
+  else if(view === "osobni") renderOsobni();
   else if(view === "archiv") renderArchiv();
   else {
     const p = state.projects.find(x => x.id === view);
@@ -5922,6 +6406,7 @@ function paintRoutes(){
 
 migrateBoxy();
 upgradeAreas();
+applyTheme();
 render();
 restoreFromBackup();
 if(sbConfigured()) sbInit();
